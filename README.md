@@ -1,94 +1,112 @@
-# 10x Astro Starter
+# Language Learning Buddy
 
-A modern, opinionated starter template for building fast, accessible, and AI-friendly web applications.
+![Project Status](https://img.shields.io/badge/status-in%20development-yellow)
+![Astro](https://img.shields.io/badge/Astro-5.0-orange)
+![React](https://img.shields.io/badge/React-19-blue)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC)
+![Supabase](https://img.shields.io/badge/Supabase-green)
+
+A personal assistant web application for English language learners, designed to help identify and consciously correct recurring grammatical errors in writing.
+
+## Table of Contents
+
+- [Project Description](#project-description)
+- [Tech Stack](#tech-stack)
+- [Getting Started Locally](#getting-started-locally)
+- [Available Scripts](#available-scripts)
+- [Project Scope](#project-scope)
+- [Project Status](#project-status)
+- [License](#license)
+
+## Project Description
+
+Language Learning Buddy is a web application designed as a personal assistant for English language learners. The main goal of the tool is to help identify and consciously correct recurring grammatical and linguistic errors made in writing. The application analyzes short texts provided by the user, highlights potential errors, and allows for them to be manually added to a personalized "To-learn" list.
+
+Unlike standard proofreading tools, Language Learning Buddy emphasizes the process of active learning, giving the user full control over which issues they want to save and analyze in the future.
 
 ## Tech Stack
 
-- [Astro](https://astro.build/) v5.5.5 - Modern web framework for building fast, content-focused websites
-- [React](https://react.dev/) v19.0.0 - UI library for building interactive components
-- [TypeScript](https://www.typescriptlang.org/) v5 - Type-safe JavaScript
-- [Tailwind CSS](https://tailwindcss.com/) v4.0.17 - Utility-first CSS framework
+The project is built with a modern tech stack focused on performance and developer experience.
 
-## Prerequisites
+- **Frontend**: [Astro 5](https://astro.build/) with [React 19](https://react.dev/) for interactive components.
+- **Styling**: [Tailwind 4](https://tailwindcss.com/) with [Shadcn/ui](https://ui.shadcn.com/) for accessible components.
+- **Language**: [TypeScript 5](https://www.typescriptlang.org/) for static typing.
+- **Backend**: [Supabase](https://supabase.io/) as a comprehensive backend solution (PostgreSQL database, Authentication, BaaS).
+- **AI Integration**: Communication with AI models via [Openrouter.ai](https://openrouter.ai/).
+- **CI/CD & Hosting**: [GitHub Actions](https://github.com/features/actions) and [DigitalOcean](https://www.digitalocean.com/) (Docker).
 
-- Node.js v22.14.0 (as specified in `.nvmrc`)
-- npm (comes with Node.js)
+## Getting Started Locally
 
-## Getting Started
+To set up and run the project locally, follow these steps:
 
-1. Clone the repository:
+### Prerequisites
 
-```bash
-git clone https://github.com/przeprogramowani/10x-astro-starter.git
-cd 10x-astro-starter
-```
+- Node.js version `22.14.0` (as specified in the `.nvmrc` file). We recommend using [nvm](https://github.com/nvm-sh/nvm) to manage Node.js versions.
+- `npm` or a compatible package manager.
 
-2. Install dependencies:
+### Installation
 
-```bash
-npm install
-```
+1.  **Clone the repository:**
 
-3. Run the development server:
+    ```sh
+    git clone https://github.com/your-username/language-learning-buddy.git
+    cd language-learning-buddy
+    ```
 
-```bash
+2.  **Set the Node.js version:**
+
+    ```sh
+    nvm use
+    ```
+
+3.  **Install dependencies:**
+
+    ```sh
+    npm install
+    ```
+
+4.  **Set up environment variables:**
+    Create a `.env` file in the root of the project and add the necessary API keys and configuration for services like Supabase and Openrouter.ai.
+    ```env
+    # .env
+    SUPABASE_URL=your_supabase_url
+    SUPABASE_ANON_KEY=your_supabase_anon_key
+    OPENROUTER_API_KEY=your_openrouter_api_key
+    ```
+
+### Running the Application
+
+To start the development server, run:
+
+```sh
 npm run dev
 ```
 
-4. Build for production:
-
-```bash
-npm run build
-```
+The application will be available at `http://localhost:3000`.
 
 ## Available Scripts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
-- `npm run lint:fix` - Fix ESLint issues
+The following scripts are available in the `package.json`:
 
-## Project Structure
+- `npm run dev`: Starts the Astro development server.
+- `npm run build`: Builds the application for production.
+- `npm run preview`: Previews the production build locally.
+- `npm run lint`: Lints the codebase using ESLint.
+- `npm run lint:fix`: Lints the codebase and automatically fixes issues.
+- `npm run format`: Formats the code using Prettier.
 
-```md
-.
-├── src/
-│   ├── layouts/    # Astro layouts
-│   ├── pages/      # Astro pages
-│   │   └── api/    # API endpoints
-│   ├── components/ # UI components (Astro & React)
-│   └── assets/     # Static assets
-├── public/         # Public assets
-```
+## Project Scope
 
-## AI Development Support
+### In Scope (MVP Features)
 
-This project is configured with AI development tools to enhance the development experience, providing guidelines for:
-
-- Project structure
-- Coding practices
-- Frontend development
-- Styling with Tailwind
-- Accessibility best practices
-- Astro and React guidelines
-
-### Cursor IDE
-
-The project includes AI rules in `.cursor/rules/` directory that help Cursor IDE understand the project structure and provide better code suggestions.
-
-### GitHub Copilot
-
-AI instructions for GitHub Copilot are available in `.github/copilot-instructions.md`
-
-### Windsurf
-
-The `.windsurfrules` file contains AI configuration for Windsurf.
-
-## Contributing
-
-Please follow the AI guidelines and coding practices defined in the AI configuration files when contributing to this project.
+- **User Accounts**: Registration and login via email and password.
+- **Text Analysis**: Analysis of short English texts (up to 500 characters) using an external AI model.
+- **Error Highlighting**: Visual highlighting of potential errors in the original text.
+- **Error Interaction**: Clicking on an error displays a short explanation.
+- **"To-learn" List**: Manually adding errors with their context sentences to a personalized list.
+- **Edge Case Handling**: Dedicated messages for texts without errors, non-English texts, or technical issues.
 
 ## License
 
-MIT
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
