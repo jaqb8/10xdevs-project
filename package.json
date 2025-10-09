@@ -9,7 +9,12 @@
     "astro": "astro",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "supabase:start": "supabase start",
+    "supabase:stop": "supabase stop",
+    "supabase:status": "supabase status",
+    "supabase:restart": "supabase restart",
+    "supabase:migrate:up": "supabase migrate up"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",
