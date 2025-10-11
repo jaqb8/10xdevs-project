@@ -14,13 +14,14 @@
     "supabase:stop": "supabase stop",
     "supabase:status": "supabase status",
     "supabase:restart": "supabase restart",
-    "supabase:migrate:up": "supabase migrate up"
+    "supabase:migration:up": "supabase migration up"
   },
   "dependencies": {
     "@astrojs/node": "^9.4.3",
     "@astrojs/react": "^4.3.1",
     "@astrojs/sitemap": "^3.5.1",
     "@radix-ui/react-slot": "^1.1.2",
+    "@supabase/supabase-js": "^2.75.0",
     "@tailwindcss/vite": "^4.1.13",
     "@types/react": "^19.1.12",
     "@types/react-dom": "^19.1.9",
