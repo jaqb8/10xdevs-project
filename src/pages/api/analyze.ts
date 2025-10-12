@@ -1,6 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { analysisService } from "../../lib/services/analysis.service";
+import { AnalysisService } from "../../lib/services/analysis.service";
 
 export const prerender = false;
 
@@ -24,7 +24,7 @@ const analyzeTextSchema = z.object({
  * @throws {400} Bad Request - Invalid input (empty text, too long, etc.)
  * @throws {500} Internal Server Error - Analysis service error
  */
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = await request.json();
     const validationResult = analyzeTextSchema.safeParse(body);
@@ -40,7 +40,7 @@ export const POST: APIRoute = async ({ request }) => {
     const { text } = validationResult.data;
 
     // Call the analysis service
-    const result = await analysisService.analyzeText(text);
+    const result = await new AnalysisService(locals.supabase).analyzeText(text);
 
     // Return successful response
     return new Response(JSON.stringify(result), {

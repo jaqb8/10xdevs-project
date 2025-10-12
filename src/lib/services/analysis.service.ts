@@ -1,3 +1,4 @@
+import type { SupabaseClient } from "@/db/supabase.client";
 import type { TextAnalysisDto } from "../../types";
 import { getMockAnalysis } from "./analysis.mocks";
 
@@ -8,7 +9,7 @@ import { getMockAnalysis } from "./analysis.mocks";
 export class AnalysisService {
   private useMocks: boolean;
 
-  constructor() {
+  constructor(private readonly supabase: SupabaseClient) {
     // Check environment variable to determine if we should use mocks
     this.useMocks = import.meta.env.USE_MOCKS !== "false";
   }
@@ -55,9 +56,3 @@ export class AnalysisService {
     throw new Error("Not implemented");
   }
 }
-
-/**
- * Singleton instance of the AnalysisService.
- * Export this for use in API endpoints.
- */
-export const analysisService = new AnalysisService();

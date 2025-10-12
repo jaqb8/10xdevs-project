@@ -26,6 +26,25 @@ export type LearningItemDto = Pick<
 >;
 
 /**
+ * DTO for pagination metadata.
+ */
+export interface PaginationDto {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}
+
+/**
+ * Generic DTO for a paginated API response.
+ * @template T The type of the items in the data array.
+ */
+export interface PaginatedResponseDto<T> {
+  data: T[];
+  pagination: PaginationDto;
+}
+
+/**
  * DTO for the response of a text analysis request.
  * It's a discriminated union based on whether errors were found.
  *
