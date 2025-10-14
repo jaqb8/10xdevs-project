@@ -5,6 +5,8 @@ import type {
   LearningItemDto,
   PaginatedResponseDto,
   PaginationDto,
+  ServiceResult,
+  ServiceVoidResult,
 } from "../../types";
 
 export class LearningItemsService {
@@ -17,18 +19,16 @@ export class LearningItemsService {
    * 1. Count query to get the total number of items
    * 2. Data query to fetch the paginated results
    *
-   * @param supabase - The Supabase client instance
    * @param userId - The authenticated user's ID
    * @param page - The page number (1-based)
    * @param pageSize - Number of items per page
-   * @returns A paginated response containing learning items and pagination metadata
-   * @throws Error if the database query fails
+   * @returns An object indicating success with data or failure with error type
    */
   async getLearningItems(
     userId: string,
     page: number,
     pageSize: number
-  ): Promise<PaginatedResponseDto<LearningItemDto>> {
+  ): Promise<ServiceResult<PaginatedResponseDto<LearningItemDto>, "database_error">> {
     const offset = (page - 1) * pageSize;
 
     const { count, error: countError } = await this.supabase
@@ -38,7 +38,7 @@ export class LearningItemsService {
 
     if (countError) {
       console.error("Database error in getLearningItems (count):", countError);
-      throw new Error("Failed to fetch learning items count from database");
+      return { success: false, error: "database_error" };
     }
 
     const totalItems = count ?? 0;
@@ -53,8 +53,11 @@ export class LearningItemsService {
       };
 
       return {
-        data: [],
-        pagination,
+        success: true,
+        data: {
+          data: [],
+          pagination,
+        },
       };
     }
 
@@ -67,7 +70,7 @@ export class LearningItemsService {
 
     if (error) {
       console.error("Database error in getLearningItems:", error);
-      throw new Error("Failed to fetch learning items from database");
+      return { success: false, error: "database_error" };
     }
 
     const learningItems: LearningItemDto[] = data ?? [];
@@ -80,8 +83,11 @@ export class LearningItemsService {
     };
 
     return {
-      data: learningItems,
-      pagination,
+      success: true,
+      data: {
+        data: learningItems,
+        pagination,
+      },
     };
   }
 
@@ -91,13 +97,14 @@ export class LearningItemsService {
    * This function inserts a new learning item record into the database
    * with the provided data and user ID.
    *
-   * @param supabase - The Supabase client instance
    * @param itemData - The learning item data (original sentence, corrected sentence, explanation)
    * @param userId - The authenticated user's ID
-   * @returns The newly created learning item
-   * @throws Error if the database insert operation fails
+   * @returns An object indicating success with the created item or failure with error type
    */
-  async createLearningItem(itemData: CreateLearningItemCommand, userId: string): Promise<LearningItem> {
+  async createLearningItem(
+    itemData: CreateLearningItemCommand,
+    userId: string
+  ): Promise<ServiceResult<LearningItem, "database_error">> {
     const insertData = {
       ...itemData,
       user_id: userId,
@@ -107,14 +114,62 @@ export class LearningItemsService {
 
     if (error) {
       console.error("Database error in createLearningItem:", error);
-      throw new Error("Failed to create learning item in database");
+      return { success: false, error: "database_error" };
     }
 
     if (!data) {
       console.error("No data returned from createLearningItem");
-      throw new Error("Failed to create learning item: no data returned");
+      return { success: false, error: "database_error" };
     }
 
-    return data;
+    return { success: true, data };
+  }
+
+  /**
+   * Deletes a learning item after verifying ownership.
+   *
+   * This function performs the following steps:
+   * 1. Fetches the learning item by ID to verify it exists
+   * 2. Checks if the user_id matches the provided userId (authorization)
+   * 3. Deletes the item if authorization passes
+   *
+   * @param id - The unique identifier of the learning item to delete
+   * @param userId - The authenticated user's ID
+   * @returns An object indicating success or the type of failure
+   */
+  async deleteLearningItem(
+    id: string,
+    userId: string
+  ): Promise<ServiceVoidResult<"not_found" | "forbidden" | "database_error">> {
+    const { data: existingItem, error: fetchError } = await this.supabase
+      .from("learning_items")
+      .select("user_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError) {
+      if (fetchError.code === "PGRST116") {
+        return { success: false, error: "not_found" };
+      }
+      console.error("Database error in deleteLearningItem (fetch):", fetchError);
+      return { success: false, error: "database_error" };
+    }
+
+    if (!existingItem) {
+      return { success: false, error: "not_found" };
+    }
+
+    if (existingItem.user_id !== userId) {
+      return { success: false, error: "forbidden" };
+    }
+
+    const { error: deleteError } = await this.supabase.from("learning_items").delete().eq("id", id);
+
+    if (deleteError) {
+      console.error("Database error in deleteLearningItem (delete):", deleteError);
+      return { success: false, error: "database_error" };
+    }
+
+    return { success: true };
   }
 }

@@ -1,7 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { LearningItemsService } from "../../lib/services/learning-items.service";
-import { DEFAULT_USER_ID } from "../../db/supabase.client";
+import { LearningItemsService } from "../../../lib/services/learning-items.service";
+import { DEFAULT_USER_ID } from "../../../db/supabase.client";
 
 export const prerender = false;
 
@@ -68,17 +68,11 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const validationResult = queryParamsSchema.safeParse(rawParams);
 
     if (!validationResult.success) {
-      const firstError = validationResult.error.errors[0];
-      return new Response(
-        JSON.stringify({
-          error: firstError.message,
-          path: firstError.path,
-        }),
-        {
-          status: 400,
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      const errors = validationResult.error.errors;
+      return new Response(JSON.stringify(errors), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const { page, pageSize } = validationResult.data;
@@ -86,7 +80,14 @@ export const GET: APIRoute = async ({ locals, url }) => {
     // MVP: Using DEFAULT_USER_ID. In production, this would use authenticated user's ID
     const result = await new LearningItemsService(locals.supabase).getLearningItems(DEFAULT_USER_ID, page, pageSize);
 
-    return new Response(JSON.stringify(result), {
+    if (!result.success) {
+      return new Response(JSON.stringify({ error: "An internal server error occurred" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify(result.data), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
@@ -143,12 +144,19 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     // Create learning item
     // MVP: Using DEFAULT_USER_ID. In production, this would use authenticated user's ID
-    const newItem = await new LearningItemsService(locals.supabase).createLearningItem(
+    const result = await new LearningItemsService(locals.supabase).createLearningItem(
       validationResult.data,
       DEFAULT_USER_ID
     );
 
-    return new Response(JSON.stringify(newItem), {
+    if (!result.success) {
+      return new Response(JSON.stringify({ error: "Internal Server Error" }), {
+        status: 500,
+        headers: { "Content-Type": "application/json" },
+      });
+    }
+
+    return new Response(JSON.stringify(result.data), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });

@@ -48,3 +48,4 @@ When modifying the directory structure, always update this section.
 - Use guard clauses to handle preconditions and invalid states early.
 - Implement proper error logging and user-friendly error messages.
 - Consider using custom error types or error factories for consistent error handling.
+- Do not write inline comments, only JSDoc comments when writting JS/TS code (if needed)

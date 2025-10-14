@@ -3,6 +3,7 @@ description:
 globs: *.tsx
 alwaysApply: false
 ---
+
 ### Guidelines for React
 
 - Use functional components with hooks instead of class components
@@ -15,3 +16,4 @@ alwaysApply: false
 - Implement useId() for generating unique IDs for accessibility attributes
 - Consider using the new useOptimistic hook for optimistic UI updates in forms
 - Use useTransition for non-urgent state updates to keep the UI responsive
+- Do not write inline comments, only JSDoc comments when writting JS/TS code (if needed)

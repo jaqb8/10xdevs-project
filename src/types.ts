@@ -125,3 +125,46 @@ export type SignUpCommand = AuthCredentials;
  * @see POST /api/auth/signin
  */
 export type SignInCommand = AuthCredentials;
+
+// ============================================================================
+// Service Layer Result Types
+// ============================================================================
+
+/**
+ * Generic result type for service layer operations that return data.
+ * Provides a discriminated union for success and error cases.
+ *
+ * @template TData The type of data returned on success
+ * @template TError The union of possible error types (as string literals)
+ *
+ * @example
+ * type CreateResult = ServiceResult<User, "database_error" | "validation_error">;
+ *
+ * const result: CreateResult = await service.create(data);
+ * if (result.success) {
+ *   console.log(result.data); // User
+ * } else {
+ *   console.error(result.error); // "database_error" | "validation_error"
+ * }
+ */
+export type ServiceResult<TData, TError extends string> =
+  | { success: true; data: TData }
+  | { success: false; error: TError };
+
+/**
+ * Result type for service layer operations that don't return data.
+ * Used for operations like delete, update without return, etc.
+ *
+ * @template TError The union of possible error types (as string literals)
+ *
+ * @example
+ * type DeleteResult = ServiceVoidResult<"not_found" | "forbidden">;
+ *
+ * const result: DeleteResult = await service.delete(id);
+ * if (result.success) {
+ *   console.log("Deleted successfully");
+ * } else {
+ *   console.error(result.error); // "not_found" | "forbidden"
+ * }
+ */
+export type ServiceVoidResult<TError extends string> = { success: true } | { success: false; error: TError };

@@ -30,8 +30,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const validationResult = analyzeTextSchema.safeParse(body);
 
     if (!validationResult.success) {
-      const firstError = validationResult.error.errors[0];
-      return new Response(JSON.stringify({ error: firstError.message, path: firstError.path }), {
+      const errors = validationResult.error.errors;
+      return new Response(JSON.stringify(errors), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
@@ -39,10 +39,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const { text } = validationResult.data;
 
-    // Call the analysis service
     const result = await new AnalysisService(locals.supabase).analyzeText(text);
 
-    // Return successful response
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },
