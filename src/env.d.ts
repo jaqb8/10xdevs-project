@@ -1,11 +1,13 @@
 /// <reference types="astro/client" />
 
 import type { SupabaseClient } from "./db/supabase.client.ts";
+import type { UserViewModel } from "./types.ts";
 
 declare global {
   namespace App {
     interface Locals {
       supabase: SupabaseClient;
+      user: UserViewModel | null;
     }
   }
 }

@@ -128,6 +128,16 @@ Następujące funkcje i cechy nie wchodzą w zakres MVP i mogą zostać rozważo
   3. Elementy są posortowane chronologicznie, od najnowszego do najstarszego.
   4. Każdy element na liście jest czytelny i zawiera pełne zdanie kontekstowe.
 
+### ID: US-007-1
+
+- Tytuł: Usuwanie błędu z listy "Do nauki"
+- Opis: Jako użytkownik, chcę mieć możliwość usunięcia błędu z mojej listy "Do nauki" jednym kliknięciem.
+- Kryteria akceptacji:
+  1. Kliknięcie przycisku "Usuń" z listy "Do nauki" usuwa błąd z listy użytkownika.
+  2. Użytkownik otrzymuje potwierdzenie usunięcia w oknie modalnym z pytaniem, czy na pewno chce usunąć błąd.
+  3. Po potwierdzeniu usunięcia, błąd jest usuwany z listy użytkownika.
+  4. Użytkownik otrzymuje wizualne potwierdzenie (np. krótki komunikat "Usunięto!").
+
 ### ID: US-008
 
 - Tytuł: Obsługa tekstu bez błędów

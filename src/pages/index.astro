@@ -1,8 +1,8 @@
 ---
-import Welcome from "../components/Welcome.astro";
 import Layout from "../layouts/Layout.astro";
+import { AnalyzeView } from "../components/views/AnalyzeView";
 ---
 
-<Layout>
-  <Welcome />
+<Layout title="Analiza tekstu - Language Learning Buddy">
+  <AnalyzeView client:load />
 </Layout>

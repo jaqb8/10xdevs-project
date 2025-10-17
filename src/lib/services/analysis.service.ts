@@ -51,7 +51,8 @@ export class AnalysisService {
    * - Response parsing and validation
    * - Error handling for API failures
    */
-  private async analyzeWithAI(text: string): Promise<TextAnalysisDto> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private async analyzeWithAI(_text: string): Promise<TextAnalysisDto> {
     // TODO: Implement OpenRouter.ai integration
     throw new Error("Not implemented");
   }

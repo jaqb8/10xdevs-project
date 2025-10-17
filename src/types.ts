@@ -168,3 +168,33 @@ export type ServiceResult<TData, TError extends string> =
  * }
  */
 export type ServiceVoidResult<TError extends string> = { success: true } | { success: false; error: TError };
+
+// ============================================================================
+// View Models
+// ============================================================================
+
+/**
+ * View model for a learning item with formatted date for UI display.
+ * Extends LearningItemDto with a human-readable date format.
+ */
+export interface LearningItemViewModel extends LearningItemDto {
+  formatted_created_at: string;
+}
+
+/**
+ * View model for pagination with UI state flags.
+ * Extends PaginationDto with boolean flags for navigation controls.
+ */
+export interface PaginationViewModel extends PaginationDto {
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+/**
+ * View model for authenticated user data displayed in the UI.
+ * Contains minimal user information needed for the header and navigation.
+ */
+export interface UserViewModel {
+  id: string;
+  email: string;
+}
