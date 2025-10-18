@@ -1,11 +1,17 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { LearningItemsService } from "../../../lib/services/learning-items.service";
+import {
+  LearningItemsService,
+  LearningItemsDatabaseError,
+  LearningItemNotFoundError,
+  LearningItemForbiddenError,
+} from "../../../lib/services/learning-items";
 import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import { createErrorResponse, createValidationErrorResponse } from "../../../lib/api-helpers";
 
 export const prerender = false;
 
-const idParamSchema = z.string().uuid({ message: "Invalid learning item ID format" });
+const idParamSchema = z.string().uuid({ message: "validation_error_invalid_uuid" });
 
 /**
  * DELETE handler for deleting a specific learning item.
@@ -33,54 +39,35 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
     const itemId = params.id;
 
     if (!itemId) {
-      return new Response(JSON.stringify({ error: "Learning item ID is required" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return createErrorResponse("validation_error_id_required", 400);
     }
 
     const validationResult = idParamSchema.safeParse(itemId);
 
     if (!validationResult.success) {
-      return new Response(JSON.stringify({ error: "Invalid learning item ID format" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return createValidationErrorResponse(validationResult.error);
     }
 
     const validatedId = validationResult.data;
 
     // MVP: Using DEFAULT_USER_ID. In production, this would use authenticated user's ID
-    const result = await new LearningItemsService(locals.supabase).deleteLearningItem(validatedId, DEFAULT_USER_ID);
-
-    if (!result.success) {
-      if (result.error === "not_found") {
-        return new Response(JSON.stringify({ error: "Learning item not found." }), {
-          status: 404,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-
-      if (result.error === "forbidden") {
-        return new Response(JSON.stringify({ error: "You do not have permission to delete this item." }), {
-          status: 403,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-
-      return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
+    await new LearningItemsService(locals.supabase).deleteLearningItem(validatedId, DEFAULT_USER_ID);
 
     return new Response(null, { status: 204 });
   } catch (error) {
-    console.error("Unexpected error in DELETE /api/learning-items/:id:", error);
+    if (error instanceof LearningItemNotFoundError) {
+      return createErrorResponse("not_found", 404);
+    }
 
-    return new Response(JSON.stringify({ error: "An unexpected error occurred" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    if (error instanceof LearningItemForbiddenError) {
+      return createErrorResponse("forbidden", 403);
+    }
+
+    if (error instanceof LearningItemsDatabaseError) {
+      return createErrorResponse("database_error", 500);
+    }
+
+    console.error("Unexpected error in DELETE /api/learning-items/:id:", error);
+    return createErrorResponse("unknown_error", 500);
   }
 };

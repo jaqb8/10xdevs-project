@@ -10,11 +10,10 @@ interface AnalysisResultProps {
   isLoading: boolean;
   analysisResult: TextAnalysisDto | null;
   isSaved: boolean;
-  onClear: () => void;
   onSave: (item: CreateLearningItemCommand) => void;
 }
 
-export function AnalysisResult({ isLoading, analysisResult, isSaved, onClear, onSave }: AnalysisResultProps) {
+export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: AnalysisResultProps) {
   const handleSave = useCallback(() => {
     if (analysisResult && !analysisResult.is_correct) {
       const command: CreateLearningItemCommand = {
@@ -57,16 +56,6 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onClear, on
             </div>
           </div>
         </CardContent>
-        <CardFooter>
-          <Button
-            onClick={onClear}
-            variant="outline"
-            className="w-full"
-            aria-label="Wyczyść formularz i zacznij od nowa"
-          >
-            Wyczyść
-          </Button>
-        </CardFooter>
       </Card>
     );
   }
@@ -86,22 +75,14 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onClear, on
           <p className="rounded-md bg-muted p-3 text-sm leading-relaxed">{analysisResult.explanation}</p>
         </div>
       </CardContent>
-      <CardFooter className="flex flex-col gap-2 sm:flex-row">
+      <CardFooter>
         <Button
           onClick={handleSave}
           disabled={isSaved}
-          className="w-full sm:w-auto"
+          className="w-full"
           aria-label={isSaved ? "Element już zapisany na liście" : "Dodaj ten błąd do listy Do nauki"}
         >
           {isSaved ? "Zapisano ✓" : "Dodaj do listy Do nauki"}
-        </Button>
-        <Button
-          onClick={onClear}
-          variant="outline"
-          className="w-full sm:w-auto"
-          aria-label="Wyczyść formularz i zacznij od nowa"
-        >
-          Wyczyść
         </Button>
       </CardFooter>
     </Card>

@@ -74,6 +74,37 @@ export class RateLimiter {
   }
 
   /**
+   * Gets the time remaining until the rate limit window resets.
+   * Returns the time in milliseconds until the oldest request expires.
+   *
+   * @param identifier - Unique identifier (e.g., user ID)
+   * @returns Time in milliseconds until window reset, or 0 if no active limits
+   */
+  getTimeUntilReset(identifier: string): number {
+    const now = Date.now();
+    const entry = this.requests.get(identifier);
+
+    if (!entry || entry.timestamps.length === 0) {
+      return 0;
+    }
+
+    // Filter timestamps within the current window
+    const validTimestamps = entry.timestamps.filter((timestamp) => now - timestamp < this.windowMs);
+
+    if (validTimestamps.length === 0) {
+      return 0;
+    }
+
+    // Find the oldest timestamp in the window
+    const oldestTimestamp = Math.min(...validTimestamps);
+
+    // Calculate time remaining until the oldest timestamp expires
+    const timeUntilReset = this.windowMs - (now - oldestTimestamp);
+
+    return Math.max(0, timeUntilReset);
+  }
+
+  /**
    * Clears all rate limit data for the given identifier.
    * Useful for testing or administrative purposes.
    *

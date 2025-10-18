@@ -21,7 +21,7 @@ Tabela przechowuje elementy do nauki (błędy gramatyczne) zapisane przez użytk
 | `user_id`            | `uuid`         | `NOT NULL`, `FOREIGN KEY` references `auth.users(id)` ON DELETE CASCADE | Identyfikator użytkownika, do którego należy element. |
 | `original_sentence`  | `text`         | `NOT NULL`                                                              | Pełne zdanie, w którym wystąpił błąd.                 |
 | `corrected_sentence` | `text`         | `NOT NULL`                                                              | Poprawiona wersja zdania.                             |
-| `explanation`        | `varchar(150)` | `NOT NULL`                                                              | Krótkie wyjaśnienie błędu (maks. 150 znaków).         |
+| `explanation`        | `varchar(500)` | `NOT NULL`                                                              | Krótkie wyjaśnienie błędu (maks. 500 znaków).         |
 | `created_at`         | `timestamptz`  | `NOT NULL`, `default now()`                                             | Znacznik czasu utworzenia elementu.                   |
 
 ## 2. Relacje między tabelami

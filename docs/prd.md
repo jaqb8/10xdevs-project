@@ -20,12 +20,12 @@ Uczący się języka angielskiego często nie są świadomi powtarzających się
 
 - Aplikacja udostępnia interfejs z jednym polem tekstowym do wprowadzania tekstu w języku angielskim.
 - Wprowadzany tekst jest ograniczony do 500 znaków.
-- Przycisk "Analizuj" inicjuje proces sprawdzania tekstu przez zewnętrzny model AI (`grok-4-fast-non-reasoning`).
+- Przycisk "Analizuj" inicjuje proces sprawdzania tekstu przez zewnętrzny model AI (`google/gemini-2.0-flash-001`).
 - Po analizie, potencjalne błędy są wizualnie podświetlane bezpośrednio w oryginalnym tekście.
 
 ### 3.3. Interakcja z błędami
 
-- Kliknięcie na znaleziony błąd powoduje wyświetlenie krótkiego wyjaśnienia (do 150 znaków) w dedykowanym miejscu interfejsu.
+- Kliknięcie na znaleziony błąd powoduje wyświetlenie krótkiego wyjaśnienia (do 500 znaków) w dedykowanym miejscu interfejsu.
 - Pod wyjaśnieniem znajduje się przycisk "Dodaj do listy Do nauki", który pozwala zapisać błąd wraz z całym zdaniem kontekstowym na osobistej liście użytkownika.
 - Błędy nie są dodawane do listy automatycznie; wymagana jest świadoma akcja użytkownika.
 
@@ -106,7 +106,7 @@ Następujące funkcje i cechy nie wchodzą w zakres MVP i mogą zostać rozważo
 - Kryteria akceptacji:
   1. Po analizie tekstu pojawia się wyjaśnienie błędu (`context` z odpowiedzi AI) w centralnym miejscu widoku.
   2. Pod wyjaśnieniem widoczny jest przycisk "Dodaj do listy Do nauki".
-  3. Wyświetlane wyjaśnienie ma maksymalnie 150 znaków.
+  3. Wyświetlane wyjaśnienie ma maksymalnie 500 znaków.
 
 ### ID: US-006
 

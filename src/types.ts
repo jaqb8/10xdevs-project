@@ -15,6 +15,17 @@ export type LearningItem = Database["public"]["Tables"]["learning_items"]["Row"]
 // ============================================================================
 
 /**
+ * DTO for API error responses.
+ * All API endpoints return errors in this standardized format.
+ *
+ * @see src/lib/api-helpers.ts
+ */
+export interface ApiErrorResponse {
+  error_code: string;
+  data?: Record<string, unknown>;
+}
+
+/**
  * DTO for a learning item returned to the client.
  * It omits the `user_id` to avoid exposing it unnecessarily.
  *

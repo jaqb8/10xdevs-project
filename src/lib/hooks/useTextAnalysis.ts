@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { TextAnalysisDto, CreateLearningItemCommand } from "../../types";
+import type { TextAnalysisDto, CreateLearningItemCommand, ApiErrorResponse } from "../../types";
 
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
 
@@ -18,6 +18,28 @@ const INITIAL_STATE: AnalyzeViewState = {
   error: null,
   isCurrentResultSaved: false,
 };
+
+function mapErrorCodeToMessage(error: ApiErrorResponse): string {
+  const { error_code, data } = error;
+  const errorMessages: Record<string, string> = {
+    validation_error_text_empty: "Tekst nie może być pusty.",
+    validation_error_text_too_long: "Tekst nie może przekraczać 500 znaków.",
+    configuration_error: "Błąd konfiguracji serwisu. Skontaktuj się z pomocą techniczną.",
+    authentication_error: "Błąd uwierzytelniania. Skontaktuj się z pomocą techniczną.",
+    rate_limit_error: `Przekroczono limit zapytań. Spróbuj ponownie za ${Math.ceil(((data?.time_until_reset as number) ?? 0) / 1000)} sekund.`,
+    invalid_request_error: "Nieprawidłowe żądanie. Sprawdź wprowadzone dane.",
+    validation_error: "Nie udało się przetworzyć odpowiedzi AI. Spróbuj ponownie.",
+    network_error: "Błąd sieci. Sprawdź połączenie i spróbuj ponownie.",
+    unknown_error: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
+    database_error: "Wystąpił błąd serwera. Spróbuj ponownie za chwilę.",
+    validation_error_original_sentence_empty: "Oryginalne zdanie jest wymagane.",
+    validation_error_corrected_sentence_empty: "Poprawione zdanie jest wymagane.",
+    validation_error_explanation_empty: "Wyjaśnienie jest wymagane.",
+    validation_error_explanation_too_long: "Wyjaśnienie nie może przekraczać 500 znaków.",
+  };
+
+  return errorMessages[error_code] || "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.";
+}
 
 export function useTextAnalysis() {
   const [state, setState] = useState<AnalyzeViewState>(INITIAL_STATE);
@@ -48,20 +70,9 @@ export function useTextAnalysis() {
         return;
       }
 
-      if (response.status === 429) {
-        setState((prev) => ({
-          ...prev,
-          status: "error",
-          error: "Przekroczono limit zapytań. Spróbuj ponownie za chwilę.",
-        }));
-        return;
-      }
-
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = Array.isArray(errorData)
-          ? errorData[0]?.message || "Wystąpił błąd podczas analizy."
-          : errorData.error || "Wystąpił błąd podczas analizy.";
+        const errorData: ApiErrorResponse = await response.json();
+        const errorMessage = mapErrorCodeToMessage(errorData);
 
         setState((prev) => ({
           ...prev,
@@ -116,10 +127,8 @@ export function useTextAnalysis() {
       }
 
       if (!response.ok) {
-        const errorData = await response.json();
-        const errorMessage = Array.isArray(errorData)
-          ? errorData[0]?.message || "Nie udało się zapisać."
-          : errorData.error || "Nie udało się zapisać.";
+        const errorData: ApiErrorResponse = await response.json();
+        const errorMessage = mapErrorCodeToMessage(errorData);
 
         setState((prev) => ({
           ...prev,

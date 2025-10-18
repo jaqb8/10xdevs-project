@@ -22,7 +22,7 @@ Ten endpoint umożliwia uwierzytelnionemu użytkownikowi dodanie nowego elementu
   - **Wymagane**:
     - `original_sentence` (string): Zdanie zawierające błąd.
     - `corrected_sentence` (string): Poprawiona wersja zdania.
-    - `explanation` (string, max 150 znaków): Krótkie wyjaśnienie błędu.
+    - `explanation` (string, max 500 znaków): Krótkie wyjaśnienie błędu.
   - **Opcjonalne**: Brak.
 
 ## 3. Wykorzystywane typy
@@ -81,7 +81,7 @@ Ten endpoint umożliwia uwierzytelnionemu użytkownikowi dodanie nowego elementu
     {
       "error": "Invalid input",
       "details": {
-        "explanation": ["String must contain at most 150 character(s)"]
+        "explanation": ["String must contain at most 500 character(s)"]
       }
     }
     ```
@@ -114,7 +114,7 @@ Operacja `INSERT` na tabeli `learning_items` jest operacją o niskiej złożono�
 
 2.  **Implementacja endpointu i walidacji**:
     - W pliku `src/pages/api/learning-items.ts`:
-      - Zdefiniuj schemat walidacji Zod `CreateLearningItemSchema` na górze pliku. Schemat powinien walidować obiekt `CreateLearningItemCommand` zgodnie z wymaganiami (wszystkie pola wymagane, `explanation` o maksymalnej długości 150 znaków).
+      - Zdefiniuj schemat walidacji Zod `CreateLearningItemSchema` na górze pliku. Schemat powinien walidować obiekt `CreateLearningItemCommand` zgodnie z wymaganiami (wszystkie pola wymagane, `explanation` o maksymalnej długości 500 znaków).
       - Dodaj `export const prerender = false;`.
       - Zaimplementuj handler `POST({ request, locals }: APIContext)`.
       - W handlerze:

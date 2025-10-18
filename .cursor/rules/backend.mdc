@@ -12,3 +12,112 @@ alwaysApply: false
 - Use supabase from context.locals in Astro routes instead of importing supabaseClient directly
 - Use SupabaseClient type from `src/db/supabase.client.ts`, not from `@supabase/supabase-js`
 - Do not write inline comments, only JSDoc comments when writting JS/TS code (if needed)
+
+### API Error Handling
+
+#### Error Response Format
+
+All API endpoints MUST return errors in the following standardized format:
+
+```typescript
+{
+  error_code: string; // snake_case error code
+}
+```
+
+#### Helper Functions
+
+Use the helper functions from `src/lib/api-helpers.ts`:
+
+- `createErrorResponse(errorCode: string, status: number): Response` - Creates a standardized error response
+- `createValidationErrorResponse(zodError: ZodError): Response` - Extracts the first Zod error and returns it as a standardized error response
+
+#### Error Code Naming Conventions
+
+- Use `snake_case` for all error codes
+- Validation errors should be prefixed with `validation_error_` (e.g., `validation_error_text_empty`, `validation_error_page_invalid`)
+- Service errors should match the error class name in snake_case (e.g., `database_error`, `not_found`, `forbidden`)
+- Generic errors: `unknown_error`, `network_error`, `configuration_error`, `authentication_error`, `rate_limit_error`
+
+#### Zod Schema Validation
+
+When defining Zod schemas, use error codes as validation messages:
+
+```typescript
+const schema = z.object({
+  text: z.string().min(1, "validation_error_text_empty").max(500, "validation_error_text_too_long"),
+  page: z.number().positive({ message: "validation_error_page_invalid" }),
+});
+```
+
+#### Mapping Service Errors to API Errors
+
+Services throw typed errors (from `src/lib/services/errors.ts`). Map them to error codes in API endpoints:
+
+```typescript
+export const POST: APIRoute = async ({ request, locals }) => {
+  try {
+    // Validate request
+    const body = await request.json();
+    const validationResult = schema.safeParse(body);
+
+    if (!validationResult.success) {
+      return createValidationErrorResponse(validationResult.error);
+    }
+
+    // Call service
+    const result = await service.doSomething(validationResult.data);
+
+    return new Response(JSON.stringify(result), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  } catch (error) {
+    // Map service errors to error codes
+    if (error instanceof DatabaseError) {
+      return createErrorResponse("database_error", 500);
+    }
+
+    if (error instanceof NotFoundError) {
+      return createErrorResponse("not_found", 404);
+    }
+
+    if (error instanceof ForbiddenError) {
+      return createErrorResponse("forbidden", 403);
+    }
+
+    // Fallback for unexpected errors
+    console.error("Unexpected error:", error);
+    return createErrorResponse("unknown_error", 500);
+  }
+};
+```
+
+#### Frontend Error Handling
+
+Frontend code should:
+
+1. Parse the `error_code` from the API response
+2. Map error codes to user-friendly messages in the appropriate language
+3. Display the mapped message to the user
+
+Example:
+
+```typescript
+function mapErrorCodeToMessage(errorCode: string): string {
+  const errorMessages: Record<string, string> = {
+    validation_error_text_empty: "Tekst nie może być pusty.",
+    database_error: "Wystąpił błąd serwera. Spróbuj ponownie za chwilę.",
+    // ... other mappings
+  };
+
+  return errorMessages[errorCode] || "Wystąpił nieoczekiwany błąd.";
+}
+
+// In fetch handler
+if (!response.ok) {
+  const errorData: ApiErrorResponse = await response.json();
+  const errorMessage = mapErrorCodeToMessage(errorData.error_code);
+  // Display errorMessage to user
+}
+```

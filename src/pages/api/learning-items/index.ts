@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { LearningItemsService } from "../../../lib/services/learning-items.service";
+import { LearningItemsService, LearningItemsDatabaseError } from "../../../lib/services/learning-items";
 import { DEFAULT_USER_ID } from "../../../db/supabase.client";
+import { createErrorResponse, createValidationErrorResponse } from "../../../lib/api-helpers";
 
 export const prerender = false;
 
@@ -11,7 +12,7 @@ const queryParamsSchema = z.object({
     .optional()
     .default("1")
     .transform((val) => parseInt(val, 10))
-    .pipe(z.number().int().positive({ message: "Page must be a positive integer" })),
+    .pipe(z.number().int().positive({ message: "validation_error_page_invalid" })),
   pageSize: z
     .string()
     .optional()
@@ -21,18 +22,18 @@ const queryParamsSchema = z.object({
       z
         .number()
         .int()
-        .min(1, { message: "Page size must be at least 1" })
-        .max(100, { message: "Page size cannot exceed 100" })
+        .min(1, { message: "validation_error_page_size_too_small" })
+        .max(100, { message: "validation_error_page_size_too_large" })
     ),
 });
 
 const createLearningItemSchema = z.object({
-  original_sentence: z.string().min(1, { message: "Original sentence is required" }),
-  corrected_sentence: z.string().min(1, { message: "Corrected sentence is required" }),
+  original_sentence: z.string().min(1, { message: "validation_error_original_sentence_empty" }),
+  corrected_sentence: z.string().min(1, { message: "validation_error_corrected_sentence_empty" }),
   explanation: z
     .string()
-    .min(1, { message: "Explanation is required" })
-    .max(150, { message: "Explanation must be at most 150 characters" }),
+    .min(1, { message: "validation_error_explanation_empty" })
+    .max(500, { message: "validation_error_explanation_too_long" }),
 });
 
 /**
@@ -68,11 +69,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
     const validationResult = queryParamsSchema.safeParse(rawParams);
 
     if (!validationResult.success) {
-      const errors = validationResult.error.errors;
-      return new Response(JSON.stringify(errors), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return createValidationErrorResponse(validationResult.error);
     }
 
     const { page, pageSize } = validationResult.data;
@@ -80,24 +77,17 @@ export const GET: APIRoute = async ({ locals, url }) => {
     // MVP: Using DEFAULT_USER_ID. In production, this would use authenticated user's ID
     const result = await new LearningItemsService(locals.supabase).getLearningItems(DEFAULT_USER_ID, page, pageSize);
 
-    if (!result.success) {
-      return new Response(JSON.stringify({ error: "An internal server error occurred" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify(result.data), {
+    return new Response(JSON.stringify(result), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Unexpected error in GET /api/learning-items:", error);
+    if (error instanceof LearningItemsDatabaseError) {
+      return createErrorResponse("database_error", 500);
+    }
 
-    return new Response(JSON.stringify({ error: "An internal server error occurred" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Unexpected error in GET /api/learning-items:", error);
+    return createErrorResponse("unknown_error", 500);
   }
 };
 
@@ -135,11 +125,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const validationResult = createLearningItemSchema.safeParse(requestBody);
 
     if (!validationResult.success) {
-      const errors = validationResult.error.errors;
-      return new Response(JSON.stringify(errors), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return createValidationErrorResponse(validationResult.error);
     }
 
     // Create learning item
@@ -149,23 +135,16 @@ export const POST: APIRoute = async ({ request, locals }) => {
       DEFAULT_USER_ID
     );
 
-    if (!result.success) {
-      return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
-    }
-
-    return new Response(JSON.stringify(result.data), {
+    return new Response(JSON.stringify(result), {
       status: 201,
       headers: { "Content-Type": "application/json" },
     });
   } catch (error) {
-    console.error("Unexpected error in POST /api/learning-items:", error);
+    if (error instanceof LearningItemsDatabaseError) {
+      return createErrorResponse("database_error", 500);
+    }
 
-    return new Response(JSON.stringify({ error: "Internal Server Error" }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    console.error("Unexpected error in POST /api/learning-items:", error);
+    return createErrorResponse("unknown_error", 500);
   }
 };

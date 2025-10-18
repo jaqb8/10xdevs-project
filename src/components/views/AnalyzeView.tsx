@@ -17,7 +17,14 @@ export function AnalyzeView() {
 
   useEffect(() => {
     if (state.isCurrentResultSaved) {
-      toast.success("Zapisano na liście Do nauki!");
+      toast.success("Zapisano na liście Do nauki!", {
+        action: {
+          label: "Przejdź do listy",
+          onClick: () => {
+            window.location.href = "/learning-list";
+          },
+        },
+      });
     }
   }, [state.isCurrentResultSaved]);
 
@@ -40,7 +47,8 @@ export function AnalyzeView() {
           text={state.text}
           onTextChange={setText}
           onSubmit={analyzeText}
-          isLoading={state.status !== "idle"}
+          onClear={clear}
+          isLoading={state.status === "loading"}
           isAnalyzing={state.status === "loading"}
           maxLength={MAX_TEXT_LENGTH}
         />
@@ -51,7 +59,6 @@ export function AnalyzeView() {
             isLoading={state.status === "loading"}
             analysisResult={state.result}
             isSaved={state.isCurrentResultSaved}
-            onClear={clear}
             onSave={handleSave}
           />
         </section>

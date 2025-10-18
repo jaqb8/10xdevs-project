@@ -13,10 +13,6 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 
-interface HeaderProps {
-  user: UserViewModel | null;
-}
-
 interface MenuItem {
   title: string;
   url: string;

@@ -7,14 +7,24 @@ interface AnalysisFormProps {
   text: string;
   onTextChange: (text: string) => void;
   onSubmit: () => void;
+  onClear: () => void;
   isLoading: boolean;
   isAnalyzing: boolean;
   maxLength: number;
 }
 
-export function AnalysisForm({ text, onTextChange, onSubmit, isLoading, isAnalyzing, maxLength }: AnalysisFormProps) {
+export function AnalysisForm({
+  text,
+  onTextChange,
+  onSubmit,
+  onClear,
+  isLoading,
+  isAnalyzing,
+  maxLength,
+}: AnalysisFormProps) {
   const isOverLimit = text.length > maxLength;
   const isDisabled = isLoading || text.trim().length === 0 || isOverLimit;
+  const isClearDisabled = isLoading || text.trim().length === 0;
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -70,17 +80,30 @@ export function AnalysisForm({ text, onTextChange, onSubmit, isLoading, isAnalyz
         </div>
       </div>
 
-      <Button type="submit" disabled={isDisabled} className="w-full text-lg" aria-busy={isAnalyzing} size="lg">
-        {isAnalyzing ? (
-          <>
-            <Loader2 className="size-4 animate-spin" /> Analizuję...
-          </>
-        ) : (
-          <>
-            <Brain className="size-4" /> Analizuj tekst
-          </>
-        )}
-      </Button>
+      <div className="flex flex-col gap-2">
+        <Button type="submit" disabled={isDisabled} className="w-full text-lg" aria-busy={isAnalyzing} size="lg">
+          {isAnalyzing ? (
+            <>
+              <Loader2 className="size-4 animate-spin" /> Analizuję...
+            </>
+          ) : (
+            <>
+              <Brain className="size-4" /> Analizuj tekst
+            </>
+          )}
+        </Button>
+        <Button
+          type="button"
+          onClick={onClear}
+          disabled={isClearDisabled}
+          variant="outline"
+          className="w-full text-lg"
+          size="lg"
+          aria-label="Wyczyść formularz i zacznij od nowa"
+        >
+          Wyczyść
+        </Button>
+      </div>
     </form>
   );
 }

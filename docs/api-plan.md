@@ -81,7 +81,7 @@ All endpoints are prefixed with `/api`.
     ```
 - **Error Responses**:
   - **Code**: `400 Bad Request`
-  - **Message**: `{ "error": "Invalid input", "details": { "explanation": "Explanation cannot exceed 150 characters." } }`
+  - **Message**: `{ "error": "Invalid input", "details": { "explanation": "Explanation cannot exceed 500 characters." } }`
   - **Code**: `401 Unauthorized`
   - **Message**: `{ "error": "Authentication required" }`
 
@@ -234,7 +234,7 @@ All endpoints are prefixed with `/api`.
 - **POST /learning-items**:
   - `original_sentence`: Must be a non-empty string.
   - `corrected_sentence`: Must be a non-empty string.
-  - `explanation`: Must be a non-empty string and not exceed 150 characters.
+  - `explanation`: Must be a non-empty string and not exceed 500 characters.
 - **POST /auth/signup**:
   - `email`: Must be a valid email address.
   - `password`: Must meet strength requirements (e.g., minimum length).

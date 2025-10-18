@@ -27,7 +27,7 @@ const { user } = Astro.locals;
   <body>
     <Header user={user} client:load />
     <slot />
-    <Toaster client:load />
+    <Toaster richColors client:load />
   </body>
 </html>
 
