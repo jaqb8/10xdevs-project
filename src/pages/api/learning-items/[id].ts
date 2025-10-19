@@ -6,7 +6,6 @@ import {
   LearningItemNotFoundError,
   LearningItemForbiddenError,
 } from "../../../lib/services/learning-items";
-import { DEFAULT_USER_ID } from "../../../db/supabase.client";
 import { createErrorResponse, createValidationErrorResponse } from "../../../lib/api-helpers";
 
 export const prerender = false;
@@ -36,6 +35,10 @@ const idParamSchema = z.string().uuid({ message: "validation_error_invalid_uuid"
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
   try {
+    if (!locals.user) {
+      return createErrorResponse("authentication_error_unauthorized", 401);
+    }
+
     const itemId = params.id;
 
     if (!itemId) {
@@ -50,8 +53,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 
     const validatedId = validationResult.data;
 
-    // MVP: Using DEFAULT_USER_ID. In production, this would use authenticated user's ID
-    await new LearningItemsService(locals.supabase).deleteLearningItem(validatedId, DEFAULT_USER_ID);
+    await new LearningItemsService(locals.supabase).deleteLearningItem(validatedId, locals.user.id);
 
     return new Response(null, { status: 204 });
   } catch (error) {

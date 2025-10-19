@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Brain, Loader2 } from "lucide-react";
+import { Brain, Loader2, UserPlus } from "lucide-react";
 
 interface AnalysisFormProps {
   text: string;

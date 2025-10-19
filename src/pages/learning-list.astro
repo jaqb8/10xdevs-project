@@ -1,10 +1,8 @@
 ---
-import Layout from "../layouts/Layout.astro";
+import AppLayout from "../layouts/AppLayout.astro";
 import { LearningItemsView } from "../components/views/LearningItemsView";
-import { Toaster } from "../components/ui/sonner";
 ---
 
-<Layout title="Moje elementy do nauki - Language Learning Buddy">
+<AppLayout title="Moje elementy do nauki - Language Learning Buddy">
   <LearningItemsView client:load />
-  <Toaster client:load />
-</Layout>
+</AppLayout>

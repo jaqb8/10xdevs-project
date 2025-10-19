@@ -3,8 +3,10 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextDiff } from "@/components/shared/TextDiff";
-import { CheckCircle2 } from "lucide-react";
+import { BookPlus, CheckCircle2, UserPlus } from "lucide-react";
+import { useAuthStore } from "@/lib/stores/auth.store";
 import type { TextAnalysisDto, CreateLearningItemCommand } from "../../types";
+import { cn } from "@/lib/utils";
 
 interface AnalysisResultProps {
   isLoading: boolean;
@@ -14,7 +16,14 @@ interface AnalysisResultProps {
 }
 
 export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: AnalysisResultProps) {
+  const { isAuth } = useAuthStore();
+
   const handleSave = useCallback(() => {
+    if (!isAuth) {
+      window.location.href = "/login";
+      return;
+    }
+
     if (analysisResult && !analysisResult.is_correct) {
       const command: CreateLearningItemCommand = {
         original_sentence: analysisResult.original_text,
@@ -23,7 +32,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
       };
       onSave(command);
     }
-  }, [analysisResult, onSave]);
+  }, [analysisResult, onSave, isAuth]);
 
   if (isLoading) {
     return (
@@ -79,10 +88,29 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
         <Button
           onClick={handleSave}
           disabled={isSaved}
-          className="w-full"
-          aria-label={isSaved ? "Element już zapisany na liście" : "Dodaj ten błąd do listy Do nauki"}
+          variant="default"
+          className={cn("w-full text-lg h-10", !isAuth && !isSaved && "bg-accent hover:bg-accent/90")}
+          aria-label={
+            isSaved
+              ? "Element już zapisany na liście"
+              : isAuth
+                ? "Dodaj ten błąd do listy Do nauki"
+                : "Zaloguj się, aby dodać do listy"
+          }
         >
-          {isSaved ? "Zapisano ✓" : "Dodaj do listy Do nauki"}
+          {isSaved ? (
+            "Zapisano ✓"
+          ) : isAuth ? (
+            <>
+              <BookPlus className="size-4" />
+              Dodaj do listy Do nauki
+            </>
+          ) : (
+            <>
+              <UserPlus className="size-4" />
+              Zaloguj się, aby dodać do listy
+            </>
+          )}
         </Button>
       </CardFooter>
     </Card>

@@ -63,7 +63,9 @@ export function LearningItemsView() {
 
       <LearningItemsList items={viewModels} onDeleteItem={handleDeleteItem} />
 
-      {paginationViewModel && <PaginationControls pagination={paginationViewModel} onPageChange={setPage} />}
+      {paginationViewModel && viewModels.length > 0 && (
+        <PaginationControls pagination={paginationViewModel} onPageChange={setPage} />
+      )}
 
       <DeleteConfirmationDialog
         isOpen={isDeleteDialogOpen}

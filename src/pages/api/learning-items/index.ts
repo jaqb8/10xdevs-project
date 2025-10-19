@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { LearningItemsService, LearningItemsDatabaseError } from "../../../lib/services/learning-items";
-import { DEFAULT_USER_ID } from "../../../db/supabase.client";
 import { createErrorResponse, createValidationErrorResponse } from "../../../lib/api-helpers";
 
 export const prerender = false;
@@ -61,6 +60,10 @@ const createLearningItemSchema = z.object({
  */
 export const GET: APIRoute = async ({ locals, url }) => {
   try {
+    if (!locals.user) {
+      return createErrorResponse("authentication_error_unauthorized", 401);
+    }
+
     const rawParams = {
       page: url.searchParams.get("page") ?? undefined,
       pageSize: url.searchParams.get("pageSize") ?? undefined,
@@ -74,8 +77,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     const { page, pageSize } = validationResult.data;
 
-    // MVP: Using DEFAULT_USER_ID. In production, this would use authenticated user's ID
-    const result = await new LearningItemsService(locals.supabase).getLearningItems(DEFAULT_USER_ID, page, pageSize);
+    const result = await new LearningItemsService(locals.supabase).getLearningItems(locals.user.id, page, pageSize);
 
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -121,6 +123,10 @@ export const GET: APIRoute = async ({ locals, url }) => {
  */
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
+    if (!locals.user) {
+      return createErrorResponse("authentication_error_unauthorized", 401);
+    }
+
     const requestBody = await request.json();
     const validationResult = createLearningItemSchema.safeParse(requestBody);
 
@@ -128,11 +134,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return createValidationErrorResponse(validationResult.error);
     }
 
-    // Create learning item
-    // MVP: Using DEFAULT_USER_ID. In production, this would use authenticated user's ID
     const result = await new LearningItemsService(locals.supabase).createLearningItem(
       validationResult.data,
-      DEFAULT_USER_ID
+      locals.user.id
     );
 
     return new Response(JSON.stringify(result), {

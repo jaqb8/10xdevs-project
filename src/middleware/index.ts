@@ -1,22 +1,44 @@
 import { defineMiddleware } from "astro:middleware";
 
-import { supabaseClient, DEFAULT_USER_ID } from "../db/supabase.client.ts";
+import { createSupabaseServerInstance, DEFAULT_USER_ID } from "../db/supabase.client.ts";
 import { analysisRateLimiter } from "../lib/rate-limiter.ts";
-import type { UserViewModel } from "@/types.ts";
 import { createErrorResponse } from "@/lib/api-helpers.ts";
 
-const MOCKED_USER: UserViewModel = {
-  id: "12345",
-  email: "test@example.com",
-};
+const AUTH_PAGES = ["/login", "/signup", "/forgot-password", "/reset-password"];
 
-export const onRequest = defineMiddleware((context, next) => {
-  context.locals.supabase = supabaseClient;
-  context.locals.user = MOCKED_USER;
+const PRIVATE_PATHS = ["/learning-list"];
 
-  // Apply rate limiting to /api/analyze endpoint
-  if (context.locals.user && context.url.pathname === "/api/analyze") {
-    const userId = context.locals.user["id"] || DEFAULT_USER_ID;
+export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
+  const supabase = createSupabaseServerInstance({
+    cookies,
+    headers: request.headers,
+  });
+
+  locals.supabase = supabase;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (user) {
+    locals.user = {
+      email: user.email!,
+      id: user.id,
+    };
+  } else {
+    locals.user = null;
+  }
+
+  if (user && AUTH_PAGES.includes(url.pathname)) {
+    return redirect("/");
+  }
+
+  if (!user && PRIVATE_PATHS.some((path) => url.pathname.startsWith(path))) {
+    return redirect("/login");
+  }
+
+  if (locals.user && url.pathname === "/api/analyze") {
+    const userId = locals.user.id || DEFAULT_USER_ID;
 
     if (!analysisRateLimiter.isAllowed(userId)) {
       const timeUntilReset = analysisRateLimiter.getTimeUntilReset(userId);

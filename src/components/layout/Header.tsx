@@ -1,4 +1,3 @@
-import type { UserViewModel } from "@/types";
 import { Book, Menu, Sunset, Trees, Zap } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -12,6 +11,7 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { useAuthStore } from "@/lib/stores/auth.store";
 
 interface MenuItem {
   title: string;
@@ -22,7 +22,6 @@ interface MenuItem {
 }
 
 interface Navbar1Props {
-  user: UserViewModel | null;
   logo?: {
     url: string;
     src: string;
@@ -33,7 +32,6 @@ interface Navbar1Props {
 }
 
 const Navbar1 = ({
-  user,
   logo = {
     url: "/",
     src: "https://deifkwefumgah.cloudfront.net/shadcnblocks/block/logos/shadcnblockscom-icon.svg",
@@ -45,7 +43,8 @@ const Navbar1 = ({
     { title: "Moja lista", url: "/learning-list" },
   ],
 }: Navbar1Props) => {
-  const filteredMenu = user ? menu : [];
+  const { user, isAuth } = useAuthStore();
+  const filteredMenu = isAuth ? menu : [];
 
   return (
     <section className="py-4">
@@ -69,9 +68,11 @@ const Navbar1 = ({
           {user ? (
             <>
               <span className="text-sm text-muted-foreground flex items-center">{user.email}</span>
-              <Button asChild variant="outline" size="sm">
-                <a href="/api/auth/logout">Wyloguj</a>
-              </Button>
+              <form action="/api/auth/logout" method="POST">
+                <Button type="submit" variant="outline" size="sm">
+                  Wyloguj
+                </Button>
+              </form>
             </>
           ) : (
             <>
@@ -118,9 +119,11 @@ const Navbar1 = ({
                   {user ? (
                     <>
                       <span className="text-md text-muted-foreground">{user.email}</span>
-                      <Button asChild variant="outline">
-                        <a href="/api/auth/logout">Wyloguj</a>
-                      </Button>
+                      <form action="/api/auth/logout" method="POST">
+                        <Button type="submit" variant="outline" className="w-full">
+                          Wyloguj
+                        </Button>
+                      </form>
                     </>
                   ) : (
                     <>

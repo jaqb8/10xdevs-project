@@ -1,0 +1,8 @@
+---
+import AuthLayout from "@/layouts/AuthLayout.astro";
+import { LoginForm } from "@/components/features/auth/LoginForm";
+---
+
+<AuthLayout title="Logowanie - Language Learning Buddy">
+  <LoginForm client:load />
+</AuthLayout>

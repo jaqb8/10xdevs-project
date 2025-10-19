@@ -16,6 +16,7 @@ function mapErrorCodeToMessage(errorCode: string): string {
     validation_error_page_size_too_large: "Rozmiar strony nie może przekraczać 100.",
     validation_error_id_required: "ID elementu jest wymagane.",
     validation_error_invalid_uuid: "Nieprawidłowy format ID elementu.",
+    authentication_error_unauthorized: "Musisz być zalogowany, aby wykonać tę operację.",
     database_error: "Wystąpił błąd serwera. Spróbuj ponownie za chwilę.",
     not_found: "Element nie został znaleziony.",
     forbidden: "Nie masz uprawnień do wykonania tej operacji.",

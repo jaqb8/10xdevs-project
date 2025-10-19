@@ -26,6 +26,7 @@ function mapErrorCodeToMessage(error: ApiErrorResponse): string {
     validation_error_text_too_long: "Tekst nie może przekraczać 500 znaków.",
     configuration_error: "Błąd konfiguracji serwisu. Skontaktuj się z pomocą techniczną.",
     authentication_error: "Błąd uwierzytelniania. Skontaktuj się z pomocą techniczną.",
+    authentication_error_unauthorized: "Musisz być zalogowany, aby wykonać tę operację.",
     rate_limit_error: `Przekroczono limit zapytań. Spróbuj ponownie za ${Math.ceil(((data?.time_until_reset as number) ?? 0) / 1000)} sekund.`,
     invalid_request_error: "Nieprawidłowe żądanie. Sprawdź wprowadzone dane.",
     validation_error: "Nie udało się przetworzyć odpowiedzi AI. Spróbuj ponownie.",

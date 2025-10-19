@@ -1,0 +1,26 @@
+import type { APIRoute } from "astro";
+import { createErrorResponse } from "@/lib/api-helpers";
+
+export const prerender = false;
+
+export const GET: APIRoute = async ({ url, locals, redirect }) => {
+  try {
+    const code = url.searchParams.get("code");
+
+    if (!code) {
+      return createErrorResponse("authentication_error_missing_code", 400);
+    }
+
+    const { error } = await locals.supabase.auth.exchangeCodeForSession(code);
+
+    if (error) {
+      console.error("Code exchange error:", error);
+      return createErrorResponse("authentication_error_invalid_code", 400);
+    }
+
+    return redirect("/", 302);
+  } catch (error) {
+    console.error("Unexpected callback error:", error);
+    return createErrorResponse("unknown_error", 500);
+  }
+};
