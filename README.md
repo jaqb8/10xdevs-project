@@ -34,6 +34,7 @@ The project is built with a modern tech stack focused on performance and develop
 - **Language**: [TypeScript 5](https://www.typescriptlang.org/) for static typing.
 - **Backend**: [Supabase](https://supabase.io/) as a comprehensive backend solution (PostgreSQL database, Authentication, BaaS).
 - **AI Integration**: Communication with AI models via [Openrouter.ai](https://openrouter.ai/).
+- **Testing**: [Vitest](https://vitest.dev/) for unit and integration tests, [Playwright](https://playwright.dev/) for end-to-end tests, and [Mock Service Worker](https://mswjs.io/) for API mocking.
 - **CI/CD & Hosting**: [GitHub Actions](https://github.com/features/actions) and [DigitalOcean](https://www.digitalocean.com/) (Docker).
 
 ## Getting Started Locally

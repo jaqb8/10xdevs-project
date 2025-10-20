@@ -22,3 +22,9 @@ CI/CD i Hosting:
 
 - Github Actions do tworzenia pipeline’ów CI/CD
 - DigitalOcean do hostowania aplikacji za pośrednictwem obrazu docker
+
+Testowanie:
+
+- **Vitest** do testów jednostkowych i integracyjnych
+- **Playwright** do testów end-to-end
+- **Mock Service Worker (MSW)** do mockowania API
