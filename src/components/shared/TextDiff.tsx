@@ -13,11 +13,20 @@ export function TextDiff({ originalText, correctedText }: TextDiffProps) {
   }, [originalText, correctedText]);
 
   return (
-    <div className="rounded-md bg-muted p-4" role="region" aria-label="Porównanie tekstu oryginalnego z poprawionym">
+    <div
+      className="rounded-md bg-muted p-4"
+      role="region"
+      aria-label="Porównanie tekstu oryginalnego z poprawionym"
+      data-test-id="text-diff-container"
+    >
       <div className="space-y-4">
         <div>
           <h4 className="mb-2 text-sm font-semibold text-muted-foreground">Oryginalny tekst:</h4>
-          <div className="text-sm leading-relaxed" aria-label="Tekst oryginalny z zaznaczonymi błędami">
+          <div
+            className="text-sm leading-relaxed"
+            aria-label="Tekst oryginalny z zaznaczonymi błędami"
+            data-test-id="text-diff-original"
+          >
             {diffs.map((diff, index) => {
               const [operation, text] = diff;
 
@@ -45,7 +54,11 @@ export function TextDiff({ originalText, correctedText }: TextDiffProps) {
 
         <div className="border-t border-border pt-3">
           <h4 className="mb-2 text-sm font-semibold text-muted-foreground">Poprawiony tekst:</h4>
-          <div className="text-sm leading-relaxed" aria-label="Tekst poprawiony z zaznaczonymi zmianami">
+          <div
+            className="text-sm leading-relaxed"
+            aria-label="Tekst poprawiony z zaznaczonymi zmianami"
+            data-test-id="text-diff-corrected"
+          >
             {diffs.map((diff, index) => {
               const [operation, text] = diff;
 

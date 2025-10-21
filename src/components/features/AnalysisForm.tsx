@@ -63,6 +63,7 @@ export function AnalysisForm({
           autoComplete="off"
           autoCorrect="off"
           spellCheck="false"
+          data-test-id="analysis-text-input"
         />
         <div className="flex items-center justify-between gap-2">
           <p id="char-count-helper" className="text-muted-foreground text-xs">
@@ -81,7 +82,14 @@ export function AnalysisForm({
       </div>
 
       <div className="flex flex-col gap-2">
-        <Button type="submit" disabled={isDisabled} className="w-full text-lg" aria-busy={isAnalyzing} size="lg">
+        <Button
+          type="submit"
+          disabled={isDisabled}
+          className="w-full text-lg"
+          aria-busy={isAnalyzing}
+          size="lg"
+          data-test-id="analysis-submit-button"
+        >
           {isAnalyzing ? (
             <>
               <Loader2 className="size-4 animate-spin" /> Analizuję...
@@ -100,6 +108,7 @@ export function AnalysisForm({
           className="w-full text-lg"
           size="lg"
           aria-label="Wyczyść formularz i zacznij od nowa"
+          data-test-id="analysis-clear-button"
         >
           Wyczyść
         </Button>

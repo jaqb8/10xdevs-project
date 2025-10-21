@@ -52,7 +52,7 @@ const Navbar1 = ({
       <nav className="hidden justify-between lg:flex px-8 items-center">
         <div className="flex items-center gap-6">
           {/* Logo */}
-          <a href={logo.url} className="flex items-center gap-2">
+          <a href={logo.url} className="flex items-center gap-2" data-test-id="header-logo">
             <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
             <span className="text-xl font-semibold tracking-tighter">{logo.title}</span>
           </a>
@@ -67,19 +67,21 @@ const Navbar1 = ({
         <div className="flex gap-2">
           {user ? (
             <>
-              <span className="text-sm text-muted-foreground flex items-center">{user.email}</span>
+              <span className="text-sm text-muted-foreground flex items-center" data-test-id="header-user-email">
+                {user.email}
+              </span>
               <form action="/api/auth/logout" method="POST">
-                <Button type="submit" variant="outline" size="sm">
+                <Button type="submit" variant="outline" size="sm" data-test-id="header-logout-button">
                   Wyloguj
                 </Button>
               </form>
             </>
           ) : (
             <>
-              <Button asChild variant="outline" size="sm">
+              <Button asChild variant="outline" size="sm" data-test-id="header-login-button">
                 <a href="/login">Zaloguj</a>
               </Button>
-              <Button asChild size="sm">
+              <Button asChild size="sm" data-test-id="header-signup-button">
                 <a href="/signup">Zarejestruj</a>
               </Button>
             </>
@@ -91,12 +93,12 @@ const Navbar1 = ({
       <div className="block lg:hidden">
         <div className="flex items-center justify-between px-8">
           {/* Logo */}
-          <a href={logo.url} className="flex items-center gap-2">
+          <a href={logo.url} className="flex items-center gap-2" data-test-id="header-logo-mobile">
             <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
           </a>
           <Sheet>
             <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
+              <Button variant="outline" size="icon" data-test-id="header-mobile-menu-trigger">
                 <Menu className="size-4" />
               </Button>
             </SheetTrigger>
@@ -118,19 +120,26 @@ const Navbar1 = ({
                 <div className="flex flex-col gap-3">
                   {user ? (
                     <>
-                      <span className="text-md text-muted-foreground">{user.email}</span>
+                      <span className="text-md text-muted-foreground" data-test-id="header-user-email-mobile">
+                        {user.email}
+                      </span>
                       <form action="/api/auth/logout" method="POST">
-                        <Button type="submit" variant="outline" className="w-full">
+                        <Button
+                          type="submit"
+                          variant="outline"
+                          className="w-full"
+                          data-test-id="header-logout-button-mobile"
+                        >
                           Wyloguj
                         </Button>
                       </form>
                     </>
                   ) : (
                     <>
-                      <Button asChild variant="outline">
+                      <Button asChild variant="outline" data-test-id="header-login-button-mobile">
                         <a href="/login">Zaloguj</a>
                       </Button>
-                      <Button asChild>
+                      <Button asChild data-test-id="header-signup-button-mobile">
                         <a href="/signup">Zarejestruj</a>
                       </Button>
                     </>
@@ -166,6 +175,7 @@ const renderMenuItem = (item: MenuItem) => {
       <NavigationMenuLink
         href={item.url}
         className="bg-background hover:bg-muted hover:text-accent-foreground group inline-flex h-10 w-max items-center justify-center rounded-md px-4 py-2 text-lg font-medium transition-colors"
+        data-test-id={`header-nav-${item.title.toLowerCase().replace(/\s+/g, "-")}`}
       >
         {item.title}
       </NavigationMenuLink>
@@ -188,7 +198,12 @@ const renderMobileMenuItem = (item: MenuItem) => {
   }
 
   return (
-    <a key={item.title} href={item.url} className="text-md font-semibold">
+    <a
+      key={item.title}
+      href={item.url}
+      className="text-md font-semibold"
+      data-test-id={`header-nav-mobile-${item.title.toLowerCase().replace(/\s+/g, "-")}`}
+    >
       {item.title}
     </a>
   );

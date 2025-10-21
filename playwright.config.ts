@@ -1,4 +1,7 @@
 import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
+dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -33,15 +36,30 @@ export default defineConfig({
   /* Configure projects for major browsers */
   projects: [
     {
+      name: "setup",
+      testMatch: /.*\.setup\.ts/,
+    },
+    {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/user.json",
+      },
+      dependencies: ["setup"],
+    },
+    {
+      name: "cleanup",
+      testMatch: /global\.teardown\.ts/,
     },
   ],
 
   /* Run your local dev server before starting the tests */
   webServer: {
-    command: "npm run dev",
+    command: "npm run dev:e2e",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
   },
+
+  /* Global teardown to clean up database after all tests */
+  globalTeardown: "./e2e/global-teardown.ts",
 });

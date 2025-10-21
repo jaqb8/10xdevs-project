@@ -121,6 +121,7 @@ export function LoginForm() {
               aria-describedby={errors.email ? "email-error" : undefined}
               autoComplete="email"
               required
+              data-test-id="login-email-input"
             />
             {errors.email && (
               <p id="email-error" className="text-sm text-destructive" role="alert">
@@ -143,6 +144,7 @@ export function LoginForm() {
               aria-describedby={errors.password ? "password-error" : undefined}
               autoComplete="current-password"
               required
+              data-test-id="login-password-input"
             />
             {errors.password && (
               <p id="password-error" className="text-sm text-destructive" role="alert">
@@ -158,7 +160,14 @@ export function LoginForm() {
               Zapomniałeś hasła?
             </a>
           </div>
-          <Button type="submit" className="w-full" disabled={isLoading} size="lg" aria-busy={isLoading}>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+            size="lg"
+            aria-busy={isLoading}
+            data-test-id="login-submit-button"
+          >
             {isLoading ? (
               <>
                 <Loader2 className="size-4 animate-spin" /> Logowanie...

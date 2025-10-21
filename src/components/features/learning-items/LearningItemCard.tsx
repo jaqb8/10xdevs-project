@@ -13,7 +13,7 @@ export function LearningItemCard({ item, onDelete }: LearningItemCardProps) {
     <Card>
       <CardHeader>
         <CardTitle className="text-base flex items-center justify-between">
-          <span>Element do nauki</span>
+          <span data-learning-item>Element do nauki</span>
           <span className="text-sm font-normal text-muted-foreground">{item.formatted_created_at}</span>
         </CardTitle>
       </CardHeader>

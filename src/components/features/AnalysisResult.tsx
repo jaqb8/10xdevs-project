@@ -36,7 +36,12 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
 
   if (isLoading) {
     return (
-      <Card aria-busy="true" role="status" aria-label="Ładowanie wyników analizy">
+      <Card
+        aria-busy="true"
+        role="status"
+        aria-label="Ładowanie wyników analizy"
+        data-test-id="analysis-result-loading"
+      >
         <CardHeader>
           <Skeleton className="h-6 w-48" />
         </CardHeader>
@@ -55,7 +60,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
 
   if (analysisResult.is_correct) {
     return (
-      <Card role="status" aria-label="Wynik analizy - tekst poprawny">
+      <Card role="status" aria-label="Wynik analizy - tekst poprawny" data-test-id="analysis-result-correct">
         <CardContent className="pt-6">
           <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
             <CheckCircle2 className="size-12 text-green-600 dark:text-green-500" aria-hidden="true" />
@@ -70,7 +75,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
   }
 
   return (
-    <Card role="article" aria-label="Wynik analizy - znaleziono błędy">
+    <Card role="article" aria-label="Wynik analizy - znaleziono błędy" data-test-id="analysis-result-with-errors">
       <CardHeader>
         <CardTitle>
           <h2 className="text-lg font-semibold">Wynik analizy</h2>
@@ -81,7 +86,9 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
 
         <div className="space-y-2">
           <h3 className="text-sm font-semibold">Wyjaśnienie:</h3>
-          <p className="rounded-md bg-muted p-3 text-sm leading-relaxed">{analysisResult.explanation}</p>
+          <p className="rounded-md bg-muted p-3 text-sm leading-relaxed" data-test-id="analysis-explanation">
+            {analysisResult.explanation}
+          </p>
         </div>
       </CardContent>
       <CardFooter>
@@ -97,6 +104,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
                 ? "Dodaj ten błąd do listy Do nauki"
                 : "Zaloguj się, aby dodać do listy"
           }
+          data-test-id="analysis-save-button"
         >
           {isSaved ? (
             "Zapisano ✓"
