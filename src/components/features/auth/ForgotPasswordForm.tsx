@@ -1,81 +1,32 @@
-import { useState, useCallback, type FormEvent } from "react";
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mail } from "lucide-react";
-import { toast } from "sonner";
-
-function mapErrorCodeToMessage(errorCode: string): string {
-  const errorMessages: Record<string, string> = {
-    validation_error_invalid_email: "Nieprawidłowy format adresu email.",
-    unknown_error: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.",
-  };
-
-  return errorMessages[errorCode] || "Wystąpił błąd. Spróbuj ponownie.";
-}
+import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validation/auth-schemas";
+import { useAuthActions } from "@/lib/hooks/useAuthActions";
 
 export function ForgotPasswordForm() {
-  const [email, setEmail] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string }>({});
+  const { forgotPassword, isLoading } = useAuthActions();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ForgotPasswordFormData>({
+    resolver: zodResolver(forgotPasswordSchema),
+    mode: "onBlur",
+  });
 
-  const validateEmail = (email: string): boolean => {
-    if (!email) {
-      setErrors((prev) => ({ ...prev, email: "Email jest wymagany" }));
-      return false;
+  const onSubmit = async (data: ForgotPasswordFormData) => {
+    const success = await forgotPassword(data);
+    if (success) {
+      setIsSuccess(true);
     }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrors((prev) => ({ ...prev, email: "Nieprawidłowy format email" }));
-      return false;
-    }
-    setErrors((prev) => ({ ...prev, email: undefined }));
-    return true;
   };
-
-  const handleSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-
-      const isEmailValid = validateEmail(email);
-
-      if (!isEmailValid) {
-        return;
-      }
-
-      setIsLoading(true);
-
-      try {
-        const response = await fetch("/api/auth/forgot-password", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email }),
-        });
-
-        if (response.ok) {
-          setIsSuccess(true);
-          toast.success("Jeśli konto istnieje, link do resetu hasła został wysłany na podany adres email.");
-        } else {
-          const data = await response.json();
-          const errorMessage = mapErrorCodeToMessage(data.error_code);
-          toast.error(errorMessage);
-        }
-      } catch (error) {
-        toast.error("Wystąpił błąd połączenia. Spróbuj ponownie.");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [email]
-  );
-
-  const handleEmailBlur = useCallback(() => {
-    if (email) validateEmail(email);
-  }, [email]);
 
   if (isSuccess) {
     return (
@@ -101,7 +52,7 @@ export function ForgotPasswordForm() {
         <CardTitle className="text-2xl font-bold">Zapomniałeś hasła?</CardTitle>
         <CardDescription>Wprowadź swój adres email, aby zresetować hasło</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -109,18 +60,15 @@ export function ForgotPasswordForm() {
               id="email"
               type="email"
               placeholder="twoj@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={handleEmailBlur}
+              {...register("email")}
               disabled={isLoading}
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "email-error" : undefined}
               autoComplete="email"
-              required
             />
             {errors.email && (
               <p id="email-error" className="text-sm text-destructive" role="alert">
-                {errors.email}
+                {errors.email.message}
               </p>
             )}
           </div>

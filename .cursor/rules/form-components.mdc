@@ -1,0 +1,471 @@
+---
+description: Best practices for creating form components with React Hook Form and Zod
+---
+
+## Form Components Best Practices
+
+### Tech Stack
+
+- **React Hook Form** - Form state management (uncontrolled components for performance)
+- **Zod** - Type-safe schema validation
+- **@hookform/resolvers/zod** - Integration layer
+
+### Architecture Pattern
+
+Forms follow a three-layer architecture:
+
+```
+Component (UI) → Hook (orchestration) → Client (API calls)
+                      ↓
+                 Validation Schema
+```
+
+**Layers:**
+
+1. **Validation Schemas** (`src/lib/validation/`) - Zod schemas, reusable across forms
+2. **Clients** (`src/lib/clients/`) - Pure API fetch calls, no UI logic
+3. **Hooks** (`src/lib/hooks/`) - Orchestrate API calls with UI feedback (toasts, redirects, loading)
+4. **Components** (`src/components/`) - UI rendering only
+
+### Directory Structure
+
+```
+src/lib/
+├── validation/
+│   └── [feature]-schemas.ts    # Zod schemas + TypeScript types
+├── clients/
+│   └── [feature]/
+│       ├── [feature].client.ts  # API fetch calls
+│       └── [feature].errors.ts  # Error handling & mapping
+└── hooks/
+    └── use[Feature]Actions.ts   # UI orchestration
+```
+
+### Creating a New Form
+
+#### 1. Define Validation Schema
+
+```typescript
+// src/lib/validation/auth-schemas.ts
+import { z } from "zod";
+
+export const emailSchema = z.string().min(1, "Email jest wymagany").email("Nieprawidłowy format email");
+
+export const passwordSchema = z.string().min(1, "Hasło jest wymagane").min(6, "Hasło musi mieć co najmniej 6 znaków");
+
+export const loginSchema = z.object({
+  email: emailSchema,
+  password: passwordSchema,
+});
+
+// Password confirmation with refine
+export const signupSchema = z
+  .object({
+    email: emailSchema,
+    password: passwordSchema,
+    confirmPassword: z.string().min(1, "Potwierdzenie hasła jest wymagane"),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Hasła muszą być identyczne",
+    path: ["confirmPassword"],
+  });
+
+// Auto-generate TypeScript types
+export type LoginFormData = z.infer<typeof loginSchema>;
+export type SignupFormData = z.infer<typeof signupSchema>;
+```
+
+#### 2. Create Error Handling
+
+```typescript
+// src/lib/clients/auth/auth.errors.ts
+export function mapAuthErrorCodeToMessage(errorCode: string): string {
+  const errorMessages: Record<string, string> = {
+    validation_error_invalid_email: "Nieprawidłowy format adresu email.",
+    authentication_error: "Wystąpił błąd podczas operacji.",
+    unknown_error: "Wystąpił nieoczekiwany błąd.",
+  };
+  return errorMessages[errorCode] || "Wystąpił błąd. Spróbuj ponownie.";
+}
+
+export class AuthClientError extends Error {
+  constructor(public code: string) {
+    super(mapAuthErrorCodeToMessage(code));
+    this.name = "AuthClientError";
+  }
+}
+```
+
+**Key principle**: Always map error codes to user-friendly messages on the client. Never display raw server messages to users.
+
+#### 3. Create API Client
+
+```typescript
+// src/lib/clients/auth/auth.client.ts
+import type { LoginFormData } from "@/lib/validation/auth-schemas";
+import { AuthClientError } from "./auth.errors";
+
+export const authClient = {
+  async login(data: LoginFormData): Promise<void> {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new AuthClientError(errorData.error_code);
+    }
+  },
+};
+```
+
+**Characteristics:**
+
+- Pure fetch logic
+- No UI concerns (no toasts, redirects, loading states)
+- Throws typed errors
+- Type-safe parameters
+
+#### 4. Create Actions Hook
+
+```typescript
+// src/lib/hooks/useAuthActions.ts
+import { useState } from "react";
+import { toast } from "sonner";
+import { authClient, AuthClientError } from "@/lib/clients/auth";
+import type { LoginFormData } from "@/lib/validation/auth-schemas";
+
+export function useAuthActions() {
+  const [isLoading, setIsLoading] = useState(false);
+
+  const login = async (data: LoginFormData) => {
+    setIsLoading(true);
+    try {
+      await authClient.login(data);
+      toast.success("Zalogowano pomyślnie!");
+      window.location.href = "/";
+    } catch (error) {
+      if (error instanceof AuthClientError) {
+        toast.error(error.message);
+      } else {
+        toast.error("Wystąpił błąd połączenia. Spróbuj ponownie.");
+      }
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { login, isLoading };
+}
+```
+
+**Characteristics:**
+
+- Manages loading state
+- Shows toast notifications
+- Handles redirects
+- Catches and displays errors
+- Re-throws errors for component-level handling if needed
+
+#### 5. Create Form Component
+
+```typescript
+// src/components/features/auth/LoginForm.tsx
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Loader2, LogIn } from "lucide-react";
+import { loginSchema, type LoginFormData } from "@/lib/validation/auth-schemas";
+import { useAuthActions } from "@/lib/hooks/useAuthActions";
+
+export function LoginForm() {
+  const { login, isLoading } = useAuthActions();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    mode: "onBlur", // Validate on blur for better UX
+  });
+
+  const onSubmit = async (data: LoginFormData) => {
+    await login(data);
+  };
+
+  return (
+    <Card className="w-full max-w-md">
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              placeholder="twoj@email.com"
+              {...register("email")}
+              disabled={isLoading}
+              aria-invalid={!!errors.email}
+              aria-describedby={errors.email ? "email-error" : undefined}
+              autoComplete="email"
+              data-test-id="login-email-input"
+            />
+            {errors.email && (
+              <p id="email-error" className="text-sm text-destructive" role="alert">
+                {errors.email.message}
+              </p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Hasło</Label>
+            <Input
+              id="password"
+              type="password"
+              {...register("password")}
+              disabled={isLoading}
+              aria-invalid={!!errors.password}
+              aria-describedby={errors.password ? "password-error" : undefined}
+              autoComplete="current-password"
+              data-test-id="login-password-input"
+            />
+            {errors.password && (
+              <p id="password-error" className="text-sm text-destructive" role="alert">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+        </CardContent>
+
+        <CardFooter>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isLoading}
+            size="lg"
+            aria-busy={isLoading}
+            data-test-id="login-submit-button"
+          >
+            {isLoading ? (
+              <>
+                <Loader2 className="size-4 animate-spin" /> Logowanie...
+              </>
+            ) : (
+              <>
+                <LogIn className="size-4" /> Zaloguj się
+              </>
+            )}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
+  );
+}
+```
+
+### Key Principles
+
+#### ❌ Don't
+
+- Don't use manual `useState` for form fields
+- Don't write validation functions in components
+- Don't duplicate error mapping across components
+- Don't mix API calls with UI logic
+- Don't use controlled components (performance issue)
+- Don't display raw server error messages to users
+- Don't skip accessibility attributes
+
+#### ✅ Do
+
+- Use React Hook Form for state management
+- Use Zod schemas for validation
+- Centralize error mapping in client layer
+- Separate concerns: component → hook → client
+- Use uncontrolled components (React Hook Form default)
+- Map error codes to user-friendly messages
+- Include ARIA attributes for accessibility
+- Add `data-test-id` for E2E tests
+- Use `mode: "onBlur"` for better UX
+- Show loading states on buttons
+- Disable inputs during submission
+
+### Validation Modes
+
+```typescript
+useForm({
+  resolver: zodResolver(schema),
+  mode: "onBlur", // Validate when field loses focus (recommended)
+  // mode: "onChange", // Validate on every keystroke (aggressive)
+  // mode: "onSubmit", // Validate only on submit (permissive)
+});
+```
+
+**Recommendation**: Use `onBlur` for best balance between UX and validation feedback.
+
+### Common Patterns
+
+#### Conditional Fields
+
+```typescript
+const schema = z
+  .object({
+    accountType: z.enum(["personal", "business"]),
+    companyName: z.string().optional(),
+  })
+  .refine((data) => data.accountType !== "business" || data.companyName, {
+    message: "Nazwa firmy jest wymagana dla konta biznesowego",
+    path: ["companyName"],
+  });
+```
+
+#### Dynamic Validation
+
+```typescript
+const schema = z
+  .object({
+    age: z.number().min(18, "Musisz mieć co najmniej 18 lat"),
+    parentConsent: z.boolean().optional(),
+  })
+  .refine((data) => data.age >= 18 || data.parentConsent, {
+    message: "Wymagana jest zgoda rodzica dla osób poniżej 18 lat",
+    path: ["parentConsent"],
+  });
+```
+
+#### File Upload
+
+```typescript
+const schema = z.object({
+  avatar: z
+    .instanceof(FileList)
+    .refine((files) => files.length > 0, "Plik jest wymagany")
+    .refine((files) => files[0]?.size <= 5000000, "Maksymalny rozmiar pliku to 5MB"),
+});
+
+// In component
+<Input type="file" {...register("avatar")} />
+```
+
+### Testing Strategy
+
+#### Test Validation Schema
+
+```typescript
+import { describe, it, expect } from "vitest";
+import { loginSchema } from "./auth-schemas";
+
+describe("loginSchema", () => {
+  it("validates correct data", () => {
+    const result = loginSchema.safeParse({
+      email: "test@test.com",
+      password: "123456",
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects invalid email", () => {
+    const result = loginSchema.safeParse({
+      email: "invalid-email",
+      password: "123456",
+    });
+    expect(result.success).toBe(false);
+  });
+});
+```
+
+#### Test API Client
+
+```typescript
+import { describe, it, expect, vi } from "vitest";
+import { authClient } from "./auth.client";
+import { AuthClientError } from "./auth.errors";
+
+describe("authClient", () => {
+  it("calls login API with correct data", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({}),
+    });
+
+    await authClient.login({ email: "test@test.com", password: "123456" });
+
+    expect(fetch).toHaveBeenCalledWith("/api/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: "test@test.com", password: "123456" }),
+    });
+  });
+
+  it("throws AuthClientError on API error", async () => {
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: false,
+      json: async () => ({ error_code: "authentication_error" }),
+    });
+
+    await expect(authClient.login({ email: "test@test.com", password: "wrong" })).rejects.toThrow(AuthClientError);
+  });
+});
+```
+
+#### Test Hook
+
+```typescript
+import { renderHook, waitFor } from "@testing-library/react";
+import { describe, it, expect, vi } from "vitest";
+import { useAuthActions } from "./useAuthActions";
+
+vi.mock("@/lib/clients/auth", () => ({
+  authClient: {
+    login: vi.fn(),
+  },
+  AuthClientError: class extends Error {},
+}));
+
+describe("useAuthActions", () => {
+  it("sets loading state during login", async () => {
+    const { result } = renderHook(() => useAuthActions());
+
+    expect(result.current.isLoading).toBe(false);
+
+    const loginPromise = result.current.login({ email: "test@test.com", password: "123456" });
+
+    expect(result.current.isLoading).toBe(true);
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+  });
+});
+```
+
+### Performance Benefits
+
+- **Fewer re-renders**: React Hook Form uses uncontrolled components (refs instead of state)
+- **Validation on demand**: Only validates when needed (onBlur/onSubmit), not on every keystroke
+- **Type safety**: Zod ensures runtime validation matches TypeScript types
+
+### Code Reduction
+
+Using this pattern typically reduces form component code by **40-50%**:
+
+- No manual `useState` hooks (4-5 per form)
+- No validation functions (15-30 lines each)
+- No blur handlers
+- No manual error state management
+- Centralized API calls and error handling
+
+### Accessibility Checklist
+
+- ✅ Use semantic HTML (`<form>`, `<label>`, `<input>`)
+- ✅ Associate labels with inputs (`htmlFor` / `id`)
+- ✅ Use `aria-invalid` for error states
+- ✅ Use `aria-describedby` to link errors to inputs
+- ✅ Use `role="alert"` for error messages
+- ✅ Use `aria-busy` for loading states
+- ✅ Disable inputs during submission
+- ✅ Use appropriate `autoComplete` attributes
+- ✅ Provide clear error messages

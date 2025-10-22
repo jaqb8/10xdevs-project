@@ -1,124 +1,27 @@
-import { useState, useCallback, type FormEvent } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, UserPlus } from "lucide-react";
-import { toast } from "sonner";
-
-function mapErrorCodeToMessage(errorCode: string): string {
-  const errorMessages: Record<string, string> = {
-    validation_error_invalid_email: "Nieprawidłowy format adresu email.",
-    validation_error_password_too_short: "Hasło musi mieć co najmniej 6 znaków.",
-    authentication_error_user_already_exists: "Użytkownik o tym adresie email już istnieje.",
-    authentication_error_weak_password: "Hasło jest zbyt słabe. Użyj silniejszego hasła.",
-    authentication_error: "Wystąpił błąd podczas rejestracji. Spróbuj ponownie.",
-    unknown_error: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.",
-  };
-
-  return errorMessages[errorCode] || "Wystąpił błąd podczas rejestracji.";
-}
+import { signupSchema, type SignupFormData } from "@/lib/validation/auth-schemas";
+import { useAuthActions } from "@/lib/hooks/useAuthActions";
 
 export function SignupForm() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{ email?: string; password?: string; confirmPassword?: string }>({});
+  const { signup, isLoading } = useAuthActions();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
+    mode: "onBlur",
+  });
 
-  const validateEmail = (email: string): boolean => {
-    if (!email) {
-      setErrors((prev) => ({ ...prev, email: "Email jest wymagany" }));
-      return false;
-    }
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setErrors((prev) => ({ ...prev, email: "Nieprawidłowy format email" }));
-      return false;
-    }
-    setErrors((prev) => ({ ...prev, email: undefined }));
-    return true;
+  const onSubmit = async (data: SignupFormData) => {
+    await signup(data);
   };
-
-  const validatePassword = (password: string): boolean => {
-    if (!password) {
-      setErrors((prev) => ({ ...prev, password: "Hasło jest wymagane" }));
-      return false;
-    }
-    if (password.length < 6) {
-      setErrors((prev) => ({ ...prev, password: "Hasło musi mieć co najmniej 6 znaków" }));
-      return false;
-    }
-    setErrors((prev) => ({ ...prev, password: undefined }));
-    return true;
-  };
-
-  const validateConfirmPassword = (confirmPassword: string, password: string): boolean => {
-    if (!confirmPassword) {
-      setErrors((prev) => ({ ...prev, confirmPassword: "Potwierdzenie hasła jest wymagane" }));
-      return false;
-    }
-    if (confirmPassword !== password) {
-      setErrors((prev) => ({ ...prev, confirmPassword: "Hasła muszą być identyczne" }));
-      return false;
-    }
-    setErrors((prev) => ({ ...prev, confirmPassword: undefined }));
-    return true;
-  };
-
-  const handleSubmit = useCallback(
-    async (e: FormEvent<HTMLFormElement>) => {
-      e.preventDefault();
-
-      const isEmailValid = validateEmail(email);
-      const isPasswordValid = validatePassword(password);
-      const isConfirmPasswordValid = validateConfirmPassword(confirmPassword, password);
-
-      if (!isEmailValid || !isPasswordValid || !isConfirmPasswordValid) {
-        return;
-      }
-
-      setIsLoading(true);
-
-      try {
-        const response = await fetch("/api/auth/signup", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ email, password }),
-        });
-
-        if (response.ok) {
-          toast.success("Rejestracja pomyślna! Sprawdź swoją skrzynkę pocztową, aby potwierdzić adres email.");
-          setTimeout(() => {
-            window.location.href = "/login";
-          }, 2000);
-        } else {
-          const data = await response.json();
-          const errorMessage = mapErrorCodeToMessage(data.error_code);
-          toast.error(errorMessage);
-        }
-      } catch (error) {
-        toast.error("Wystąpił błąd połączenia. Spróbuj ponownie.");
-      } finally {
-        setIsLoading(false);
-      }
-    },
-    [email, password, confirmPassword]
-  );
-
-  const handleEmailBlur = useCallback(() => {
-    if (email) validateEmail(email);
-  }, [email]);
-
-  const handlePasswordBlur = useCallback(() => {
-    if (password) validatePassword(password);
-  }, [password]);
-
-  const handleConfirmPasswordBlur = useCallback(() => {
-    if (confirmPassword) validateConfirmPassword(confirmPassword, password);
-  }, [confirmPassword, password]);
 
   return (
     <Card className="w-full max-w-md">
@@ -126,7 +29,7 @@ export function SignupForm() {
         <CardTitle className="text-2xl font-bold">Rejestracja</CardTitle>
         <CardDescription>Utwórz nowe konto, aby rozpocząć naukę</CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
@@ -134,18 +37,15 @@ export function SignupForm() {
               id="email"
               type="email"
               placeholder="twoj@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onBlur={handleEmailBlur}
+              {...register("email")}
               disabled={isLoading}
               aria-invalid={!!errors.email}
               aria-describedby={errors.email ? "email-error" : undefined}
               autoComplete="email"
-              required
             />
             {errors.email && (
               <p id="email-error" className="text-sm text-destructive" role="alert">
-                {errors.email}
+                {errors.email.message}
               </p>
             )}
           </div>
@@ -156,18 +56,15 @@ export function SignupForm() {
               id="password"
               type="password"
               placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onBlur={handlePasswordBlur}
+              {...register("password")}
               disabled={isLoading}
               aria-invalid={!!errors.password}
               aria-describedby={errors.password ? "password-error" : undefined}
               autoComplete="new-password"
-              required
             />
             {errors.password && (
               <p id="password-error" className="text-sm text-destructive" role="alert">
-                {errors.password}
+                {errors.password.message}
               </p>
             )}
           </div>
@@ -178,18 +75,15 @@ export function SignupForm() {
               id="confirmPassword"
               type="password"
               placeholder="••••••••"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              onBlur={handleConfirmPasswordBlur}
+              {...register("confirmPassword")}
               disabled={isLoading}
               aria-invalid={!!errors.confirmPassword}
               aria-describedby={errors.confirmPassword ? "confirmPassword-error" : undefined}
               autoComplete="new-password"
-              required
             />
             {errors.confirmPassword && (
               <p id="confirmPassword-error" className="text-sm text-destructive" role="alert">
-                {errors.confirmPassword}
+                {errors.confirmPassword.message}
               </p>
             )}
           </div>
