@@ -1,9 +1,10 @@
 import { OpenRouterService } from "./openrouter.service";
+import { OPENROUTER_API_KEY, ASTRO_SITE, APP_NAME, USE_MOCKS } from "astro:env/server";
 
 export const openRouterService = new OpenRouterService({
-  apiKey: import.meta.env.USE_MOCKS !== "false" ? "mock-api-key" : import.meta.env.OPENROUTER_API_KEY,
-  siteUrl: import.meta.env.ASTRO_SITE || "http://localhost:3000",
-  appName: import.meta.env.APP_NAME || "Language Learning Buddy",
+  apiKey: USE_MOCKS ? "mock-api-key" : OPENROUTER_API_KEY,
+  siteUrl: ASTRO_SITE,
+  appName: APP_NAME,
 });
 
 export { OpenRouterService } from "./openrouter.service";

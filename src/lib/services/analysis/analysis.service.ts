@@ -21,6 +21,7 @@ import {
 } from "./analysis.errors";
 import { z } from "zod";
 import grammarPrompt from "@/lib/prompts/grammar-analysis.prompt.md?raw";
+import { USE_MOCKS } from "astro:env/server";
 
 const TextAnalysisSchema = z.discriminatedUnion("is_correct", [
   z.object({
@@ -39,7 +40,7 @@ export class AnalysisService {
   private useMocks: boolean;
 
   constructor(private readonly supabase: SupabaseClient) {
-    this.useMocks = import.meta.env.USE_MOCKS !== "false";
+    this.useMocks = USE_MOCKS;
   }
 
   async analyzeText(text: string): Promise<TextAnalysisDto> {

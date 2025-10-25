@@ -108,7 +108,7 @@ jobs:
     steps:
       - name: Get PR details
         id: pr_details
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const { owner, repo } = context.repo;
@@ -132,7 +132,7 @@ jobs:
             test-results/
 
       - name: Create status comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: ${{ needs.unit-test.result == 'success' && needs.e2e-test.result == 'success' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -151,7 +151,7 @@ jobs:
             });
 
       - name: Create failure comment
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: ${{ needs.unit-test.result != 'success' || needs.e2e-test.result != 'success' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}

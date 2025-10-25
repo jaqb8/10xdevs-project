@@ -15,6 +15,7 @@ A personal assistant web application for English language learners, designed to 
 - [Tech Stack](#tech-stack)
 - [Getting Started Locally](#getting-started-locally)
 - [Available Scripts](#available-scripts)
+- [Deployment](#deployment)
 - [Project Scope](#project-scope)
 - [Project Status](#project-status)
 - [License](#license)
@@ -35,7 +36,7 @@ The project is built with a modern tech stack focused on performance and develop
 - **Backend**: [Supabase](https://supabase.io/) as a comprehensive backend solution (PostgreSQL database, Authentication, BaaS).
 - **AI Integration**: Communication with AI models via [Openrouter.ai](https://openrouter.ai/).
 - **Testing**: [Vitest](https://vitest.dev/) for unit and integration tests, [Playwright](https://playwright.dev/) for end-to-end tests, and [Mock Service Worker](https://mswjs.io/) for API mocking.
-- **CI/CD & Hosting**: [GitHub Actions](https://github.com/features/actions) and [DigitalOcean](https://www.digitalocean.com/) (Docker).
+- **CI/CD & Hosting**: [GitHub Actions](https://github.com/features/actions) for CI/CD and [Cloudflare Pages](https://pages.cloudflare.com/) for hosting.
 
 ## Getting Started Locally
 
@@ -108,6 +109,37 @@ The following scripts are available in the `package.json`:
 - `npm run test:e2e:ui`: Runs the end-to-end tests in UI mode.
 - `npm run test:e2e:headed`: Runs the end-to-end tests in headed mode.
 - `npm run test:e2e:install`: Installs the Playwright browsers.
+
+## Deployment
+
+The application is deployed to Cloudflare Pages using GitHub Actions. Every push to the `master` branch triggers an automatic deployment.
+
+### Prerequisites for Deployment
+
+1. **Cloudflare Pages Project**: Create a project in Cloudflare Pages
+2. **GitHub Secrets**: Configure the following secrets in your repository:
+   - `CLOUDFLARE_API_TOKEN`: API token with Pages:Edit permissions
+   - `CLOUDFLARE_ACCOUNT_ID`: Your Cloudflare account ID
+   - `SUPABASE_URL`: Supabase project URL
+   - `SUPABASE_PUBLIC_KEY`: Supabase anonymous key
+   - `OPENROUTER_API_KEY`: OpenRouter API key
+
+3. **GitHub Variables**: Configure the following variables:
+   - `CLOUDFLARE_PROJECT_NAME`: Name of your Cloudflare Pages project
+   - `APP_NAME`: Application name
+   - `ASTRO_SITE`: Production site URL
+   - `ENV_NAME`: Environment name (production)
+
+### Deployment Process
+
+The deployment workflow automatically:
+
+1. Runs linting checks
+2. Executes unit tests with coverage
+3. Builds the application with Cloudflare adapter
+4. Deploys to Cloudflare Pages
+
+For detailed deployment documentation, see `.cursor/rules/hosting-analysis.md`.
 
 ## Project Scope
 

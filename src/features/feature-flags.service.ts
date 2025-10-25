@@ -1,7 +1,8 @@
 import featureFlagsConfig, { type Environment, type Feature } from "./feature-flags.config";
+import { PUBLIC_ENV_NAME } from "astro:env/client";
 
 const getEnvironment = (): Environment => {
-  const env = import.meta.env.PUBLIC_ENV_NAME || import.meta.env.ENV_NAME;
+  const env = PUBLIC_ENV_NAME;
   if (env === "local" || env === "integration" || env === "production") {
     return env;
   }
