@@ -1,7 +1,9 @@
 name: Deploy to Cloudflare Pages
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - master
 
 jobs:
   lint:
