@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom";
-import { expect, vi, beforeAll, afterEach, afterAll } from "vitest";
+import { vi, beforeAll, afterEach, afterAll } from "vitest";
 import { server } from "./msw-setup";
 
 // Start MSW server before all tests

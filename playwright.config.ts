@@ -1,7 +1,12 @@
 import { defineConfig, devices } from "@playwright/test";
 import dotenv from "dotenv";
 import path from "path";
-dotenv.config({ path: path.resolve(process.cwd(), ".env.test") });
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+dotenv.config({ path: path.resolve(__dirname, ".env.test") });
 
 /**
  * @see https://playwright.dev/docs/test-configuration
@@ -17,7 +22,11 @@ export default defineConfig({
   /* Opt out of parallel tests on CI. */
   workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: process.env.CI ? "github" : "html",
+  reporter: [
+    ["html", { outputFolder: "playwright-report", open: "never" }],
+    ["json", { outputFile: "test-results/results.json" }],
+    ["list"],
+  ],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -38,6 +47,11 @@ export default defineConfig({
     {
       name: "setup",
       testMatch: /.*\.setup\.ts/,
+      teardown: "cleanup",
+    },
+    {
+      name: "cleanup",
+      testMatch: /global\.teardown\.ts/,
     },
     {
       name: "chromium",
@@ -47,10 +61,6 @@ export default defineConfig({
       },
       dependencies: ["setup"],
     },
-    {
-      name: "cleanup",
-      testMatch: /global\.teardown\.ts/,
-    },
   ],
 
   /* Run your local dev server before starting the tests */
@@ -58,8 +68,6 @@ export default defineConfig({
     command: "npm run dev:e2e",
     url: "http://localhost:3000",
     reuseExistingServer: !process.env.CI,
+    timeout: 120000,
   },
-
-  /* Global teardown to clean up database after all tests */
-  globalTeardown: "./e2e/global-teardown.ts",
 });

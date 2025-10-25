@@ -30,9 +30,9 @@ export interface OpenRouterRequestBody {
 }
 
 export interface OpenRouterResponse {
-  choices: Array<{
+  choices: {
     message: {
       content: string;
     };
-  }>;
+  }[];
 }

@@ -67,9 +67,18 @@ test.describe("Text Analysis and Save Flow", () => {
     // Arrange
     const correctText = "This sentence has no grammar errors.";
 
-    // Act - Analyze correct text
+    // Act - Navigate to analyze page
     await analyzePage.goto();
-    await analyzePage.analyzeText(correctText);
+    await expect(analyzePage.heading).toBeVisible();
+
+    // Act - Fill text and wait for it to be ready
+    await analyzePage.form.fillText(correctText);
+    await expect(analyzePage.form.textInput).toHaveValue(correctText);
+
+    // Act - Submit analysis
+    await analyzePage.form.submitAnalysis();
+    await analyzePage.result.waitForLoading();
+    await analyzePage.result.waitForResult();
 
     // Assert - Correct result is shown
     await expect(analyzePage.result.correctResult).toBeVisible();
@@ -78,22 +87,28 @@ test.describe("Text Analysis and Save Flow", () => {
   });
 
   test("should disable submit button when text is empty", async ({ page }) => {
+    // Arrange
+    const testText = "Some text";
+
     // Act - Navigate to analyze page
     await analyzePage.goto();
+    await expect(analyzePage.heading).toBeVisible();
 
     // Assert - Submit button is disabled when empty
     await expect(analyzePage.form.submitButton).toBeDisabled();
 
     // Act - Fill text
-    await analyzePage.form.fillText("Some text");
+    await analyzePage.form.fillText(testText);
 
-    // Assert - Submit button is enabled
+    // Assert - Text is filled and submit button is enabled
+    await expect(analyzePage.form.textInput).toHaveValue(testText);
     await expect(analyzePage.form.submitButton).toBeEnabled();
 
     // Act - Clear form
     await analyzePage.form.clearForm();
 
-    // Assert - Submit button is disabled again
+    // Assert - Text is cleared and submit button is disabled again
+    await expect(analyzePage.form.textInput).toHaveValue("");
     await expect(analyzePage.form.submitButton).toBeDisabled();
   });
 
@@ -103,13 +118,12 @@ test.describe("Text Analysis and Save Flow", () => {
 
     // Act - Navigate to analyze page
     await analyzePage.goto();
+    await expect(analyzePage.heading).toBeVisible();
 
     // Act - Fill text
     await analyzePage.form.fillText(testText);
 
-    // Assert - Character count is displayed
-    const charCount = await analyzePage.form.getCharCount();
-    expect(charCount).toContain(`${testText.length}`);
-    expect(charCount).toContain("500");
+    // Assert - Character count is updated and displayed correctly
+    await expect(analyzePage.form.charCount).toContainText(`${testText.length} / 500`);
   });
 });

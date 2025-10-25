@@ -16,7 +16,8 @@ export class AnalysisFormComponent {
   }
 
   async fillText(text: string) {
-    await this.textInput.fill(text);
+    await this.textInput.clear();
+    await this.textInput.pressSequentially(text, { delay: 0 });
   }
 
   async submitAnalysis() {
