@@ -70,4 +70,6 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI,
     timeout: 120000,
   },
+
+  globalTeardown: "./e2e/global-teardown.ts",
 });
