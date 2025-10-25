@@ -16,7 +16,7 @@ export default defineConfig({
       PUBLIC_ENV_NAME: envField.string({ context: "client", access: "public" }),
       SUPABASE_URL: envField.string({ context: "server", access: "secret" }),
       SUPABASE_PUBLIC_KEY: envField.string({ context: "server", access: "secret" }),
-      OPENROUTER_API_KEY: envField.string({ context: "server", access: "secret" }),
+      OPENROUTER_API_KEY: envField.string({ context: "server", access: "secret", default: "mock-api-key" }),
       ASTRO_SITE: envField.string({ context: "server", access: "public", default: "http://localhost:3000" }),
       APP_NAME: envField.string({ context: "server", access: "public", default: "Language Learning Buddy" }),
       USE_MOCKS: envField.boolean({ context: "server", access: "public", default: true }),
