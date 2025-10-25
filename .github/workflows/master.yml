@@ -68,6 +68,8 @@ jobs:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           PUBLIC_ENV_NAME: ${{ vars.ENV_NAME }}
           USE_MOCKS: ${{ vars.USE_MOCKS }}
+          ASTRO_SITE: ${{ vars.ASTRO_SITE }}
+          APP_NAME: ${{ vars.APP_NAME }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
