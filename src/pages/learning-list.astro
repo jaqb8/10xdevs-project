@@ -1,6 +1,11 @@
 ---
 import AppLayout from "../layouts/AppLayout.astro";
 import { LearningItemsView } from "../components/views/LearningItemsView";
+import { isFeatureEnabled } from "@/features/feature-flags.service";
+
+if (!isFeatureEnabled("learning-items")) {
+  return Astro.redirect("/");
+}
 ---
 
 <AppLayout title="Moje elementy do nauki - Language Learning Buddy">

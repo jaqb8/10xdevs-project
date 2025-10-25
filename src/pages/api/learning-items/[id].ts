@@ -7,6 +7,7 @@ import {
   LearningItemForbiddenError,
 } from "../../../lib/services/learning-items";
 import { createErrorResponse, createValidationErrorResponse } from "../../../lib/api-helpers";
+import { isFeatureEnabled } from "../../../features/feature-flags.service";
 
 export const prerender = false;
 
@@ -34,6 +35,10 @@ const idParamSchema = z.string().uuid({ message: "validation_error_invalid_uuid"
  * - 500: Internal server error
  */
 export const DELETE: APIRoute = async ({ params, locals }) => {
+  if (!isFeatureEnabled("learning-items")) {
+    return createErrorResponse("feature_not_available", 404);
+  }
+
   try {
     if (!locals.user) {
       return createErrorResponse("authentication_error_unauthorized", 401);

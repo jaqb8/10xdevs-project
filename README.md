@@ -69,11 +69,16 @@ To set up and run the project locally, follow these steps:
 
 4.  **Set up environment variables:**
     Create a `.env` file in the root of the project and add the necessary API keys and configuration for services like Supabase and Openrouter.ai.
+
     ```env
     # .env
     SUPABASE_URL=your_supabase_url
     SUPABASE_ANON_KEY=your_supabase_anon_key
     OPENROUTER_API_KEY=your_openrouter_api_key
+
+    # Environment name for feature flags (local, integration, production)
+    ENV_NAME=local
+    PUBLIC_ENV_NAME=local
     ```
 
 ### Running the Application

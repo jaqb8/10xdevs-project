@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { isFeatureEnabled } from "@/features/feature-flags.service";
 
 interface MenuItem {
   title: string;
@@ -44,7 +45,10 @@ const Navbar1 = ({
   ],
 }: Navbar1Props) => {
   const { user, isAuth } = useAuthStore();
-  const filteredMenu = isAuth ? menu : [];
+  const isAuthFeatureEnabled = isFeatureEnabled("auth");
+  const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
+
+  const filteredMenu = isAuth && isLearningItemsFeatureEnabled ? menu : [];
 
   return (
     <section className="py-4">
@@ -65,25 +69,29 @@ const Navbar1 = ({
           )}
         </div>
         <div className="flex gap-2">
-          {user ? (
+          {isAuthFeatureEnabled && (
             <>
-              <span className="text-sm text-muted-foreground flex items-center" data-test-id="header-user-email">
-                {user.email}
-              </span>
-              <form action="/api/auth/logout" method="POST">
-                <Button type="submit" variant="outline" size="sm" data-test-id="header-logout-button">
-                  Wyloguj
-                </Button>
-              </form>
-            </>
-          ) : (
-            <>
-              <Button asChild variant="outline" size="sm" data-test-id="header-login-button">
-                <a href="/login">Zaloguj</a>
-              </Button>
-              <Button asChild size="sm" data-test-id="header-signup-button">
-                <a href="/signup">Zarejestruj</a>
-              </Button>
+              {user ? (
+                <>
+                  <span className="text-sm text-muted-foreground flex items-center" data-test-id="header-user-email">
+                    {user.email}
+                  </span>
+                  <form action="/api/auth/logout" method="POST">
+                    <Button type="submit" variant="outline" size="sm" data-test-id="header-logout-button">
+                      Wyloguj
+                    </Button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <Button asChild variant="outline" size="sm" data-test-id="header-login-button">
+                    <a href="/login">Zaloguj</a>
+                  </Button>
+                  <Button asChild size="sm" data-test-id="header-signup-button">
+                    <a href="/signup">Zarejestruj</a>
+                  </Button>
+                </>
+              )}
             </>
           )}
         </div>
@@ -118,30 +126,34 @@ const Navbar1 = ({
                 )}
 
                 <div className="flex flex-col gap-3">
-                  {user ? (
+                  {isAuthFeatureEnabled && (
                     <>
-                      <span className="text-md text-muted-foreground" data-test-id="header-user-email-mobile">
-                        {user.email}
-                      </span>
-                      <form action="/api/auth/logout" method="POST">
-                        <Button
-                          type="submit"
-                          variant="outline"
-                          className="w-full"
-                          data-test-id="header-logout-button-mobile"
-                        >
-                          Wyloguj
-                        </Button>
-                      </form>
-                    </>
-                  ) : (
-                    <>
-                      <Button asChild variant="outline" data-test-id="header-login-button-mobile">
-                        <a href="/login">Zaloguj</a>
-                      </Button>
-                      <Button asChild data-test-id="header-signup-button-mobile">
-                        <a href="/signup">Zarejestruj</a>
-                      </Button>
+                      {user ? (
+                        <>
+                          <span className="text-md text-muted-foreground" data-test-id="header-user-email-mobile">
+                            {user.email}
+                          </span>
+                          <form action="/api/auth/logout" method="POST">
+                            <Button
+                              type="submit"
+                              variant="outline"
+                              className="w-full"
+                              data-test-id="header-logout-button-mobile"
+                            >
+                              Wyloguj
+                            </Button>
+                          </form>
+                        </>
+                      ) : (
+                        <>
+                          <Button asChild variant="outline" data-test-id="header-login-button-mobile">
+                            <a href="/login">Zaloguj</a>
+                          </Button>
+                          <Button asChild data-test-id="header-signup-button-mobile">
+                            <a href="/signup">Zarejestruj</a>
+                          </Button>
+                        </>
+                      )}
                     </>
                   )}
                 </div>

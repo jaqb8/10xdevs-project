@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TextDiff } from "@/components/shared/TextDiff";
 import { BookPlus, CheckCircle2, UserPlus } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { isFeatureEnabled } from "@/features/feature-flags.service";
 import type { TextAnalysisDto, CreateLearningItemCommand } from "../../types";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +18,8 @@ interface AnalysisResultProps {
 
 export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: AnalysisResultProps) {
   const { isAuth } = useAuthStore();
+  const isAuthFeatureEnabled = isFeatureEnabled("auth");
+  const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
 
   const handleSave = useCallback(() => {
     if (!isAuth) {
@@ -33,6 +36,8 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
       onSave(command);
     }
   }, [analysisResult, onSave, isAuth]);
+
+  const shouldShowSaveButton = isAuthFeatureEnabled && isLearningItemsFeatureEnabled;
 
   if (isLoading) {
     return (
@@ -91,36 +96,38 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
           </p>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button
-          onClick={handleSave}
-          disabled={isSaved}
-          variant="default"
-          className={cn("w-full text-lg h-10", !isAuth && !isSaved && "bg-accent hover:bg-accent/90")}
-          aria-label={
-            isSaved
-              ? "Element już zapisany na liście"
-              : isAuth
-                ? "Dodaj ten błąd do listy Do nauki"
-                : "Zaloguj się, aby dodać do listy"
-          }
-          data-test-id="analysis-save-button"
-        >
-          {isSaved ? (
-            "Zapisano ✓"
-          ) : isAuth ? (
-            <>
-              <BookPlus className="size-4" />
-              Dodaj do listy Do nauki
-            </>
-          ) : (
-            <>
-              <UserPlus className="size-4" />
-              Zaloguj się, aby dodać do listy
-            </>
-          )}
-        </Button>
-      </CardFooter>
+      {shouldShowSaveButton && (
+        <CardFooter>
+          <Button
+            onClick={handleSave}
+            disabled={isSaved}
+            variant="default"
+            className={cn("w-full text-lg h-10", !isAuth && !isSaved && "bg-accent hover:bg-accent/90")}
+            aria-label={
+              isSaved
+                ? "Element już zapisany na liście"
+                : isAuth
+                  ? "Dodaj ten błąd do listy Do nauki"
+                  : "Zaloguj się, aby dodać do listy"
+            }
+            data-test-id="analysis-save-button"
+          >
+            {isSaved ? (
+              "Zapisano ✓"
+            ) : isAuth ? (
+              <>
+                <BookPlus className="size-4" />
+                Dodaj do listy Do nauki
+              </>
+            ) : (
+              <>
+                <UserPlus className="size-4" />
+                Zaloguj się, aby dodać do listy
+              </>
+            )}
+          </Button>
+        </CardFooter>
+      )}
     </Card>
   );
 }
