@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
 import { __setEnv, __resetEnv } from "../test/mocks/astro-env-client";
 import { isFeatureEnabled } from "./feature-flags.service";
+import featureFlagsConfig from "./feature-flags.config";
 
 describe("feature-flags.service", () => {
   beforeEach(() => {
@@ -12,70 +13,76 @@ describe("feature-flags.service", () => {
   });
 
   describe("isFeatureEnabled", () => {
-    describe("when environment is 'local'", () => {
-      it("should return true for 'auth' feature", () => {
+    describe("configuration reading", () => {
+      it("should read feature flag from config for 'local' environment", () => {
         __setEnv("local");
-        expect(isFeatureEnabled("auth")).toBe(true);
+        const authEnabled = isFeatureEnabled("auth");
+        expect(authEnabled).toBe(featureFlagsConfig.local.auth);
       });
 
-      it("should return true for 'learning-items' feature", () => {
-        __setEnv("local");
-        expect(isFeatureEnabled("learning-items")).toBe(true);
-      });
-    });
-
-    describe("when environment is 'integration'", () => {
-      it("should return true for 'auth' feature", () => {
+      it("should read feature flag from config for 'integration' environment", () => {
         __setEnv("integration");
-        expect(isFeatureEnabled("auth")).toBe(true);
+        const authEnabled = isFeatureEnabled("auth");
+        expect(authEnabled).toBe(featureFlagsConfig.integration.auth);
       });
 
-      it("should return true for 'learning-items' feature", () => {
-        __setEnv("integration");
-        expect(isFeatureEnabled("learning-items")).toBe(true);
-      });
-    });
-
-    describe("when environment is 'production'", () => {
-      it("should return false for 'auth' feature", () => {
+      it("should read feature flag from config for 'production' environment", () => {
         __setEnv("production");
-        expect(isFeatureEnabled("auth")).toBe(false);
+        const authEnabled = isFeatureEnabled("auth");
+        expect(authEnabled).toBe(featureFlagsConfig.production.auth);
       });
 
-      it("should return false for 'learning-items' feature", () => {
-        __setEnv("production");
-        expect(isFeatureEnabled("learning-items")).toBe(false);
-      });
-    });
-
-    describe("when PUBLIC_ENV_NAME is not set", () => {
-      it("should fallback to ENV_NAME", () => {
+      it("should handle all defined features", () => {
         __setEnv("local");
-        expect(isFeatureEnabled("auth")).toBe(true);
+        const authEnabled = isFeatureEnabled("auth");
+        const learningItemsEnabled = isFeatureEnabled("learning-items");
+
+        expect(authEnabled).toBe(featureFlagsConfig.local.auth);
+        expect(learningItemsEnabled).toBe(featureFlagsConfig.local["learning-items"]);
       });
     });
 
-    describe("when environment is invalid", () => {
-      it("should default to 'production' and return false for features", () => {
+    describe("environment fallback", () => {
+      it("should default to 'production' when environment is invalid", () => {
         __setEnv("invalid-env");
-        expect(isFeatureEnabled("auth")).toBe(false);
-        expect(isFeatureEnabled("learning-items")).toBe(false);
+        const authEnabled = isFeatureEnabled("auth");
+        expect(authEnabled).toBe(featureFlagsConfig.production.auth);
       });
-    });
 
-    describe("when both PUBLIC_ENV_NAME and ENV_NAME are not set", () => {
-      it("should default to 'production' and return false for features", () => {
+      it("should default to 'production' when environment is not set", () => {
         __resetEnv();
-        expect(isFeatureEnabled("auth")).toBe(false);
-        expect(isFeatureEnabled("learning-items")).toBe(false);
+        const authEnabled = isFeatureEnabled("auth");
+        expect(authEnabled).toBe(featureFlagsConfig.production.auth);
+      });
+
+      it("should default to 'production' when environment is empty string", () => {
+        __setEnv("");
+        const authEnabled = isFeatureEnabled("auth");
+        expect(authEnabled).toBe(featureFlagsConfig.production.auth);
       });
     });
 
-    describe("when environment is empty string", () => {
-      it("should default to 'production' and return false for features", () => {
-        __setEnv("");
-        expect(isFeatureEnabled("auth")).toBe(false);
-        expect(isFeatureEnabled("learning-items")).toBe(false);
+    describe("error handling", () => {
+      it("should return false when environment config is missing", () => {
+        __setEnv("production");
+        vi.spyOn(featureFlagsConfig, "production", "get").mockReturnValue(undefined as any);
+
+        const result = isFeatureEnabled("auth");
+        expect(result).toBe(false);
+
+        vi.restoreAllMocks();
+      });
+
+      it("should return false when feature is not defined in config", () => {
+        __setEnv("local");
+        const config = { ...featureFlagsConfig.local };
+        delete (config as any).auth;
+        vi.spyOn(featureFlagsConfig, "local", "get").mockReturnValue(config);
+
+        const result = isFeatureEnabled("auth");
+        expect(result).toBe(false);
+
+        vi.restoreAllMocks();
       });
     });
   });
