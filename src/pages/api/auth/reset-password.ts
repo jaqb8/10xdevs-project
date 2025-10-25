@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-helpers";
+import { isFeatureEnabled } from "@/features/feature-flags.service";
 
 const resetPasswordSchema = z.object({
   password: z.string().min(6, "validation_error_password_too_short"),
@@ -9,6 +10,9 @@ const resetPasswordSchema = z.object({
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  if (!isFeatureEnabled("auth")) {
+    return createErrorResponse("feature_not_available", 404);
+  }
   try {
     const body = await request.json();
     const validationResult = resetPasswordSchema.safeParse(body);

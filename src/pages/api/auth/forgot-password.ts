@@ -1,6 +1,7 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-helpers";
+import { isFeatureEnabled } from "@/features/feature-flags.service";
 
 const forgotPasswordSchema = z.object({
   email: z.string().email("validation_error_invalid_email"),
@@ -9,6 +10,9 @@ const forgotPasswordSchema = z.object({
 export const prerender = false;
 
 export const POST: APIRoute = async ({ request, locals }) => {
+  if (!isFeatureEnabled("auth")) {
+    return createErrorResponse("feature_not_available", 404);
+  }
   try {
     const body = await request.json();
     const validationResult = forgotPasswordSchema.safeParse(body);

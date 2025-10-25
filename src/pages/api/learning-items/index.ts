@@ -1,7 +1,8 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
-import { LearningItemsService, LearningItemsDatabaseError } from "../../../lib/services/learning-items";
-import { createErrorResponse, createValidationErrorResponse } from "../../../lib/api-helpers";
+import { LearningItemsService, LearningItemsDatabaseError } from "@/lib/services/learning-items";
+import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-helpers";
+import { isFeatureEnabled } from "@/features/feature-flags.service";
 
 export const prerender = false;
 
@@ -59,6 +60,10 @@ const createLearningItemSchema = z.object({
  * }
  */
 export const GET: APIRoute = async ({ locals, url }) => {
+  if (!isFeatureEnabled("learning-items")) {
+    return createErrorResponse("feature_not_available", 404);
+  }
+
   try {
     if (!locals.user) {
       return createErrorResponse("authentication_error_unauthorized", 401);
@@ -122,6 +127,10 @@ export const GET: APIRoute = async ({ locals, url }) => {
  * }
  */
 export const POST: APIRoute = async ({ request, locals }) => {
+  if (!isFeatureEnabled("learning-items")) {
+    return createErrorResponse("feature_not_available", 404);
+  }
+
   try {
     if (!locals.user) {
       return createErrorResponse("authentication_error_unauthorized", 401);
