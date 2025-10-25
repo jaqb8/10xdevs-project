@@ -96,6 +96,13 @@ The following scripts are available in the `package.json`:
 - `npm run lint`: Lints the codebase using ESLint.
 - `npm run lint:fix`: Lints the codebase and automatically fixes issues.
 - `npm run format`: Formats the code using Prettier.
+- `npm run test`: Runs the unit tests.
+- `npm run test:coverage`: Runs the unit tests with coverage.
+- `npm run test:watch`: Runs the unit tests in watch mode.
+- `npm run test:e2e`: Runs the end-to-end tests.
+- `npm run test:e2e:ui`: Runs the end-to-end tests in UI mode.
+- `npm run test:e2e:headed`: Runs the end-to-end tests in headed mode.
+- `npm run test:e2e:install`: Installs the Playwright browsers.
 
 ## Project Scope
 
