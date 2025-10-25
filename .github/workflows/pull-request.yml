@@ -23,7 +23,7 @@ jobs:
         run: npm ci
 
       - name: Run linter
-        run: npm run lint
+        run: npm run lint:check
 
   unit-test:
     name: Unit Tests

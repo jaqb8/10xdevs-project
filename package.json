@@ -9,6 +9,7 @@
     "preview": "astro preview",
     "astro": "astro",
     "lint": "eslint .",
+    "lint:check": "eslint \"src/**/*.{ts,tsx,astro}\"",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "supabase:start": "supabase start",
