@@ -11,8 +11,8 @@ const featureFlagsConfig: Record<Environment, Record<Feature, boolean>> = {
     "learning-items": true,
   },
   production: {
-    auth: false,
-    "learning-items": false,
+    auth: true,
+    "learning-items": true,
   },
 };
 
