@@ -10,6 +10,9 @@ import cloudflare from "@astrojs/cloudflare";
 export default defineConfig({
   output: "server",
   integrations: [react(), sitemap()],
+  devToolbar: {
+    enabled: false,
+  },
   server: { port: 3000 },
   env: {
     schema: {
