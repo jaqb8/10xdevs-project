@@ -9,10 +9,14 @@ export function createErrorResponse(errorCode: string, status: number, data?: Re
 }
 
 export function createValidationErrorResponse(zodError: ZodError): Response {
-  const firstError = zodError.errors[0];
-  const errorCode = firstError?.message || "validation_error";
+  const errorCode = parseZodErrorCode(zodError);
 
   return createErrorResponse(errorCode, 400);
+}
+
+export function parseZodErrorCode(zodError: ZodError): string {
+  const firstError = zodError.errors[0];
+  return firstError?.message || "validation_error";
 }
 
 export type { ApiErrorResponse };

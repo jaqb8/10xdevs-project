@@ -33,9 +33,11 @@ export function useAuthActions() {
     setIsLoading(true);
     try {
       await authClient.signup(data);
-      toast.success("Rejestracja pomyślna! Sprawdź swoją skrzynkę pocztową, aby potwierdzić adres email.");
+      toast.success("Rejestracja pomyślna! Sprawdź swoją skrzynkę pocztową, aby potwierdzić adres email.", {
+        duration: 5000,
+      });
       setTimeout(() => {
-        window.location.href = "/login";
+        window.location.href = "/";
       }, 2000);
     } catch (error) {
       if (error instanceof AuthClientError) {
@@ -71,10 +73,10 @@ export function useAuthActions() {
     setIsLoading(true);
     try {
       await authClient.resetPassword(data);
-      toast.success("Hasło zostało zmienione pomyślnie!");
+      toast.success("Hasło zostało zmienione pomyślnie! Za chwilę zostaniesz przekierowany do strony głównej.");
       setTimeout(() => {
         window.location.href = "/login";
-      }, 2000);
+      }, 500);
     } catch (error) {
       if (error instanceof AuthClientError) {
         toast.error(error.message);

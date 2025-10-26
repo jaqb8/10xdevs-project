@@ -28,23 +28,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { data, error } = await locals.supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: `${new URL(request.url).origin}/api/auth/callback`,
+      },
     });
 
     if (error) {
-      if (error.message.includes("User already registered")) {
-        return createErrorResponse("authentication_error_user_already_exists", 409);
-      }
-
-      if (error.message.includes("Password should be at least")) {
-        return createErrorResponse("authentication_error_weak_password", 400);
-      }
-
-      if (error.message.includes("Unable to validate email address")) {
-        return createErrorResponse("validation_error_invalid_email", 400);
-      }
-
       console.error("Signup error:", error);
-      return createErrorResponse("authentication_error", 400);
+      return createErrorResponse(error.code || "authentication_error", 400);
     }
 
     if (!data.user) {

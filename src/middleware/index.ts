@@ -4,7 +4,7 @@ import { createSupabaseServerInstance, DEFAULT_USER_ID } from "../db/supabase.cl
 import { analysisRateLimiter } from "../lib/rate-limiter.ts";
 import { createErrorResponse } from "@/lib/api-helpers.ts";
 
-const AUTH_PAGES = ["/login", "/signup", "/forgot-password", "/reset-password"];
+const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
 const PRIVATE_PATHS = ["/learning-list"];
 
