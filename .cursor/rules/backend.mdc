@@ -50,6 +50,50 @@ const schema = z.object({
 });
 ```
 
+#### Handling Supabase Errors
+
+**IMPORTANT:** Always use `error.code` from Supabase errors directly. Never manually create error codes based on `error.message.includes()`.
+
+When handling Supabase Auth or Database errors:
+
+```typescript
+// ✅ CORRECT - Use error.code directly
+const { data, error } = await locals.supabase.auth.signInWithPassword({
+  email,
+  password,
+});
+
+if (error) {
+  console.error("Login error:", error);
+  return createErrorResponse(error.code || "authentication_error", 401);
+}
+```
+
+```typescript
+// ❌ INCORRECT - Don't check error.message
+if (error) {
+  if (error.message.includes("Invalid login credentials")) {
+    return createErrorResponse("authentication_error_invalid_credentials", 401);
+  }
+  // This is fragile and error-prone
+}
+```
+
+**Common Supabase Auth Error Codes:**
+
+- `invalid_credentials` - Invalid email or password
+- `email_not_confirmed` - Email not confirmed
+- `user_not_found` - User not found
+- `email_exists` / `user_already_exists` - User already exists
+- `weak_password` - Password too weak
+- `same_password` - New password same as old
+- `otp_expired` - OTP/reset code expired
+- `session_not_found` / `session_expired` - Session issues
+- `over_request_rate_limit` - Rate limiting
+- `user_banned` - Account banned
+
+See full list in `node_modules/@supabase/auth-js/src/lib/error-codes.ts`
+
 #### Mapping Service Errors to API Errors
 
 Services throw typed errors (from `src/lib/services/errors.ts`). Map them to error codes in API endpoints:

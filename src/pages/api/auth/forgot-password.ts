@@ -24,7 +24,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { email } = validationResult.data;
 
     const { error } = await locals.supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${new URL(request.url).origin}/reset-password`,
+      redirectTo: `${new URL(request.url).origin}/api/auth/confirm?type=recovery&next=/reset-password`,
     });
 
     if (error) {

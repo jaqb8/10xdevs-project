@@ -13,7 +13,7 @@ export const POST: APIRoute = async ({ locals, redirect }) => {
 
     if (error) {
       console.error("Logout error:", error);
-      return createErrorResponse("authentication_error", 400);
+      return createErrorResponse(error.code || "authentication_error", 400);
     }
 
     return redirect("/", 302);

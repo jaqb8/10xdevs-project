@@ -31,20 +31,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
 
     if (error) {
-      if (error.message.includes("Invalid login credentials")) {
-        return createErrorResponse("authentication_error_invalid_credentials", 401);
-      }
-
-      if (error.message.includes("Email not confirmed")) {
-        return createErrorResponse("authentication_error_email_not_confirmed", 401);
-      }
-
-      if (error.message.includes("User not found")) {
-        return createErrorResponse("authentication_error_invalid_credentials", 401);
-      }
-
       console.error("Login error:", error);
-      return createErrorResponse("authentication_error", 401);
+      return createErrorResponse(error.code || "authentication_error", 401);
     }
 
     if (!data.user) {

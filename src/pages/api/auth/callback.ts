@@ -19,7 +19,7 @@ export const GET: APIRoute = async ({ url, locals, redirect }) => {
 
     if (error) {
       console.error("Code exchange error:", error);
-      return createErrorResponse("authentication_error_invalid_code", 400);
+      return createErrorResponse(error.code || "authentication_error", 400);
     }
 
     return redirect("/", 302);
