@@ -6,7 +6,7 @@ on:
       - staging
     paths-ignore:
       - "docs/**"
-      - "README.md"
+      - "**/README.md"
 
 jobs:
   deploy:

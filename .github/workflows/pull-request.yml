@@ -7,7 +7,7 @@ on:
       - master
     paths-ignore:
       - "docs/**"
-      - "README.md"
+      - "**/README.md"
 
 jobs:
   lint:
