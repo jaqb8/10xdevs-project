@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,8 +6,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mail } from "lucide-react";
+import { toast } from "sonner";
 import { forgotPasswordSchema, type ForgotPasswordFormData } from "@/lib/validation/auth-schemas";
 import { useAuthActions } from "@/lib/hooks/useAuthActions";
+import { mapAuthErrorCodeToMessage } from "@/lib/clients/auth/auth.errors";
 
 export function ForgotPasswordForm() {
   const [isSuccess, setIsSuccess] = useState(false);
@@ -20,6 +22,20 @@ export function ForgotPasswordForm() {
     resolver: zodResolver(forgotPasswordSchema),
     mode: "onBlur",
   });
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const errorCode = params.get("error");
+
+    if (errorCode) {
+      const errorMessage = mapAuthErrorCodeToMessage(errorCode);
+      toast.error(errorMessage);
+
+      const url = new URL(window.location.href);
+      url.searchParams.delete("error");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, []);
 
   const onSubmit = async (data: ForgotPasswordFormData) => {
     const success = await forgotPassword(data);

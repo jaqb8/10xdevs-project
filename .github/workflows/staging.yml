@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - staging
+    paths-ignore:
+      - "docs/**"
+      - "**/README.md"
 
 jobs:
   deploy:

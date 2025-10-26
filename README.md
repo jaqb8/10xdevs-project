@@ -1,6 +1,6 @@
 # Language Learning Buddy
 
-![Project Status](https://img.shields.io/badge/status-v1.0.0-brightgreen)
+![Project Status](https://img.shields.io/badge/status-v1.0.1-brightgreen)
 ![Astro](https://img.shields.io/badge/Astro-5.0-orange)
 ![React](https://img.shields.io/badge/React-19-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
@@ -158,3 +158,9 @@ For detailed deployment documentation, see `.cursor/rules/hosting-analysis.md`.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Author
+
+**Name**: [Jakub Aniszewski](https://github.com/jaqb8)
+**Email**: [jakubaniszewski@pm.me](mailto:jakubaniszewski@pm.me)
+**Website**: [aniszewski.com](https://aniszewski.com)

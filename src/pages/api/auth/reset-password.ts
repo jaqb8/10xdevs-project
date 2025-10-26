@@ -14,6 +14,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
     return createErrorResponse("feature_not_available", 404);
   }
   try {
+    const {
+      data: { user },
+    } = await locals.supabase.auth.getUser();
+
+    if (!user) {
+      return createErrorResponse("authentication_error_no_session", 401);
+    }
+
     const body = await request.json();
     const validationResult = resetPasswordSchema.safeParse(body);
 
@@ -28,12 +36,8 @@ export const POST: APIRoute = async ({ request, locals }) => {
     });
 
     if (error) {
-      if (error.message.includes("Password should be at least")) {
-        return createErrorResponse("authentication_error_weak_password", 400);
-      }
-
       console.error("Reset password error:", error);
-      return createErrorResponse("authentication_error", 400);
+      return createErrorResponse(error.code || "authentication_error", 400);
     }
 
     return new Response(JSON.stringify({ message: "Password updated successfully" }), {

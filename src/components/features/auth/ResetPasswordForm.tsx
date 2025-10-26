@@ -1,4 +1,3 @@
-import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,12 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Loader2, Lock } from "lucide-react";
-import { toast } from "sonner";
 import { resetPasswordSchema, type ResetPasswordFormData } from "@/lib/validation/auth-schemas";
 import { useAuthActions } from "@/lib/hooks/useAuthActions";
 
 export function ResetPasswordForm() {
-  const [hasValidToken, setHasValidToken] = useState(false);
   const { resetPassword, isLoading } = useAuthActions();
   const {
     register,
@@ -22,35 +19,9 @@ export function ResetPasswordForm() {
     mode: "onBlur",
   });
 
-  useEffect(() => {
-    const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    const accessToken = hashParams.get("access_token");
-    setHasValidToken(!!accessToken);
-
-    if (!accessToken) {
-      toast.error("Nieprawidłowy lub wygasły link resetujący hasło.");
-    }
-  }, []);
-
   const onSubmit = async (data: ResetPasswordFormData) => {
     await resetPassword(data);
   };
-
-  if (!hasValidToken) {
-    return (
-      <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold">Nieprawidłowy link</CardTitle>
-          <CardDescription>Link do resetowania hasła jest nieprawidłowy lub wygasł.</CardDescription>
-        </CardHeader>
-        <CardFooter className="flex flex-col space-y-4">
-          <Button asChild className="w-full" size="lg">
-            <a href="/forgot-password">Wyślij nowy link</a>
-          </Button>
-        </CardFooter>
-      </Card>
-    );
-  }
 
   return (
     <Card className="w-full max-w-md">
@@ -99,7 +70,7 @@ export function ResetPasswordForm() {
           </div>
         </CardContent>
 
-        <CardFooter className="flex flex-col space-y-4 pt-1">
+        <CardFooter className="flex flex-col space-y-4 pt-6">
           <Button type="submit" className="w-full" disabled={isLoading} size="lg" aria-busy={isLoading}>
             {isLoading ? (
               <>
