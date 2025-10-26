@@ -158,3 +158,9 @@ For detailed deployment documentation, see `.cursor/rules/hosting-analysis.md`.
 ## License
 
 This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+## Author
+
+- **Name**: [Jakub Aniszewski](https://github.com/jaqb8)
+- **Email**: [jakubaniszewski@pm.me](mailto:jakubaniszewski@pm.me)
+- **Website**: [aniszewski.com](https://aniszewski.com)
