@@ -1,7 +1,7 @@
 {
   "name": "10x-astro-starter",
   "type": "module",
-  "version": "0.0.1",
+  "version": "1.0.1",
   "scripts": {
     "dev": "astro dev",
     "dev:e2e": "astro dev --mode test",
@@ -36,6 +36,7 @@
     "@radix-ui/react-alert-dialog": "^1.1.15",
     "@radix-ui/react-avatar": "^1.1.10",
     "@radix-ui/react-dialog": "^1.1.15",
+    "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-navigation-menu": "^1.2.14",
     "@radix-ui/react-slot": "^1.2.3",
@@ -89,6 +90,7 @@
     "lint-staged": "15.5.0",
     "msw": "^2.7.0",
     "prettier-plugin-astro": "0.14.1",
+    "shadcn": "^3.5.0",
     "supabase": "^2.48.3",
     "typescript-eslint": "8.28.0",
     "vitest": "^2.1.8"

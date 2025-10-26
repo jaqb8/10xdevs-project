@@ -13,6 +13,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
+import { ModeToggle } from "@/components/shared/ModeToggle";
 
 interface MenuItem {
   title: string;
@@ -53,7 +54,7 @@ const Navbar1 = ({
   return (
     <section className="py-4">
       {/* Desktop Menu */}
-      <nav className="hidden justify-between lg:flex px-8 items-center">
+      <nav className="hidden justify-between lg:flex container mx-auto items-center">
         <div className="flex items-center gap-6">
           {/* Logo */}
           <a href={logo.url} className="flex items-center gap-2" data-test-id="header-logo">
@@ -94,12 +95,13 @@ const Navbar1 = ({
               )}
             </>
           )}
+          <ModeToggle />
         </div>
       </nav>
 
       {/* Mobile Menu */}
       <div className="block lg:hidden">
-        <div className="flex items-center justify-between px-8">
+        <div className="flex items-center justify-between px-4">
           {/* Logo */}
           <a href={logo.url} className="flex items-center gap-2" data-test-id="header-logo-mobile">
             <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
@@ -157,6 +159,7 @@ const Navbar1 = ({
                     </>
                   )}
                 </div>
+                <ModeToggle>Przełącz motyw</ModeToggle>
               </div>
             </SheetContent>
           </Sheet>

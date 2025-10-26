@@ -1,6 +1,7 @@
 ---
 import Layout from "./Layout.astro";
 import { Header } from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer.astro";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthInitializer } from "@/components/shared/AuthInitializer";
 
@@ -15,6 +16,9 @@ const { user } = Astro.locals;
 <Layout title={title}>
   <AuthInitializer user={user} client:only="react" />
   <Header client:load />
-  <slot />
+  <main class="flex-1">
+    <slot />
+  </main>
+  <Footer />
   <Toaster richColors client:load />
 </Layout>
