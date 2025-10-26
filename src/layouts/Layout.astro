@@ -9,7 +9,7 @@ const { title = "Language Learning Buddy" } = Astro.props;
 ---
 
 <!doctype html>
-<html lang="pl" class="dark">
+<html lang="pl">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -20,6 +20,25 @@ const { title = "Language Learning Buddy" } = Astro.props;
       content="Language Learning Buddy - Narzędzie do nauki języka angielskiego z analizą błędów gramatycznych przez AI"
     />
     <title>{title}</title>
+    <script is:inline>
+      const getThemePreference = () => {
+        // eslint-disable-next-line prettier/prettier
+        if (typeof localStorage !== "undefined" && localStorage.getItem("theme")) {
+          return localStorage.getItem("theme");
+        }
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      };
+      const isDark = getThemePreference() === "dark";
+      document.documentElement.classList[isDark ? "add" : "remove"]("dark");
+
+      if (typeof localStorage !== "undefined") {
+        const observer = new MutationObserver(() => {
+          const isDark = document.documentElement.classList.contains("dark");
+          localStorage.setItem("theme", isDark ? "dark" : "light");
+        });
+        observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+      }
+    </script>
   </head>
   <body class="flex flex-col min-h-screen">
     <slot />
