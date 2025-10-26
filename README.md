@@ -161,6 +161,6 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE) file 
 
 ## Author
 
-- **Name**: [Jakub Aniszewski](https://github.com/jaqb8)
-- **Email**: [jakubaniszewski@pm.me](mailto:jakubaniszewski@pm.me)
-- **Website**: [aniszewski.com](https://aniszewski.com)
+**Name**: [Jakub Aniszewski](https://github.com/jaqb8)
+**Email**: [jakubaniszewski@pm.me](mailto:jakubaniszewski@pm.me)
+**Website**: [aniszewski.com](https://aniszewski.com)
