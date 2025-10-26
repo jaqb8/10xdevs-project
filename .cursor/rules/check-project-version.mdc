@@ -1,0 +1,34 @@
+---
+alwaysApply: false
+---
+
+## Check Project Version
+
+Check for version prompted by user in prompt. If there is no version in prompt, use the latest version from the GitHub releases with the following command:
+
+```bash
+curl -s https://api.github.com/repos/jaqb8/10xdevs-project/releases/latest | jq -r '.tag_name, .name, .published_at'
+```
+
+Then, check if the project version is correct in the `package.json` file and `README.md` file.
+
+- Check if the project version is correct in the `package.json` file
+- Check if the project version is correct in the `README.md` file
+
+Also, if there is no changelog in docs/v{version}/changelog.md file, create it based on commits between the previous and current version. Use the following command to get the commits:
+
+```bash
+git log --pretty=format:"%h - %an, %ar : %s" v{previous-version}..v{current-version}
+```
+
+Then, create the changelog file in the docs/v{version}/changelog.md file in english.
+
+```markdown
+# Language Learning Buddy v{version}
+
+## What's New
+
+## Fixed
+
+## Changed
+```
