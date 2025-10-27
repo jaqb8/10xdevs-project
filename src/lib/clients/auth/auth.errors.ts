@@ -5,7 +5,8 @@ export function mapAuthErrorCodeToMessage(errorCode: string): string {
     authentication_error_missing_code: "Brak kodu resetującego hasło. Link jest nieprawidłowy.",
     authentication_error_missing_token: "Brak tokenu resetującego hasło. Link jest nieprawidłowy.",
     authentication_error_invalid_type: "Nieprawidłowy typ tokenu.",
-    authentication_error_no_session: "Brak aktywnej sesji. Zaloguj się ponownie.",
+    authentication_error_no_session:
+      "Brak aktywnej sesji. Aby zresetować hasło, kliknij w link znajdujący się w emailu z resetem hasła.",
     authentication_error_unauthorized: "Musisz być zalogowany, aby wykonać tę operację.",
     authentication_error: "Wystąpił błąd podczas operacji. Spróbuj ponownie.",
     unknown_error: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie później.",

@@ -1,0 +1,1 @@
+- [x] Poprawić układ głównej części apki w stosunku do footera na mobile
