@@ -53,6 +53,7 @@ export function AnalyzeView() {
           maxLength={MAX_TEXT_LENGTH}
         />
       </section>
+      {/* {state.status === "idle" && <div className="h-48"></div>} */}
       {(state.status === "loading" || state.result) && (
         <section aria-label="Wyniki analizy" aria-live="polite">
           <AnalysisResult
