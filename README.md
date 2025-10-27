@@ -1,6 +1,6 @@
 # Language Learning Buddy
 
-![Project Status](https://img.shields.io/badge/status-v1.1.0-brightgreen)
+![Project Status](https://img.shields.io/badge/status-v1.1.1-brightgreen)
 ![Astro](https://img.shields.io/badge/Astro-5.0-orange)
 ![React](https://img.shields.io/badge/React-19-blue)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
