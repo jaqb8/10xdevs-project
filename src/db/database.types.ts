@@ -22,6 +22,7 @@ export interface Database {
     Tables: {
       learning_items: {
         Row: {
+          analysis_mode: string;
           corrected_sentence: string;
           created_at: string;
           explanation: string;
@@ -30,6 +31,7 @@ export interface Database {
           user_id: string;
         };
         Insert: {
+          analysis_mode?: string;
           corrected_sentence: string;
           created_at?: string;
           explanation: string;
@@ -38,6 +40,7 @@ export interface Database {
           user_id: string;
         };
         Update: {
+          analysis_mode?: string;
           corrected_sentence?: string;
           created_at?: string;
           explanation?: string;

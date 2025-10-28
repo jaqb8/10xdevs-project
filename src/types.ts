@@ -10,6 +10,13 @@ import type { Database } from "./db/database.types";
  */
 export type LearningItem = Database["public"]["Tables"]["learning_items"]["Row"];
 
+/**
+ * Represents the mode of text analysis.
+ * - 'grammar_and_spelling': Analyzes text for grammatical and spelling errors
+ * - 'colloquial_speech': Analyzes text for naturalness and colloquial style
+ */
+export type AnalysisMode = "grammar_and_spelling" | "colloquial_speech";
+
 // ============================================================================
 // API DTOs (Data Transfer Objects)
 // ============================================================================
@@ -33,7 +40,7 @@ export interface ApiErrorResponse {
  */
 export type LearningItemDto = Pick<
   LearningItem,
-  "id" | "original_sentence" | "corrected_sentence" | "explanation" | "created_at"
+  "id" | "original_sentence" | "corrected_sentence" | "explanation" | "analysis_mode" | "created_at"
 >;
 
 /**
@@ -104,15 +111,20 @@ export type SignedInUserDto = Omit<UserDto, "created_at">;
  *
  * @see POST /api/learning-items
  */
-export type CreateLearningItemCommand = Pick<LearningItem, "original_sentence" | "corrected_sentence" | "explanation">;
+export type CreateLearningItemCommand = Pick<
+  LearningItem,
+  "original_sentence" | "corrected_sentence" | "explanation" | "analysis_mode"
+>;
 
 /**
  * Command model for analyzing a piece of text.
+ * The `mode` field is optional and defaults to 'grammar_and_spelling'.
  *
  * @see POST /api/analyze
  */
 export interface AnalyzeTextCommand {
   text: string;
+  mode?: AnalysisMode;
 }
 
 /**
@@ -209,3 +221,12 @@ export interface UserViewModel {
   id: string;
   email: string;
 }
+
+// ============================================================================
+// Analysis Mode Constants
+// ============================================================================
+
+export const ANALYSIS_MODES = {
+  GRAMMAR_AND_SPELLING: "grammar_and_spelling",
+  COLLOQUIAL_SPEECH: "colloquial_speech",
+} as const;

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import type { TextAnalysisDto, CreateLearningItemCommand, ApiErrorResponse } from "../../types";
+import type { TextAnalysisDto, CreateLearningItemCommand, ApiErrorResponse, AnalysisMode } from "../../types";
 
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
 
@@ -49,7 +49,7 @@ export function useTextAnalysis() {
     setState((prev) => ({ ...prev, text }));
   };
 
-  const analyzeText = async () => {
+  const analyzeText = async (mode: AnalysisMode) => {
     if (!state.text.trim()) {
       return;
     }
@@ -62,7 +62,7 @@ export function useTextAnalysis() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: state.text }),
+        body: JSON.stringify({ text: state.text, mode }),
       });
 
       if (response.status === 401) {
@@ -102,7 +102,7 @@ export function useTextAnalysis() {
     }
   };
 
-  const saveResult = async () => {
+  const saveResult = async (mode: AnalysisMode) => {
     if (!state.result || state.result.is_correct) {
       return;
     }
@@ -111,6 +111,7 @@ export function useTextAnalysis() {
       original_sentence: state.result.original_text,
       corrected_sentence: state.result.corrected_text,
       explanation: state.result.explanation,
+      analysis_mode: mode,
     };
 
     try {

@@ -13,8 +13,8 @@ export class LearningListPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.heading = page.getByRole("heading", { name: /moje elementy do nauki/i });
-    this.emptyState = page.getByText(/nie masz jeszcze żadnych elementów/i);
+    this.heading = page.getByRole("heading", { name: /lista wyrażeń do nauki/i });
+    this.emptyState = page.getByText(/brak wyrażeń do nauki/i);
     this.learningItems = page.locator("[data-learning-item]");
     this.deleteButtons = page.getByRole("button", { name: /usuń/i });
     this.confirmDeleteButton = page.getByRole("button", { name: /tak, usuń/i });
