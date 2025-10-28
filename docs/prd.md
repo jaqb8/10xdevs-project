@@ -19,6 +19,7 @@ Uczący się języka angielskiego często nie są świadomi powtarzających się
 ### 3.2. Analiza tekstu
 
 - Aplikacja udostępnia interfejs z jednym polem tekstowym do wprowadzania tekstu w języku angielskim.
+- Użytkownik ma możliwość wyboru trybu analizy tekstu spośród dostępnych opcji (np. "gramatyka i ortografia", "mowa potoczna").
 - Wprowadzany tekst jest ograniczony do 500 znaków.
 - Przycisk "Analizuj" inicjuje proces sprawdzania tekstu przez zewnętrzny model AI (`google/gemini-2.0-flash-001`).
 - Po analizie, potencjalne błędy są wizualnie podświetlane bezpośrednio w oryginalnym tekście.
@@ -170,6 +171,26 @@ Następujące funkcje i cechy nie wchodzą w zakres MVP i mogą zostać rozważo
   1. W interfejsie aplikacji znajduje się wyraźnie oznaczony przycisk lub link "Wyloguj".
   2. Po kliknięciu przycisku sesja użytkownika jest kończona.
   3. Użytkownik jest przekierowywany na stronę logowania lub stronę główną dla niezalogowanych.
+
+### ID: US-012
+
+- Tytuł: Wybór trybu analizy tekstu
+- Opis: Jako użytkownik, chcę mieć możliwość wyboru trybu analizy (np. "gramatyka i ortografia" lub "mowa potoczna") przed wysłaniem tekstu, aby dostosować rodzaj otrzymywanych wskazówek do moich potrzeb.
+- Kryteria akceptacji:
+  1. W interfejsie, pod polem do wprowadzania tekstu, znajduje się rozwijana lista (dropdown) z dostępnymi trybami analizy.
+  2. Domyślnie wybrany jest tryb "gramatyka i ortografia".
+  3. Wybór trybu przez użytkownika jest zapamiętywany (np. w `localStorage`) i zostaje zachowany po odświeżeniu strony.
+  4. Wybrany tryb jest przesyłany do backendu podczas inicjowania analizy.
+
+### ID: US-013
+
+- Tytuł: Otrzymywanie wyników analizy dostosowanych do wybranego trybu
+- Opis: Jako użytkownik, po wybraniu trybu "mowa potoczna" i przeanalizowaniu tekstu, chcę otrzymać sugestie dotyczące nie tylko błędów gramatycznych, ale także stylu, naturalności i użycia języka potocznego.
+- Kryteria akceptacji:
+  1. Gdy wybrany jest tryb "mowa potoczna", system używa dedykowanego promptu do analizy stylistycznej.
+  2. Wyniki analizy dla tego trybu mogą wskazywać fragmenty, które są gramatycznie poprawne, ale brzmią nienaturalnie.
+  3. Wyjaśnienie błędu (`context`) informuje o aspekcie stylistycznym, a nie tylko gramatycznym.
+  4. Zapisany na liście "Do nauki" element zawiera informację o trybie, w jakim został zidentyfikowany.
 
 ## 6. Metryki sukcesu
 

@@ -63,7 +63,8 @@ All endpoints are prefixed with `/api`.
   {
     "original_sentence": "She have two cats.",
     "corrected_sentence": "She has two cats.",
-    "explanation": "Use 'has' for the third-person singular present tense."
+    "explanation": "Use 'has' for the third-person singular present tense.",
+    "analysis_mode": "grammar_and_spelling"
   }
   ```
 - **Success Response**:
@@ -76,6 +77,7 @@ All endpoints are prefixed with `/api`.
       "original_sentence": "She have two cats.",
       "corrected_sentence": "She has two cats.",
       "explanation": "Use 'has' for the third-person singular present tense.",
+      "analysis_mode": "grammar_and_spelling",
       "created_at": "2025-10-26T10:05:00Z"
     }
     ```
@@ -109,11 +111,12 @@ All endpoints are prefixed with `/api`.
 
 - **Method**: `POST`
 - **Path**: `/analyze`
-- **Description**: Sends a block of text to be analyzed by the AI model for grammatical errors.
+- **Description**: Sends a block of text to be analyzed by the AI model for grammatical errors, based on the selected analysis mode.
 - **Request Payload**:
   ```json
   {
-    "text": "I is a student. He go to school."
+    "text": "I is a student. He go to school.",
+    "mode": "grammar_and_spelling"
   }
   ```
 - **Success Response (Errors Found)**:
@@ -231,10 +234,12 @@ All endpoints are prefixed with `/api`.
 - **POST /analyze**:
   - `text`: Must be a non-empty string.
   - `text`: Must not exceed 500 characters.
+  - `mode`: Must be a non-empty string, one of `grammar_and_spelling` or `colloquial_speech`.
 - **POST /learning-items**:
   - `original_sentence`: Must be a non-empty string.
   - `corrected_sentence`: Must be a non-empty string.
   - `explanation`: Must be a non-empty string and not exceed 500 characters.
+  - `analysis_mode`: Must be a non-empty string, one of `grammar_and_spelling` or `colloquial_speech`.
 - **POST /auth/signup**:
   - `email`: Must be a valid email address.
   - `password`: Must meet strength requirements (e.g., minimum length).

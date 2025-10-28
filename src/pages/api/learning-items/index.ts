@@ -34,6 +34,9 @@ const createLearningItemSchema = z.object({
     .string()
     .min(1, { message: "validation_error_explanation_empty" })
     .max(500, { message: "validation_error_explanation_too_long" }),
+  analysis_mode: z.enum(["grammar_and_spelling", "colloquial_speech"], {
+    message: "validation_error_invalid_mode",
+  }),
 });
 
 /**

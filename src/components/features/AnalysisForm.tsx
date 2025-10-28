@@ -2,6 +2,7 @@ import { useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Brain, Loader2 } from "lucide-react";
+import { AnalysisModeSelector } from "./AnalysisModeSelector";
 
 interface AnalysisFormProps {
   text: string;
@@ -79,6 +80,7 @@ export function AnalysisForm({
             {text.length} / {maxLength}
           </p>
         </div>
+        <AnalysisModeSelector />
       </div>
 
       <div className="flex flex-col gap-2">

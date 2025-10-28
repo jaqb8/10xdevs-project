@@ -32,6 +32,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
         original_sentence: analysisResult.original_text,
         corrected_sentence: analysisResult.corrected_text,
         explanation: analysisResult.explanation,
+        analysis_mode: "grammar_and_spelling",
       };
       onSave(command);
     }

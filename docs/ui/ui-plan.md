@@ -36,11 +36,13 @@ Struktura opiera się na czterech głównych widokach: dwóch publicznych (`/log
 - **Główny cel:** Główne narzędzie aplikacji, umożliwiające analizę tekstu, przeglądanie wyników i dodawanie błędów do listy "Do nauki".
 - **Kluczowe informacje do wyświetlenia:**
   - Pole tekstowe (`Textarea`) na tekst do analizy (z licznikiem znaków).
+  - `Dropdown` (lub `Select`) do wyboru trybu analizy tekstu (np. "Gramatyka i ortografia", "Mowa potoczna").
+  - Dynamicznie zmieniający się podtytuł, wyjaśniający działanie wybranego trybu analizy.
   - Wyniki analizy: porównanie tekstu oryginalnego z poprawionym (z wizualnym wyróżnieniem zmian), wyjaśnienie błędu.
   - Komunikaty o stanie: informacja o braku błędów w tekście po analizie lub informacja o błędzie w analizowanym tekście, stan ładowania.
-- **Kluczowe komponenty widoku:** `Textarea`, `Button` ("Analizuj", "Dodaj do listy Do nauki", "Wyczyść"), `Card` (do prezentacji wyników), `Skeleton` (wskaźnik ładowania), `Toast` (dla powiadomień).
+- **Kluczowe komponenty widoku:** `Textarea`, `Button` ("Analizuj", "Dodaj do listy Do nauki", "Wyczyść"), `Card` (do prezentacji wyników), `Skeleton` (wskaźnik ładowania), `Toast` (dla powiadomień), `Select`.
 - **UX, dostępność i względy bezpieczeństwa:**
-  - **UX:** Przycisk "Analizuj" jest nieaktywny podczas ładowania i pokazuje spinner. Wyniki są ładowane asynchronicznie, co sygnalizuje `Skeleton`. Dodanie do listy jest potwierdzane przez `Toast`. Wyniki pozostają widoczne do momentu ręcznego wyczyszczenia.
+  - **UX:** Przycisk "Analizuj" jest nieaktywny podczas ładowania i pokazuje spinner. Wyniki są ładowane asynchronicznie, co sygnalizuje `Skeleton`. Dodanie do listy jest potwierdzane przez `Toast`. Wyniki pozostają widoczne do momentu ręcznego wyczyszczenia. Wybór trybu analizy jest zapisywany w `localStorage`, dzięki czemu ostatnio używany tryb jest przywracany przy kolejnej wizycie.
   - **Dostępność:** Stan ładowania jest komunikowany atrybutem `aria-busy`. Nowo pojawiające się wyniki i komunikaty o błędach są ogłaszane przez czytniki ekranu za pomocą `aria-live`.
   - **Bezpieczeństwo:** Widok chroniony. Wymaga uwierzytelnienia. Próba dostępu bez aktywnej sesji skutkuje przekierowaniem na `/login`.
 
