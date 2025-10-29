@@ -51,15 +51,15 @@ export class AnalysisService {
 
   async analyzeText(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     if (this.useMocks) {
-      return this.analyzeMocked(text);
+      return this.analyzeMocked(text, mode);
     }
 
     return this.analyzeWithAI(text, mode);
   }
 
-  private async analyzeMocked(text: string): Promise<TextAnalysisDto> {
+  private async analyzeMocked(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     await new Promise((resolve) => setTimeout(resolve, 100));
-    return getMockAnalysis(text);
+    return getMockAnalysis(text, mode);
   }
 
   private async analyzeWithAI(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {

@@ -72,7 +72,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
             <CheckCircle2 className="size-12 text-green-600 dark:text-green-500" aria-hidden="true" />
             <div>
               <h2 className="text-lg font-semibold">Świetna robota!</h2>
-              <p className="text-muted-foreground text-sm">Twój tekst nie zawiera błędów gramatycznych.</p>
+              <p className="text-muted-foreground text-sm">Twój tekst nie wymaga poprawek.</p>
             </div>
           </div>
         </CardContent>
