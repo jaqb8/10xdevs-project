@@ -31,7 +31,8 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_PUBLIC_KEY: ${{ secrets.SUPABASE_PUBLIC_KEY }}
           PUBLIC_ENV_NAME: ${{ vars.ENV_NAME }}
-          USE_MOCKS: ${{ vars.USE_MOCKS }}
+          USE_MOCKS: false
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           APP_NAME: ${{ vars.APP_NAME }}
         run: npm run build
 
