@@ -36,7 +36,7 @@ export function LearningItemCard({ item, onDelete }: LearningItemCardProps) {
           <span className="text-sm font-normal text-muted-foreground">{item.formatted_created_at}</span>
         </CardTitle>
         <div className="pt-2">
-          <Badge variant={modeVariant} className="text-xs">
+          <Badge variant={modeVariant} className="text-xs" data-test-id="analysis-mode-badge">
             {modeLabel}
           </Badge>
         </div>

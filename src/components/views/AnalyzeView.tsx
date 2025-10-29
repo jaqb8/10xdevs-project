@@ -1,27 +1,15 @@
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect } from "react";
 import { useTextAnalysis } from "../../lib/hooks/useTextAnalysis";
 import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
 import { AnalysisForm } from "../features/AnalysisForm";
 import { AnalysisResult } from "../features/AnalysisResult";
 import { toast } from "sonner";
-import { ANALYSIS_MODES } from "@/types";
 
 const MAX_TEXT_LENGTH = 500;
-
-const ANALYSIS_MODE_DESCRIPTIONS = {
-  [ANALYSIS_MODES.GRAMMAR_AND_SPELLING]:
-    "Wprowadź tekst w języku angielskim, a AI pomoże Ci znaleźć błędy gramatyczne.",
-  [ANALYSIS_MODES.COLLOQUIAL_SPEECH]:
-    "Wprowadź tekst w języku angielskim, a AI sprawdzi, czy brzmi naturalnie i potocznie.",
-} as const;
 
 export function AnalyzeView() {
   const { state, setText, analyzeText, saveResult, clear } = useTextAnalysis();
   const mode = useAnalysisModeStore((state) => state.mode);
-
-  const description = useMemo(() => {
-    return ANALYSIS_MODE_DESCRIPTIONS[mode] || ANALYSIS_MODE_DESCRIPTIONS[ANALYSIS_MODES.GRAMMAR_AND_SPELLING];
-  }, [mode]);
 
   useEffect(() => {
     if (state.error) {
@@ -50,12 +38,8 @@ export function AnalyzeView() {
     <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
       <header className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">Analiza tekstu</h1>
-        <p
-          key={mode}
-          className="text-muted-foreground text-base sm:text-lg animate-in fade-in duration-300"
-          suppressHydrationWarning
-        >
-          {description}
+        <p className="text-muted-foreground text-base sm:text-lg">
+          Wprowadź tekst w języku angielskim, a AI pomoże Ci znaleźć błędy gramtyczne oraz stylistyczne.
         </p>
       </header>
 

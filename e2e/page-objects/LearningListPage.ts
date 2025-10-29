@@ -10,6 +10,7 @@ export class LearningListPage {
   readonly cancelDeleteButton: Locator;
   readonly paginationNext: Locator;
   readonly paginationPrevious: Locator;
+  readonly modeBadges: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -21,6 +22,7 @@ export class LearningListPage {
     this.cancelDeleteButton = page.getByRole("button", { name: /anuluj/i });
     this.paginationNext = page.getByRole("button", { name: /następna/i });
     this.paginationPrevious = page.getByRole("button", { name: /poprzednia/i });
+    this.modeBadges = page.locator("[data-learning-item]").locator("..").locator("..").locator("..");
   }
 
   async goto() {
@@ -55,5 +57,17 @@ export class LearningListPage {
 
   async goToPreviousPage() {
     await this.paginationPrevious.click();
+  }
+
+  async getFirstItemModeBadge() {
+    const badge = this.page.locator('[data-test-id="analysis-mode-badge"]').first();
+    await badge.waitFor({ state: "visible" });
+    return await badge.textContent();
+  }
+
+  async getItemModeBadge(index: number) {
+    const badge = this.page.locator('[data-test-id="analysis-mode-badge"]').nth(index);
+    await badge.waitFor({ state: "visible" });
+    return await badge.textContent();
   }
 }
