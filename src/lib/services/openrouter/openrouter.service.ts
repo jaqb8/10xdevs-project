@@ -104,6 +104,9 @@ export class OpenRouterService {
     const requestBody: OpenRouterRequestBody = {
       model: params.model,
       messages,
+      reasoning: {
+        enabled: false,
+      },
       response_format: {
         type: "json_schema",
         json_schema: {

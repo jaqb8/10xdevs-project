@@ -17,6 +17,9 @@ export interface OpenRouterMessage {
 export interface OpenRouterRequestBody {
   model: string;
   messages: OpenRouterMessage[];
+  reasoning?: {
+    enabled: boolean;
+  };
   response_format?: {
     type: "json_schema";
     json_schema: {
