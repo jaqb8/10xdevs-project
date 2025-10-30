@@ -67,7 +67,7 @@ export class AnalysisService {
 
     try {
       return await openRouterService.getChatCompletion({
-        model: "google/gemini-2.0-flash-001",
+        model: "x-ai/grok-4-fast",
         systemMessage: systemPrompt,
         userMessage: text,
         responseSchema: TextAnalysisSchema,
