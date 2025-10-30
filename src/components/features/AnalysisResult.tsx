@@ -102,8 +102,8 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
           <Button
             onClick={handleSave}
             disabled={isSaved}
-            variant="default"
-            className={cn("w-full text-lg h-10", !isAuth && !isSaved && "bg-accent hover:bg-accent/90")}
+            variant="secondary"
+            className={cn("w-full text-lg h-10", !isAuth && !isSaved && "hover:bg-accent/90")}
             aria-label={
               isSaved
                 ? "Element już zapisany na liście"
