@@ -42,7 +42,7 @@ export function LearningItemsView() {
   if (isLoading) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">Moje elementy do nauki</h1>
+        <h1 className="text-3xl font-bold mb-8">Lista wyrażeń do nauki</h1>
         <LoadingSkeleton />
       </div>
     );
@@ -51,7 +51,7 @@ export function LearningItemsView() {
   if (error && !viewModels.length) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
-        <h1 className="text-3xl font-bold mb-8">Moje elementy do nauki</h1>
+        <h1 className="text-3xl font-bold mb-8">Lista wyrażeń do nauki</h1>
         <ErrorMessage message={error} />
       </div>
     );
@@ -59,7 +59,7 @@ export function LearningItemsView() {
 
   return (
     <div className="container mx-auto px-4 py-8 max-w-4xl">
-      <h1 className="text-3xl font-bold mb-8">Moje elementy do nauki</h1>
+      <h1 className="text-3xl font-bold mb-8">Lista wyrażeń do nauki</h1>
 
       <LearningItemsList items={viewModels} onDeleteItem={handleDeleteItem} />
 

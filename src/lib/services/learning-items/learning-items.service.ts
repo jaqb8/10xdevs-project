@@ -51,7 +51,7 @@ export class LearningItemsService {
 
     const { data, error } = await this.supabase
       .from("learning_items")
-      .select("id, original_sentence, corrected_sentence, explanation, created_at")
+      .select("id, original_sentence, corrected_sentence, explanation, analysis_mode, created_at")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .range(offset, offset + pageSize - 1);

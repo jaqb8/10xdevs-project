@@ -13,16 +13,17 @@ Tabela ta jest zarządzana przez mechanizm uwierzytelniania Supabase i będzie u
 
 ### Tabela: `learning_items`
 
-Tabela przechowuje elementy do nauki (błędy gramatyczne) zapisane przez użytkowników.
+Tabela przechowuje elementy do nauki (błędy gramatyczne) zapisane przez użytkowników. Każdy element jest powiązany z trybem analizy, w którym został zidentyfikowany.
 
-| Nazwa kolumny        | Typ danych     | Ograniczenia                                                            | Opis                                                  |
-| -------------------- | -------------- | ----------------------------------------------------------------------- | ----------------------------------------------------- |
-| `id`                 | `uuid`         | `PRIMARY KEY`, `default gen_random_uuid()`                              | Unikalny identyfikator elementu do nauki.             |
-| `user_id`            | `uuid`         | `NOT NULL`, `FOREIGN KEY` references `auth.users(id)` ON DELETE CASCADE | Identyfikator użytkownika, do którego należy element. |
-| `original_sentence`  | `text`         | `NOT NULL`                                                              | Pełne zdanie, w którym wystąpił błąd.                 |
-| `corrected_sentence` | `text`         | `NOT NULL`                                                              | Poprawiona wersja zdania.                             |
-| `explanation`        | `varchar(500)` | `NOT NULL`                                                              | Krótkie wyjaśnienie błędu (maks. 500 znaków).         |
-| `created_at`         | `timestamptz`  | `NOT NULL`, `default now()`                                             | Znacznik czasu utworzenia elementu.                   |
+| Nazwa kolumny        | Typ danych     | Ograniczenia                                                                                                           | Opis                                                  |
+| -------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| `id`                 | `uuid`         | `PRIMARY KEY`, `default gen_random_uuid()`                                                                             | Unikalny identyfikator elementu do nauki.             |
+| `user_id`            | `uuid`         | `NOT NULL`, `FOREIGN KEY` references `auth.users(id)` ON DELETE CASCADE                                                | Identyfikator użytkownika, do którego należy element. |
+| `original_sentence`  | `text`         | `NOT NULL`                                                                                                             | Pełne zdanie, w którym wystąpił błąd.                 |
+| `corrected_sentence` | `text`         | `NOT NULL`                                                                                                             | Poprawiona wersja zdania.                             |
+| `explanation`        | `varchar(500)` | `NOT NULL`                                                                                                             | Krótkie wyjaśnienie błędu (maks. 500 znaków).         |
+| `analysis_mode`      | `text`         | `NOT NULL`, `DEFAULT 'grammar_and_spelling'`, `CHECK (analysis_mode IN ('grammar_and_spelling', 'colloquial_speech'))` | Tryb analizy, w którym został zidentyfikowany błąd.   |
+| `created_at`         | `timestamptz`  | `NOT NULL`, `default now()`                                                                                            | Znacznik czasu utworzenia elementu.                   |
 
 ## 2. Relacje między tabelami
 

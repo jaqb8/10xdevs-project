@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@/db/supabase.client";
-import type { TextAnalysisDto } from "../../../types";
+import type { AnalysisMode, TextAnalysisDto } from "../../../types";
 import { getMockAnalysis } from "./analysis.mocks";
 import { openRouterService } from "../openrouter";
 import {
@@ -21,6 +21,7 @@ import {
 } from "./analysis.errors";
 import { z } from "zod";
 import grammarPrompt from "@/lib/prompts/grammar-analysis.prompt.md?raw";
+import colloquialPrompt from "@/lib/prompts/colloquial-speech.prompt.md?raw";
 import { USE_MOCKS } from "astro:env/server";
 
 const TextAnalysisSchema = z.discriminatedUnion("is_correct", [
@@ -36,6 +37,11 @@ const TextAnalysisSchema = z.discriminatedUnion("is_correct", [
   }),
 ]);
 
+const ANALYSIS_PROMPTS: Record<AnalysisMode, string> = {
+  grammar_and_spelling: grammarPrompt,
+  colloquial_speech: colloquialPrompt,
+};
+
 export class AnalysisService {
   private useMocks: boolean;
 
@@ -43,24 +49,26 @@ export class AnalysisService {
     this.useMocks = USE_MOCKS;
   }
 
-  async analyzeText(text: string): Promise<TextAnalysisDto> {
+  async analyzeText(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     if (this.useMocks) {
-      return this.analyzeMocked(text);
+      return this.analyzeMocked(text, mode);
     }
 
-    return this.analyzeWithAI(text);
+    return this.analyzeWithAI(text, mode);
   }
 
-  private async analyzeMocked(text: string): Promise<TextAnalysisDto> {
+  private async analyzeMocked(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     await new Promise((resolve) => setTimeout(resolve, 100));
-    return getMockAnalysis(text);
+    return getMockAnalysis(text, mode);
   }
 
-  private async analyzeWithAI(text: string): Promise<TextAnalysisDto> {
+  private async analyzeWithAI(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
+    const systemPrompt = ANALYSIS_PROMPTS[mode];
+
     try {
       return await openRouterService.getChatCompletion({
-        model: "google/gemini-2.0-flash-001",
-        systemMessage: grammarPrompt,
+        model: "x-ai/grok-4-fast",
+        systemMessage: systemPrompt,
         userMessage: text,
         responseSchema: TextAnalysisSchema,
         temperature: 0.3,

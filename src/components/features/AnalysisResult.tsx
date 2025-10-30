@@ -32,6 +32,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
         original_sentence: analysisResult.original_text,
         corrected_sentence: analysisResult.corrected_text,
         explanation: analysisResult.explanation,
+        analysis_mode: "grammar_and_spelling",
       };
       onSave(command);
     }
@@ -71,7 +72,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
             <CheckCircle2 className="size-12 text-green-600 dark:text-green-500" aria-hidden="true" />
             <div>
               <h2 className="text-lg font-semibold">Świetna robota!</h2>
-              <p className="text-muted-foreground text-sm">Twój tekst nie zawiera błędów gramatycznych.</p>
+              <p className="text-muted-foreground text-sm">Twój tekst nie wymaga poprawek.</p>
             </div>
           </div>
         </CardContent>
@@ -101,8 +102,8 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
           <Button
             onClick={handleSave}
             disabled={isSaved}
-            variant="default"
-            className={cn("w-full text-lg h-10", !isAuth && !isSaved && "bg-accent hover:bg-accent/90")}
+            variant="secondary"
+            className={cn("w-full text-lg h-10", !isAuth && !isSaved && "hover:bg-accent/90")}
             aria-label={
               isSaved
                 ? "Element już zapisany na liście"
