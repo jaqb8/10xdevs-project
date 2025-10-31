@@ -106,7 +106,7 @@ jobs:
     name: Code Review
     runs-on: ubuntu-latest
     environment: integration
-    needs: [unit-test, e2e-test]
+    needs: [lint, unit-test, e2e-test]
     if: github.event.pull_request.draft == false
     permissions:
       pull-requests: write
@@ -137,7 +137,8 @@ jobs:
         run: |
           BLOCKING_REVIEW=${BLOCKING_REVIEW_VAR:-false}
           export BLOCKING_REVIEW
-          cursor-agent --force --model "$MODEL" --output-format=text --print 'You are operating in a GitHub Actions runner performing automated code review. The gh CLI is available and authenticated via GH_TOKEN. You may comment on pull requests.
+          cursor-agent --force --model "$MODEL" --output-format=text --print <<'PROMPT_EOF'
+          You are operating in a GitHub Actions runner performing automated code review. The gh CLI is available and authenticated via GH_TOKEN. You may comment on pull requests.
 
           Context:
           - Repo: ${{ github.repository }}
@@ -195,8 +196,7 @@ jobs:
           - If BLOCKING_REVIEW is true and any 🚨 or 🔒 issues were posted: echo "CRITICAL_ISSUES_FOUND=true" >> $GITHUB_ENV
           - Otherwise: echo "CRITICAL_ISSUES_FOUND=false" >> $GITHUB_ENV
           - Always set CRITICAL_ISSUES_FOUND at the end
-
-          '
+          PROMPT_EOF
 
       - name: Check blocking review results
         if: env.BLOCKING_REVIEW_VAR == 'true'
@@ -213,7 +213,7 @@ jobs:
   status-comment:
     name: Status Comment
     runs-on: ubuntu-latest
-    needs: [lint, unit-test, e2e-test, code-review]
+    needs: [code-review]
     if: always()
     permissions:
       pull-requests: write
@@ -226,6 +226,27 @@ jobs:
             const { owner, repo } = context.repo;
             const pr_number = context.issue.number;
             return { owner, repo, pr_number };
+
+      - name: Get jobs status
+        id: jobs_status
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const workflowRunId = context.runId;
+            const { owner, repo } = context.repo;
+
+            const jobs = await github.rest.actions.listJobsForWorkflowRun({
+              owner,
+              repo,
+              run_id: workflowRunId,
+            });
+
+            const statusMap = {};
+            for (const job of jobs.data.jobs) {
+              statusMap[job.name] = job.conclusion || job.status;
+            }
+
+            core.setOutput('result', JSON.stringify(statusMap));
 
       - name: Download unit test coverage
         uses: actions/download-artifact@v6
@@ -245,7 +266,7 @@ jobs:
 
       - name: Create status comment
         uses: actions/github-script@v8
-        if: ${{ needs.unit-test.result == 'success' && needs.e2e-test.result == 'success' && (needs.code-review.result == 'success' || needs.code-review.result == 'skipped') }}
+        if: ${{ needs.code-review.result == 'success' || needs.code-review.result == 'skipped' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
@@ -266,15 +287,18 @@ jobs:
 
       - name: Create failure comment
         uses: actions/github-script@v8
-        if: ${{ needs.unit-test.result != 'success' || needs.e2e-test.result != 'success' || (needs.code-review.result != 'success' && needs.code-review.result != 'skipped') }}
+        if: ${{ needs.code-review.result != 'success' && needs.code-review.result != 'skipped' }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const { owner, repo, pr_number } = ${{ steps.pr_details.outputs.result }};
-            const lintStatus = "${{ needs.lint.result }}" === "success" ? "✅" : "❌";
-            const unitStatus = "${{ needs.unit-test.result }}" === "success" ? "✅" : "❌";
-            const e2eStatus = "${{ needs.e2e-test.result }}" === "success" ? "✅" : "❌";
+            const jobsStatusJson = "${{ steps.jobs_status.outputs.result }}";
+            const jobsStatus = jobsStatusJson ? JSON.parse(jobsStatusJson) : {};
             const codeReviewResult = "${{ needs.code-review.result }}";
+
+            const lintStatus = jobsStatus["Lint Code"] === "success" ? "✅" : "❌";
+            const unitStatus = jobsStatus["Unit Tests"] === "success" ? "✅" : "❌";
+            const e2eStatus = jobsStatus["E2E Tests"] === "success" ? "✅" : "❌";
             const codeReviewStatus = codeReviewResult === "skipped" ? "⏭️ (skipped - draft PR)" : (codeReviewResult === "success" ? "✅" : "❌");
 
             github.rest.issues.createComment({
