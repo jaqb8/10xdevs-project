@@ -92,7 +92,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
         <TextDiff originalText={analysisResult.original_text} correctedText={analysisResult.corrected_text} />
 
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold">Wyjaśnienie:</h3>
+          <h3 className="text-sm font-semibold px-2">Wyjaśnienie:</h3>
           <div
             className="rounded-md bg-muted p-3 text-sm leading-relaxed markdown-content"
             data-test-id="analysis-explanation"

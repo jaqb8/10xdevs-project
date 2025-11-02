@@ -45,8 +45,8 @@ export function LearningItemCard({ item, onDelete }: LearningItemCardProps) {
       <CardContent className="space-y-4">
         <TextDiff originalText={item.original_sentence} correctedText={item.corrected_sentence} />
         <div>
-          <h4 className="mb-2 text-sm font-semibold text-muted-foreground">Wyjaśnienie:</h4>
-          <div className="text-sm leading-relaxed">
+          <h4 className="mb-2 text-sm font-semibold px-2">Wyjaśnienie:</h4>
+          <div className="text-sm leading-relaxed rounded-md bg-muted p-3">
             <ReactMarkdown
               components={{
                 p: ({ children }) => <p className="mb-3 last:mb-0">{children}</p>,
