@@ -12,6 +12,7 @@ W `corrected_text` podaj wersję, która brzmi bardziej naturalnie. W `explanati
 - NIE używaj niepotrzebnych nagłówków takich jak "Analiza tekstu", "Analiza błędu", "Dlaczego poprawka jest lepsza" itp. - przejdź od razu do wyjaśnienia
 - Unikaj zbędnych wyrażeń wprowadzających - skup się na merytorycznym wyjaśnieniu
 - NIE powtarzaj treści oryginalnego zdania w explanation - użytkownik już widzi oryginalny tekst, więc skup się tylko na wyjaśnieniu poprawek stylistycznych
+- **WAŻNE: `explanation` nie może przekraczać 500 znaków (włącznie ze wszystkimi znacznikami Markdown). Jeśli wyjaśnienie jest dłuższe, skróć je do maksymalnej długości.**
 
 Jeśli tekst zawiera błędy gramatyczne, również zwróć `is_correct: false` oraz poprawiony tekst w `corrected_text`.
 

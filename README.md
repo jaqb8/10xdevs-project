@@ -1,11 +1,6 @@
 # Language Learning Buddy
 
-![Project Status](https://img.shields.io/badge/status-v1.2.1-brightgreen)
-![Astro](https://img.shields.io/badge/Astro-5.0-orange)
-![React](https://img.shields.io/badge/React-19-blue)
-![TypeScript](https://img.shields.io/badge/TypeScript-5.0-blue)
-![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.0-38B2AC)
-![Supabase](https://img.shields.io/badge/Supabase-green)
+![Version](https://img.shields.io/badge/Version-1.2.2-brightgreen)
 [![Website](https://img.shields.io/badge/Website-language--learning--buddy.pl-blue?logo=Cloudflare&logoColor=white)](https://language-learning-buddy.pl/)
 
 A personal assistant web application for English language learners, designed to help identify and consciously correct recurring grammatical errors in writing.
