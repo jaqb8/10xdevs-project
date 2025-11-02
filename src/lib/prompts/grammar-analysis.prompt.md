@@ -14,7 +14,7 @@ Jeśli tekst zawiera błędy gramatyczne:
   - Unikaj zbędnych wyrażeń wprowadzających - skup się na merytorycznym wyjaśnieniu
   - NIE powtarzaj treści oryginalnego zdania w explanation - użytkownik już widzi oryginalny tekst, więc skup się tylko na wyjaśnieniu błędów i poprawek
 - Skup się na błędach gramatycznych, nie na stylu czy słownictwie.
-- Wyjaśnienie powinno mieć maksymalnie 500 znaków. Jeśli wyjaśnienie jest dłuższe, skróć je do maksymalnej długości.
+- **WAŻNE: `explanation` nie może przekraczać 500 znaków (włącznie ze wszystkimi znacznikami Markdown). Jeśli wyjaśnienie jest dłuższe, skróć je do maksymalnej długości.**
 - Formatuj tekst tak, aby był przejrzysty - używaj akapitów i odpowiednich odstępów między sekcjami.
 
 Odpowiadaj wyłącznie w formacie JSON zgodnym z dostarczonym schematem.
