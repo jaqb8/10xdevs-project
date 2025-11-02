@@ -107,7 +107,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: integration
     needs: [lint, unit-test, e2e-test]
-    if: github.event.pull_request.draft == false
+    if: github.event.pull_request.draft == false && !(github.event.pull_request.base.ref == 'master' && github.event.pull_request.head.ref == 'staging')
     permissions:
       pull-requests: write
       contents: read
