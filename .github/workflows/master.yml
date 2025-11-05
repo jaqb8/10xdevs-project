@@ -66,6 +66,11 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Apply database migrations
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npm run drizzle:migrate
+
       - name: Build application
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
