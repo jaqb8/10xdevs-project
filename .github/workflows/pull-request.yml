@@ -81,6 +81,7 @@ jobs:
       - name: Create test environment file
         run: |
           echo "SUPABASE_URL=${{ secrets.SUPABASE_URL }}" >> .env.test
+          echo "DATABASE_URL=${{ secrets.DATABASE_URL }}" >> .env.test
           echo "SUPABASE_PUBLIC_KEY=${{ secrets.SUPABASE_PUBLIC_KEY }}" >> .env.test
           echo "USE_MOCKS=${{ vars.USE_MOCKS }}" >> .env.test
           echo "E2E_USERNAME=${{ secrets.E2E_USERNAME }}" >> .env.test
