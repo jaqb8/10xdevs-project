@@ -1,76 +1,80 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { LearningItemsService } from "./learning-items.service";
 import { LearningItemsDatabaseError } from "./learning-items.errors";
-
-// Mock Supabase client
-const mockSupabase = {
-  from: vi.fn(),
-};
+import type { DrizzleDb } from "../../../db/drizzle.client";
 
 describe("LearningItemsService - getLearningItems pagination logic", () => {
   let service: LearningItemsService;
-  let callCounter: { count: number };
+  let mockDb: DrizzleDb;
+  let mockSelect: ReturnType<typeof vi.fn>;
+  let mockFrom: ReturnType<typeof vi.fn>;
+  let mockWhere: ReturnType<typeof vi.fn>;
+  let mockOrderBy: ReturnType<typeof vi.fn>;
+  let mockLimit: ReturnType<typeof vi.fn>;
+  let mockOffset: ReturnType<typeof vi.fn>;
+  let mockCount: ReturnType<typeof vi.fn>;
+  let mockInsert: ReturnType<typeof vi.fn>;
+  let mockValues: ReturnType<typeof vi.fn>;
+  let mockReturning: ReturnType<typeof vi.fn>;
+  let mockDelete: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
     vi.clearAllMocks();
-    callCounter = { count: 0 };
-    service = new LearningItemsService(mockSupabase as any);
+
+    mockCount = vi.fn();
+    mockSelect = vi.fn();
+    mockFrom = vi.fn();
+    mockWhere = vi.fn();
+    mockOrderBy = vi.fn();
+    mockLimit = vi.fn();
+    mockOffset = vi.fn();
+    mockInsert = vi.fn();
+    mockValues = vi.fn();
+    mockReturning = vi.fn();
+    mockDelete = vi.fn();
+
+    mockDb = {
+      select: mockSelect,
+      insert: mockInsert,
+      delete: mockDelete,
+    } as unknown as DrizzleDb;
+
+    service = new LearningItemsService(mockDb);
   });
 
-  // Helper function to create a proper Supabase query builder mock
-  const createMockQueryBuilder = (config: {
-    countResult?: { count: number | null; error: any };
-    dataResult?: { data: any[] | null; error: any };
-  }) => {
-    const { countResult = { count: 0, error: null }, dataResult = { data: [], error: null } } = config;
-
-    // Reset call counter for this test
-    callCounter.count = 0;
-
-    mockSupabase.from.mockImplementation((tableName) => {
-      if (tableName !== "learning_items") return {};
-
-      callCounter.count++;
-
-      if (callCounter.count === 1) {
-        // Count query: from().select("*", { count: "exact", head: true }).eq()
-        return {
-          select: vi.fn().mockImplementation((fields, options) => {
-            // Two arguments: fields and options
-            if (fields === "*" && options?.count === "exact") {
-              const eqMock = vi.fn().mockImplementation(() => {
-                // For count queries with head: true, Supabase returns the count directly
-                return Promise.resolve(countResult);
-              });
-              return { eq: eqMock };
-            }
-            return {};
-          }),
-        };
-      } else {
-        // Data query: from().select("id, original_sentence, corrected_sentence, explanation, created_at").eq().order().range()
-        return {
-          select: vi.fn().mockImplementation((fields) => {
-            // Data query: first arg is a string with comma-separated field names
-            if (typeof fields === "string" && fields.includes("id") && fields.includes("original_sentence")) {
-              return {
-                eq: vi.fn().mockReturnValue({
-                  order: vi.fn().mockReturnValue({
-                    range: vi.fn().mockResolvedValue(dataResult),
-                  }),
-                }),
-              };
-            }
-            return {};
-          }),
-        };
-      }
+  const createMockCountQuery = (countResult: number) => {
+    mockSelect.mockReturnValueOnce({
+      from: mockFrom,
     });
+    mockFrom.mockReturnValueOnce({
+      where: mockWhere,
+    });
+    mockWhere.mockReturnValueOnce([
+      { count: countResult },
+    ]);
+  };
+
+  const createMockDataQuery = (data: any[]) => {
+    mockSelect.mockReturnValueOnce({
+      from: mockFrom,
+    });
+    mockFrom.mockReturnValueOnce({
+      where: mockWhere,
+    });
+    mockWhere.mockReturnValueOnce({
+      orderBy: mockOrderBy,
+    });
+    mockOrderBy.mockReturnValueOnce({
+      limit: mockLimit,
+    });
+    mockLimit.mockReturnValueOnce({
+      offset: mockOffset,
+    });
+    mockOffset.mockResolvedValueOnce(data);
   };
 
   describe("normal pagination with data", () => {
     it("should return paginated data for page 1 with 10 items", async () => {
-      // Arrange
       const userId = "user-123";
       const page = 1;
       const pageSize = 5;
@@ -82,131 +86,125 @@ describe("LearningItemsService - getLearningItems pagination logic", () => {
           original_sentence: "test1",
           corrected_sentence: "test1",
           explanation: "test1",
-          created_at: "2023-01-01",
+          analysis_mode: "grammar_and_spelling",
+          created_at: new Date("2023-01-01"),
         },
         {
           id: "2",
           original_sentence: "test2",
           corrected_sentence: "test2",
           explanation: "test2",
-          created_at: "2023-01-02",
+          analysis_mode: "grammar_and_spelling",
+          created_at: new Date("2023-01-02"),
         },
         {
           id: "3",
           original_sentence: "test3",
           corrected_sentence: "test3",
           explanation: "test3",
-          created_at: "2023-01-03",
+          analysis_mode: "grammar_and_spelling",
+          created_at: new Date("2023-01-03"),
         },
         {
           id: "4",
           original_sentence: "test4",
           corrected_sentence: "test4",
           explanation: "test4",
-          created_at: "2023-01-04",
+          analysis_mode: "grammar_and_spelling",
+          created_at: new Date("2023-01-04"),
         },
         {
           id: "5",
           original_sentence: "test5",
           corrected_sentence: "test5",
           explanation: "test5",
-          created_at: "2023-01-05",
+          analysis_mode: "grammar_and_spelling",
+          created_at: new Date("2023-01-05"),
         },
       ];
 
-      createMockQueryBuilder({
-        countResult: { count: totalItems, error: null },
-        dataResult: { data: mockData, error: null },
-      });
+      createMockCountQuery(totalItems);
+      createMockDataQuery(mockData);
 
-      // Act
       const result = await service.getLearningItems(userId, page, pageSize);
 
-      // Assert
       expect(result).toEqual({
-        data: mockData,
+        data: [
+          {
+            id: "1",
+            original_sentence: "test1",
+            corrected_sentence: "test1",
+            explanation: "test1",
+            analysis_mode: "grammar_and_spelling",
+            created_at: "2023-01-01T00:00:00.000Z",
+          },
+          {
+            id: "2",
+            original_sentence: "test2",
+            corrected_sentence: "test2",
+            explanation: "test2",
+            analysis_mode: "grammar_and_spelling",
+            created_at: "2023-01-02T00:00:00.000Z",
+          },
+          {
+            id: "3",
+            original_sentence: "test3",
+            corrected_sentence: "test3",
+            explanation: "test3",
+            analysis_mode: "grammar_and_spelling",
+            created_at: "2023-01-03T00:00:00.000Z",
+          },
+          {
+            id: "4",
+            original_sentence: "test4",
+            corrected_sentence: "test4",
+            explanation: "test4",
+            analysis_mode: "grammar_and_spelling",
+            created_at: "2023-01-04T00:00:00.000Z",
+          },
+          {
+            id: "5",
+            original_sentence: "test5",
+            corrected_sentence: "test5",
+            explanation: "test5",
+            analysis_mode: "grammar_and_spelling",
+            created_at: "2023-01-05T00:00:00.000Z",
+          },
+        ],
         pagination: {
           page: 1,
           pageSize: 5,
           totalItems: 12,
-          totalPages: 3, // Math.ceil(12/5) = 3
+          totalPages: 3,
         },
       });
     });
 
     it("should calculate correct offset for page 2", async () => {
-      // Arrange
       const userId = "user-123";
       const page = 2;
       const pageSize = 3;
       const totalItems = 10;
 
-      let capturedRangeMock: any;
-      callCounter.count = 0; // Reset counter
+      createMockCountQuery(totalItems);
+      createMockDataQuery([]);
 
-      mockSupabase.from.mockImplementation((tableName) => {
-        if (tableName !== "learning_items") return {};
-
-        callCounter.count++;
-
-        if (callCounter.count === 1) {
-          // Count query
-          return {
-            select: vi.fn().mockImplementation((fields, options) => {
-              if (fields === "*" && options?.count === "exact") {
-                const eqMock = vi.fn().mockImplementation(() => {
-                  // For count queries with head: true, Supabase returns the count directly
-                  return Promise.resolve({ count: totalItems, error: null });
-                });
-                return { eq: eqMock };
-              }
-              return {};
-            }),
-          };
-        } else {
-          // Data query - capture range mock
-          capturedRangeMock = vi.fn().mockResolvedValue({ data: [], error: null });
-          return {
-            select: vi.fn().mockImplementation((fields) => {
-              if (typeof fields === "string" && fields.includes("id") && fields.includes("original_sentence")) {
-                return {
-                  eq: vi.fn().mockReturnValue({
-                    order: vi.fn().mockReturnValue({
-                      range: capturedRangeMock,
-                    }),
-                  }),
-                };
-              }
-              return {};
-            }),
-          };
-        }
-      });
-
-      // Act
       await service.getLearningItems(userId, page, pageSize);
 
-      // Assert
-      expect(capturedRangeMock).toHaveBeenCalledWith(3, 5); // offset = (2-1)*3 = 3, range = 3 to 3+3-1 = 5
+      expect(mockOffset).toHaveBeenCalledWith(3);
     });
   });
 
   describe("edge cases", () => {
     it("should return empty data when no items exist", async () => {
-      // Arrange
       const userId = "user-123";
       const page = 1;
       const pageSize = 5;
 
-      createMockQueryBuilder({
-        countResult: { count: 0, error: null },
-        dataResult: { data: [], error: null },
-      });
+      createMockCountQuery(0);
 
-      // Act
       const result = await service.getLearningItems(userId, page, pageSize);
 
-      // Assert
       expect(result).toEqual({
         data: [],
         pagination: {
@@ -216,24 +214,20 @@ describe("LearningItemsService - getLearningItems pagination logic", () => {
           totalPages: 0,
         },
       });
+
+      expect(mockSelect).toHaveBeenCalledTimes(1);
     });
 
     it("should return empty data when requesting page beyond available data", async () => {
-      // Arrange
       const userId = "user-123";
       const page = 5;
       const pageSize = 5;
-      const totalItems = 12; // Only 3 pages available (Math.ceil(12/5) = 3)
+      const totalItems = 12;
 
-      createMockQueryBuilder({
-        countResult: { count: totalItems, error: null },
-        dataResult: { data: [], error: null }, // This shouldn't be called due to early return
-      });
+      createMockCountQuery(totalItems);
 
-      // Act
       const result = await service.getLearningItems(userId, page, pageSize);
 
-      // Assert - should return empty data for invalid page
       expect(result).toEqual({
         data: [],
         pagination: {
@@ -244,41 +238,53 @@ describe("LearningItemsService - getLearningItems pagination logic", () => {
         },
       });
 
-      // Verify that data query was not called (since we return early when offset >= totalItems)
-      expect(mockSupabase.from).toHaveBeenCalledTimes(1); // Only count query
+      expect(mockSelect).toHaveBeenCalledTimes(1);
     });
   });
 
   describe("error handling", () => {
     it("should throw LearningItemsDatabaseError when count query fails", async () => {
-      // Arrange
       const userId = "user-123";
       const page = 1;
       const pageSize = 5;
-      const mockError = { message: "Database connection failed" };
+      const mockError = new Error("Database connection failed");
 
-      createMockQueryBuilder({
-        countResult: { count: null, error: mockError },
-        dataResult: { data: [], error: null },
+      mockSelect.mockReturnValueOnce({
+        from: mockFrom,
       });
+      mockFrom.mockReturnValueOnce({
+        where: mockWhere,
+      });
+      mockWhere.mockRejectedValueOnce(mockError);
 
-      // Act & Assert
       await expect(service.getLearningItems(userId, page, pageSize)).rejects.toThrow(LearningItemsDatabaseError);
     });
 
     it("should throw LearningItemsDatabaseError when data query fails", async () => {
-      // Arrange
       const userId = "user-123";
       const page = 1;
       const pageSize = 5;
-      const mockError = { message: "Query failed" };
+      const mockError = new Error("Query failed");
 
-      createMockQueryBuilder({
-        countResult: { count: 5, error: null },
-        dataResult: { data: null, error: mockError },
+      createMockCountQuery(5);
+
+      mockSelect.mockReturnValueOnce({
+        from: mockFrom,
       });
+      mockFrom.mockReturnValueOnce({
+        where: mockWhere,
+      });
+      mockWhere.mockReturnValueOnce({
+        orderBy: mockOrderBy,
+      });
+      mockOrderBy.mockReturnValueOnce({
+        limit: mockLimit,
+      });
+      mockLimit.mockReturnValueOnce({
+        offset: mockOffset,
+      });
+      mockOffset.mockRejectedValueOnce(mockError);
 
-      // Act & Assert
       await expect(service.getLearningItems(userId, page, pageSize)).rejects.toThrow(LearningItemsDatabaseError);
     });
   });
@@ -294,19 +300,13 @@ describe("LearningItemsService - getLearningItems pagination logic", () => {
     ])(
       "should calculate totalPages correctly: $totalItems items, pageSize $pageSize = $expectedTotalPages pages",
       async ({ totalItems, pageSize, expectedTotalPages }) => {
-        // Arrange
         const userId = "user-123";
         const page = 1;
 
-        createMockQueryBuilder({
-          countResult: { count: totalItems, error: null },
-          dataResult: { data: [], error: null },
-        });
+        createMockCountQuery(totalItems);
 
-        // Act
         const result = await service.getLearningItems(userId, page, pageSize);
 
-        // Assert
         expect(result.pagination.totalPages).toBe(expectedTotalPages);
       }
     );

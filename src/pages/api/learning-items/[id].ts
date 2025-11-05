@@ -58,7 +58,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 
     const validatedId = validationResult.data;
 
-    await new LearningItemsService(locals.supabase).deleteLearningItem(validatedId, locals.user.id);
+    await new LearningItemsService(locals.drizzle).deleteLearningItem(validatedId, locals.user.id);
 
     return new Response(null, { status: 204 });
   } catch (error) {

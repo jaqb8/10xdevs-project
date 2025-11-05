@@ -17,6 +17,10 @@
     "supabase:status": "supabase status",
     "supabase:restart": "supabase restart",
     "supabase:migration:up": "supabase migration up",
+    "drizzle:generate": "drizzle-kit generate",
+    "drizzle:introspect": "drizzle-kit introspect",
+    "drizzle:migrate": "drizzle-kit migrate",
+    "db:clean": "node scripts/clean-database.js",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
@@ -63,7 +67,8 @@
     "tw-animate-css": "^1.2.5",
     "zod": "^3.25.76",
     "zod-to-json-schema": "^3.24.6",
-    "zustand": "^5.0.8"
+    "zustand": "^5.0.8",
+    "drizzle-orm": "^0.36.4"
   },
   "devDependencies": {
     "@eslint/compat": "1.2.7",
@@ -95,7 +100,9 @@
     "shadcn": "^3.5.0",
     "supabase": "^2.48.3",
     "typescript-eslint": "8.28.0",
-    "vitest": "^2.1.8"
+    "vitest": "^2.1.8",
+    "drizzle-kit": "^0.31.5",
+    "postgres": "^3.4.5"
   },
   "lint-staged": {
     "*.{ts,tsx,astro}": [

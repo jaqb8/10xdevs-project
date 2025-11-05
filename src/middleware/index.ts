@@ -1,6 +1,7 @@
 import { defineMiddleware } from "astro:middleware";
 
 import { createSupabaseServerInstance, DEFAULT_USER_ID } from "../db/supabase.client.ts";
+import { createDrizzleClient } from "../db/drizzle.client.ts";
 import { analysisRateLimiter } from "../lib/rate-limiter.ts";
 import { createErrorResponse } from "@/lib/api-helpers.ts";
 
@@ -15,6 +16,7 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
   });
 
   locals.supabase = supabase;
+  locals.drizzle = createDrizzleClient();
 
   const {
     data: { user },

@@ -11,4 +11,3 @@
 -- to accommodate more detailed error explanations for users.
 alter table learning_items 
   alter column explanation type varchar(500);
-

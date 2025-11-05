@@ -1,4 +1,4 @@
-import type { SupabaseClient } from "../../../db/supabase.client";
+import type { DrizzleDb } from "../../../db/drizzle.client";
 import type {
   CreateLearningItemCommand,
   LearningItem,
@@ -11,9 +11,11 @@ import {
   LearningItemNotFoundError,
   LearningItemForbiddenError,
 } from "./learning-items.errors";
+import { learningItems } from "../../../db/schema";
+import { eq, desc, count } from "drizzle-orm";
 
 export class LearningItemsService {
-  constructor(private readonly supabase: SupabaseClient) {}
+  constructor(private readonly db: DrizzleDb) {}
 
   async getLearningItems(
     userId: string,
@@ -22,20 +24,53 @@ export class LearningItemsService {
   ): Promise<PaginatedResponseDto<LearningItemDto>> {
     const offset = (page - 1) * pageSize;
 
-    const { count, error: countError } = await this.supabase
-      .from("learning_items")
-      .select("*", { count: "exact", head: true })
-      .eq("user_id", userId);
+    try {
+      const countResult = await this.db
+        .select({ count: count() })
+        .from(learningItems)
+        .where(eq(learningItems.userId, userId));
 
-    if (countError) {
-      console.error("Database error in getLearningItems (count):", countError);
-      throw new LearningItemsDatabaseError(countError);
-    }
+      const totalItems = countResult[0]?.count ?? 0;
+      const totalPages = Math.ceil(totalItems / pageSize);
 
-    const totalItems = count ?? 0;
-    const totalPages = Math.ceil(totalItems / pageSize);
+      if (totalItems === 0 || offset >= totalItems) {
+        const pagination: PaginationDto = {
+          page,
+          pageSize,
+          totalItems,
+          totalPages,
+        };
 
-    if (totalItems === 0 || offset >= totalItems) {
+        return {
+          data: [],
+          pagination,
+        };
+      }
+
+      const data = await this.db
+        .select({
+          id: learningItems.id,
+          original_sentence: learningItems.originalSentence,
+          corrected_sentence: learningItems.correctedSentence,
+          explanation: learningItems.explanation,
+          analysis_mode: learningItems.analysisMode,
+          created_at: learningItems.createdAt,
+        })
+        .from(learningItems)
+        .where(eq(learningItems.userId, userId))
+        .orderBy(desc(learningItems.createdAt))
+        .limit(pageSize)
+        .offset(offset);
+
+      const learningItemsDto: LearningItemDto[] = data.map((item) => ({
+        id: item.id,
+        original_sentence: item.original_sentence,
+        corrected_sentence: item.corrected_sentence,
+        explanation: item.explanation,
+        analysis_mode: item.analysis_mode as "grammar_and_spelling" | "colloquial_speech",
+        created_at: item.created_at.toISOString(),
+      }));
+
       const pagination: PaginationDto = {
         page,
         pageSize,
@@ -44,87 +79,77 @@ export class LearningItemsService {
       };
 
       return {
-        data: [],
+        data: learningItemsDto,
         pagination,
       };
-    }
-
-    const { data, error } = await this.supabase
-      .from("learning_items")
-      .select("id, original_sentence, corrected_sentence, explanation, analysis_mode, created_at")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .range(offset, offset + pageSize - 1);
-
-    if (error) {
+    } catch (error) {
       console.error("Database error in getLearningItems:", error);
       throw new LearningItemsDatabaseError(error);
     }
-
-    const learningItems: LearningItemDto[] = data ?? [];
-
-    const pagination: PaginationDto = {
-      page,
-      pageSize,
-      totalItems,
-      totalPages,
-    };
-
-    return {
-      data: learningItems,
-      pagination,
-    };
   }
 
   async createLearningItem(itemData: CreateLearningItemCommand, userId: string): Promise<LearningItem> {
-    const insertData = {
-      ...itemData,
-      user_id: userId,
-    };
+    try {
+      const insertData = {
+        userId,
+        originalSentence: itemData.original_sentence,
+        correctedSentence: itemData.corrected_sentence,
+        explanation: itemData.explanation,
+        analysisMode: itemData.analysis_mode ?? "grammar_and_spelling",
+      };
 
-    const { data, error } = await this.supabase.from("learning_items").insert(insertData).select().single();
+      const result = await this.db.insert(learningItems).values(insertData).returning();
 
-    if (error) {
+      if (!result || result.length === 0) {
+        console.error("No data returned from createLearningItem");
+        throw new LearningItemsDatabaseError();
+      }
+
+      const item = result[0];
+
+      return {
+        id: item.id,
+        user_id: item.userId,
+        original_sentence: item.originalSentence,
+        corrected_sentence: item.correctedSentence,
+        explanation: item.explanation,
+        analysis_mode: item.analysisMode,
+        created_at: item.createdAt.toISOString(),
+      };
+    } catch (error) {
       console.error("Database error in createLearningItem:", error);
       throw new LearningItemsDatabaseError(error);
     }
-
-    if (!data) {
-      console.error("No data returned from createLearningItem");
-      throw new LearningItemsDatabaseError();
-    }
-
-    return data;
   }
 
   async deleteLearningItem(id: string, userId: string): Promise<void> {
-    const { data: existingItem, error: fetchError } = await this.supabase
-      .from("learning_items")
-      .select("user_id")
-      .eq("id", id)
-      .single();
+    try {
+      const existingItem = await this.db
+        .select({ userId: learningItems.userId })
+        .from(learningItems)
+        .where(eq(learningItems.id, id))
+        .limit(1);
 
-    if (fetchError) {
-      if (fetchError.code === "PGRST116") {
+      if (!existingItem || existingItem.length === 0) {
         throw new LearningItemNotFoundError();
       }
-      console.error("Database error in deleteLearningItem (fetch):", fetchError);
-      throw new LearningItemsDatabaseError(fetchError);
-    }
 
-    if (!existingItem) {
-      throw new LearningItemNotFoundError();
-    }
+      if (existingItem[0].userId !== userId) {
+        throw new LearningItemForbiddenError();
+      }
 
-    if (existingItem.user_id !== userId) {
-      throw new LearningItemForbiddenError();
-    }
+      const deleteResult = await this.db.delete(learningItems).where(eq(learningItems.id, id)).returning();
 
-    const { error: deleteError } = await this.supabase.from("learning_items").delete().eq("id", id);
+      if (!deleteResult || deleteResult.length === 0) {
+        throw new LearningItemNotFoundError();
+      }
+    } catch (error) {
+      if (error instanceof LearningItemNotFoundError || error instanceof LearningItemForbiddenError) {
+        throw error;
+      }
 
-    if (deleteError) {
-      console.error("Database error in deleteLearningItem (delete):", deleteError);
-      throw new LearningItemsDatabaseError(deleteError);
+      console.error("Database error in deleteLearningItem:", error);
+      throw new LearningItemsDatabaseError(error);
     }
   }
 }

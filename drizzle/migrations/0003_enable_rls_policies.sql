@@ -97,4 +97,3 @@ create policy "anon_users_no_delete"
   for delete
   to anon
   using (false);
-

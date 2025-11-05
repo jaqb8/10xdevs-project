@@ -29,4 +29,3 @@ drop policy if exists "anon_users_no_delete" on learning_items;
 -- Warning: This allows unrestricted access to all rows in the table
 -- Only use this in development environments
 alter table learning_items disable row level security;
-

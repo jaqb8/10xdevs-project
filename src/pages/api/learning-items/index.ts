@@ -85,7 +85,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     const { page, pageSize } = validationResult.data;
 
-    const result = await new LearningItemsService(locals.supabase).getLearningItems(locals.user.id, page, pageSize);
+    const result = await new LearningItemsService(locals.drizzle).getLearningItems(locals.user.id, page, pageSize);
 
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -146,7 +146,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return createValidationErrorResponse(validationResult.error);
     }
 
-    const result = await new LearningItemsService(locals.supabase).createLearningItem(
+    const result = await new LearningItemsService(locals.drizzle).createLearningItem(
       validationResult.data,
       locals.user.id
     );

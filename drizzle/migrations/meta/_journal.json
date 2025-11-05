@@ -1,0 +1,48 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1728000000000,
+      "tag": "0000_create_learning_items",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1728000001000,
+      "tag": "0001_disable_rls_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1728000002000,
+      "tag": "0002_increase_explanation_length",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1728000003000,
+      "tag": "0003_enable_rls_policies",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1728000004000,
+      "tag": "0004_add_analysis_mode",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1728000005000,
+      "tag": "0005_change_explanation_to_text_and_analysis_mode_to_enum",
+      "breakpoints": true
+    }
+  ]
+}
