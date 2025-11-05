@@ -8,8 +8,6 @@ export const learningItems = pgTable("learning_items", {
   originalSentence: text("original_sentence").notNull(),
   correctedSentence: text("corrected_sentence").notNull(),
   explanation: text("explanation").notNull(),
-  analysisMode: analysisModeEnum("analysis_mode")
-    .notNull()
-    .default("grammar_and_spelling"),
+  analysisMode: analysisModeEnum("analysis_mode").notNull().default("grammar_and_spelling"),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
