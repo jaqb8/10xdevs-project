@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { LearningItemsService } from "./learning-items.service";
 import { LearningItemsDatabaseError } from "./learning-items.errors";
 import type { DrizzleDb } from "../../../db/drizzle.client";
@@ -49,9 +49,7 @@ describe("LearningItemsService - getLearningItems pagination logic", () => {
     mockFrom.mockReturnValueOnce({
       where: mockWhere,
     });
-    mockWhere.mockReturnValueOnce([
-      { count: countResult },
-    ]);
+    mockWhere.mockReturnValueOnce([{ count: countResult }]);
   };
 
   const createMockDataQuery = (data: any[]) => {
@@ -243,6 +241,16 @@ describe("LearningItemsService - getLearningItems pagination logic", () => {
   });
 
   describe("error handling", () => {
+    let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
+
+    beforeEach(() => {
+      consoleErrorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      consoleErrorSpy.mockRestore();
+    });
+
     it("should throw LearningItemsDatabaseError when count query fails", async () => {
       const userId = "user-123";
       const page = 1;
@@ -304,6 +312,10 @@ describe("LearningItemsService - getLearningItems pagination logic", () => {
         const page = 1;
 
         createMockCountQuery(totalItems);
+
+        if (totalItems > 0) {
+          createMockDataQuery([]);
+        }
 
         const result = await service.getLearningItems(userId, page, pageSize);
 
