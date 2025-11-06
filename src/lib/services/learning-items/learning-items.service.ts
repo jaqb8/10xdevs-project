@@ -13,6 +13,7 @@ import {
 } from "./learning-items.errors";
 import { learningItems } from "../../../db/schema";
 import { eq, desc, count } from "drizzle-orm";
+import { toISOString } from "../../utils.ts";
 
 export class LearningItemsService {
   constructor(private readonly db: DrizzleDb) {}
@@ -68,7 +69,7 @@ export class LearningItemsService {
         corrected_sentence: item.corrected_sentence,
         explanation: item.explanation,
         analysis_mode: item.analysis_mode as "grammar_and_spelling" | "colloquial_speech",
-        created_at: item.created_at.toISOString(),
+        created_at: toISOString(item.created_at),
       }));
 
       const pagination: PaginationDto = {
@@ -114,7 +115,7 @@ export class LearningItemsService {
         corrected_sentence: item.correctedSentence,
         explanation: item.explanation,
         analysis_mode: item.analysisMode,
-        created_at: item.createdAt.toISOString(),
+        created_at: toISOString(item.createdAt),
       };
     } catch (error) {
       console.error("Database error in createLearningItem:", error);
