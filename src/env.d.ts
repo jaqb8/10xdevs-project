@@ -19,6 +19,12 @@ interface ImportMetaEnv {
   readonly USE_MOCKS?: string;
   readonly RATE_LIMIT_MAX_REQUESTS?: string;
   readonly RATE_LIMIT_WINDOW_MS?: string;
+  readonly POSTHOG_PROJECT_API_KEY?: string;
+  readonly POSTHOG_HOST?: string;
+  readonly POSTHOG_DISABLED?: string;
+  readonly PUBLIC_POSTHOG_PROJECT_API_KEY?: string;
+  readonly PUBLIC_POSTHOG_HOST?: string;
+  readonly PUBLIC_POSTHOG_DISABLED?: string;
   // more env variables...
 }
 
