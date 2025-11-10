@@ -7,7 +7,9 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      "@": path.resolve(__dirname, "./src"),
       "astro:env/client": path.resolve(__dirname, "./src/test/mocks/astro-env-client.ts"),
+      "astro:env/server": path.resolve(__dirname, "./src/test/mocks/astro-env-server.ts"),
     },
   },
   test: {

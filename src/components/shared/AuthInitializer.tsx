@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { initPosthogClient } from "@/lib/analytics/posthog.client";
 import type { UserViewModel } from "@/types";
 
 interface AuthInitializerProps {
@@ -11,6 +12,7 @@ export function AuthInitializer({ user }: AuthInitializerProps) {
 
   useEffect(() => {
     setUser(user);
+    initPosthogClient(user);
   }, [user, setUser]);
 
   return null;
