@@ -37,6 +37,7 @@ const createLearningItemSchema = z.object({
   analysis_mode: z.enum(["grammar_and_spelling", "colloquial_speech"], {
     message: "validation_error_invalid_mode",
   }),
+  translation: z.string().nullable(),
 });
 
 /**

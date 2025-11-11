@@ -102,17 +102,10 @@ export function useTextAnalysis() {
     }
   };
 
-  const saveResult = async (mode: AnalysisMode) => {
+  const saveResult = async (command: CreateLearningItemCommand) => {
     if (!state.result || state.result.is_correct) {
       return;
     }
-
-    const command: CreateLearningItemCommand = {
-      original_sentence: state.result.original_text,
-      corrected_sentence: state.result.corrected_text,
-      explanation: state.result.explanation,
-      analysis_mode: mode,
-    };
 
     try {
       const response = await fetch("/api/learning-items", {

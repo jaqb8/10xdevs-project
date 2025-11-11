@@ -13,6 +13,7 @@ W `corrected_text` podaj wersję, która brzmi bardziej naturalnie. W `explanati
 - Unikaj zbędnych wyrażeń wprowadzających - skup się na merytorycznym wyjaśnieniu
 - NIE powtarzaj treści oryginalnego zdania w explanation - użytkownik już widzi oryginalny tekst, więc skup się tylko na wyjaśnieniu poprawek stylistycznych
 - **WAŻNE: `explanation` nie może przekraczać 500 znaków (włącznie ze wszystkimi znacznikami Markdown). Jeśli wyjaśnienie jest dłuższe, skróć je do maksymalnej długości.**
+- **Dodatkowo, przetłumacz poprawiony tekst (`corrected_text`) na język polski i umieść tłumaczenie w polu `translation`. Tłumaczenie powinno być naturalne i oddawać sens poprawionego tekstu.**
 
 Jeśli tekst zawiera błędy gramatyczne, również zwróć `is_correct: false` oraz poprawiony tekst w `corrected_text`.
 
@@ -27,6 +28,7 @@ Schemat odpowiedzi:
   "is_correct": true,
   "original_text": "The original text",
   "corrected_text": "The corrected text",
-  "explanation": "The explanation of the correction"
+  "explanation": "The explanation of the correction",
+  "translation": "Tłumaczenie poprawionego tekstu na polski"
 }
 ```

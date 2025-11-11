@@ -39,6 +39,7 @@ const TextAnalysisSchema = z.discriminatedUnion("is_correct", [
     original_text: z.string(),
     corrected_text: z.string(),
     explanation: z.string(),
+    translation: z.string().nullable().optional(),
   }),
 ]);
 
@@ -54,7 +55,7 @@ export class AnalysisService {
     this.useMocks = USE_MOCKS;
   }
 
-  async analyzeText(text: string, mode: AnalysisMode, userId: string): Promise<TextAnalysisDto> {
+  async analyzeText(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
     if (this.useMocks) {
       return this.analyzeMocked(text, mode);
     }
@@ -67,7 +68,7 @@ export class AnalysisService {
     return getMockAnalysis(text, mode);
   }
 
-  private async analyzeWithAI(text: string, mode: AnalysisMode, userId: string): Promise<TextAnalysisDto> {
+  private async analyzeWithAI(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
     trackTextAnalysisRequested({
       user_id: userId,
       mode,

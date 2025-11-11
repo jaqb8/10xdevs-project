@@ -40,7 +40,7 @@ export interface ApiErrorResponse {
  */
 export type LearningItemDto = Pick<
   LearningItem,
-  "id" | "original_sentence" | "corrected_sentence" | "explanation" | "analysis_mode" | "created_at"
+  "id" | "original_sentence" | "corrected_sentence" | "explanation" | "analysis_mode" | "translation" | "created_at"
 >;
 
 /**
@@ -78,6 +78,7 @@ export type TextAnalysisDto =
       original_text: string;
       corrected_text: string;
       explanation: string;
+      translation: string | null;
     };
 
 /**
@@ -113,7 +114,7 @@ export type SignedInUserDto = Omit<UserDto, "created_at">;
  */
 export type CreateLearningItemCommand = Pick<
   LearningItem,
-  "original_sentence" | "corrected_sentence" | "explanation" | "analysis_mode"
+  "original_sentence" | "corrected_sentence" | "explanation" | "analysis_mode" | "translation"
 >;
 
 /**

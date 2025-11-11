@@ -47,6 +47,7 @@ jobs:
           USE_MOCKS: false
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           APP_NAME: ${{ vars.APP_NAME }}
+          POSTHOG_DISABLED: true
         run: npm run build
 
       - name: Deploy to Cloudflare Pages

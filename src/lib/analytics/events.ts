@@ -18,7 +18,7 @@ export interface UserAuthEventProperties extends Record<string, unknown> {
 }
 
 export interface TextAnalysisEventProperties extends Record<string, unknown> {
-  user_id: string;
+  user_id?: string;
   mode: "grammar_and_spelling" | "colloquial_speech";
   text_length: number;
 }
