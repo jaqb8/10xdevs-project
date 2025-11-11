@@ -29,4 +29,3 @@ export function AnalysisModeBadge({ mode, className }: AnalysisModeBadgeProps) {
     </Badge>
   );
 }
-
