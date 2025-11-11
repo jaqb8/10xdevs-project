@@ -1,23 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { TextDiff } from "@/components/shared/TextDiff";
+import { AnalysisModeBadge } from "@/components/shared/AnalysisModeBadge";
 import ReactMarkdown from "react-markdown";
-import { ANALYSIS_MODES, type LearningItemViewModel, type AnalysisMode } from "@/types";
-
-const ANALYSIS_MODE_LABELS: Record<AnalysisMode, string> = {
-  [ANALYSIS_MODES.GRAMMAR_AND_SPELLING]: "Gramatyka i ortografia",
-  [ANALYSIS_MODES.COLLOQUIAL_SPEECH]: "Mowa potoczna",
-};
-
-const ANALYSIS_MODE_VARIANTS: Record<AnalysisMode, "default" | "secondary"> = {
-  [ANALYSIS_MODES.GRAMMAR_AND_SPELLING]: "default",
-  [ANALYSIS_MODES.COLLOQUIAL_SPEECH]: "secondary",
-};
-
-function isValidAnalysisMode(mode: string): mode is AnalysisMode {
-  return mode === ANALYSIS_MODES.GRAMMAR_AND_SPELLING || mode === ANALYSIS_MODES.COLLOQUIAL_SPEECH;
-}
+import type { LearningItemViewModel } from "@/types";
 
 interface LearningItemCardProps {
   item: LearningItemViewModel;
@@ -25,10 +11,6 @@ interface LearningItemCardProps {
 }
 
 export function LearningItemCard({ item, onDelete }: LearningItemCardProps) {
-  const mode = isValidAnalysisMode(item.analysis_mode) ? item.analysis_mode : ANALYSIS_MODES.GRAMMAR_AND_SPELLING;
-  const modeLabel = ANALYSIS_MODE_LABELS[mode];
-  const modeVariant = ANALYSIS_MODE_VARIANTS[mode];
-
   return (
     <Card>
       <CardHeader>
@@ -37,13 +19,15 @@ export function LearningItemCard({ item, onDelete }: LearningItemCardProps) {
           <span className="text-sm font-normal text-muted-foreground">{item.formatted_created_at}</span>
         </CardTitle>
         <div className="pt-2">
-          <Badge variant={modeVariant} className="text-xs" data-test-id="analysis-mode-badge">
-            {modeLabel}
-          </Badge>
+          <AnalysisModeBadge mode={item.analysis_mode} className="text-xs" />
         </div>
       </CardHeader>
       <CardContent className="space-y-4">
-        <TextDiff originalText={item.original_sentence} correctedText={item.corrected_sentence} />
+        <TextDiff
+          originalText={item.original_sentence}
+          correctedText={item.corrected_sentence}
+          translation={item.translation}
+        />
         <div>
           <h4 className="mb-2 text-sm font-semibold px-2">Wyjaśnienie:</h4>
           <div className="text-sm leading-relaxed rounded-md bg-muted p-3">

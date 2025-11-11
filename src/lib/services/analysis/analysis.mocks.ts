@@ -10,6 +10,7 @@ export const incorrectTextMock: TextAnalysisDto = {
   original_text: "I is a student. He go to school.",
   corrected_text: "I am a student. He goes to school.",
   explanation: "Use 'am' with 'I'. Use 'goes' for third-person singular.",
+  translation: "Jestem studentem. On chodzi do szkoły.",
 };
 
 export const verbTenseErrorMock: TextAnalysisDto = {
@@ -17,6 +18,7 @@ export const verbTenseErrorMock: TextAnalysisDto = {
   original_text: "She don't like apples.",
   corrected_text: "She doesn't like apples.",
   explanation: "Use 'doesn't' for third-person singular in negative present simple.",
+  translation: "Ona nie lubi jabłek.",
 };
 
 export const articleErrorMock: TextAnalysisDto = {
@@ -24,6 +26,7 @@ export const articleErrorMock: TextAnalysisDto = {
   original_text: "I saw a apple on table.",
   corrected_text: "I saw an apple on the table.",
   explanation: "Use 'an' before vowel sounds. Add 'the' before specific nouns.",
+  translation: "Widziałem jabłko na stole.",
 };
 
 export const formalTextMock: TextAnalysisDto = {
@@ -32,6 +35,7 @@ export const formalTextMock: TextAnalysisDto = {
   corrected_text: "Could you help me?",
   explanation:
     "The original text is grammatically correct but sounds overly formal. A more natural, colloquial way to ask for help would be 'Could you help me?' or 'Can you help me out?'",
+  translation: "Czy możesz mi pomóc?",
 };
 
 export const unnaturalPhrasingMock: TextAnalysisDto = {
@@ -40,6 +44,7 @@ export const unnaturalPhrasingMock: TextAnalysisDto = {
   corrected_text: "I'm heading to work.",
   explanation:
     "While grammatically correct, this sounds unnatural and overly formal. Native speakers would say 'I'm heading to work' or 'I'm going to work' in casual conversation.",
+  translation: "Idę do pracy.",
 };
 
 export const naturalColloquialTextMock: TextAnalysisDto = {

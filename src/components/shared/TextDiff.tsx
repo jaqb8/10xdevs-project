@@ -1,16 +1,19 @@
 import { useCallback, useMemo, useState } from "react";
 import DiffMatchPatch from "diff-match-patch";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Languages } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 interface TextDiffProps {
   originalText: string;
   correctedText: string;
+  translation: string | null;
 }
 
-export function TextDiff({ originalText, correctedText }: TextDiffProps) {
+export function TextDiff({ originalText, correctedText, translation }: TextDiffProps) {
   const [copied, setCopied] = useState(false);
+  const [showTranslation, setShowTranslation] = useState(false);
 
   const diffs = useMemo(() => {
     const dmp = new DiffMatchPatch();
@@ -74,20 +77,37 @@ export function TextDiff({ originalText, correctedText }: TextDiffProps) {
         <div className="border-t border-border pt-3">
           <div className="mb-2 flex items-center justify-between">
             <h4 className="text-sm font-semibold text-muted-foreground">Poprawiony tekst:</h4>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={handleCopy}
-              className="h-7 w-7"
-              aria-label="Kopiuj poprawiony tekst do schowka"
-              data-test-id="copy-corrected-text-button"
-            >
-              {copied ? (
-                <Check className="size-3.5 text-green-600 dark:text-green-500" aria-hidden="true" />
-              ) : (
-                <Copy className="size-3.5" aria-hidden="true" />
+            <div className="flex items-center gap-2">
+              {translation && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTranslation((prev) => !prev)}
+                  className={cn("h-7 text-xs sm:px-2 px-1", showTranslation && "bg-accent text-accent-foreground")}
+                  aria-label={showTranslation ? "Ukryj tłumaczenie" : "Pokaż tłumaczenie"}
+                  data-test-id="toggle-translation-button"
+                >
+                  <Languages className="size-3.5 sm:mr-1" aria-hidden="true" />
+                  <span className="hidden sm:inline">
+                    {showTranslation ? "Ukryj tłumaczenie" : "Pokaż tłumaczenie"}
+                  </span>
+                </Button>
               )}
-            </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={handleCopy}
+                className="h-7 w-7"
+                aria-label="Kopiuj poprawiony tekst do schowka"
+                data-test-id="copy-corrected-text-button"
+              >
+                {copied ? (
+                  <Check className="size-3.5 text-green-600 dark:text-green-500" aria-hidden="true" />
+                ) : (
+                  <Copy className="size-3.5" aria-hidden="true" />
+                )}
+              </Button>
+            </div>
           </div>
           <div
             className="text-sm leading-relaxed"
@@ -117,6 +137,14 @@ export function TextDiff({ originalText, correctedText }: TextDiffProps) {
               return null;
             })}
           </div>
+          {translation && showTranslation && (
+            <div
+              className="text-sm font-thin leading-relaxed text-foreground/80 italic"
+              data-test-id="text-diff-translation"
+            >
+              {translation}
+            </div>
+          )}
         </div>
       </div>
     </div>

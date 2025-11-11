@@ -4,6 +4,7 @@ import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
 import { AnalysisForm } from "../features/AnalysisForm";
 import { AnalysisResult } from "../features/AnalysisResult";
 import { toast } from "sonner";
+import type { CreateLearningItemCommand } from "../../types";
 
 const MAX_TEXT_LENGTH = 500;
 
@@ -30,9 +31,12 @@ export function AnalyzeView() {
     }
   }, [state.isCurrentResultSaved]);
 
-  const handleSave = useCallback(() => {
-    saveResult(mode);
-  }, [saveResult, mode]);
+  const handleSave = useCallback(
+    (command: CreateLearningItemCommand) => {
+      saveResult(command);
+    },
+    [saveResult]
+  );
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
@@ -61,6 +65,7 @@ export function AnalyzeView() {
             isLoading={state.status === "loading"}
             analysisResult={state.result}
             isSaved={state.isCurrentResultSaved}
+            analysisMode={mode}
             onSave={handleSave}
           />
         </section>

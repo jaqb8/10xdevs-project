@@ -25,10 +25,7 @@ const analyzeTextSchema = z.object({
 
 export const POST: APIRoute = async ({ request, locals }) => {
   try {
-    if (!locals.user) {
-      return createErrorResponse("authentication_error_unauthorized", 401);
-    }
-
+    const userId = locals.user?.id;
     const body = await request.json();
     const validationResult = analyzeTextSchema.safeParse(body);
 
@@ -38,7 +35,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const { text, mode } = validationResult.data;
 
-    const result = await new AnalysisService(locals.supabase).analyzeText(text, mode, locals.user.id);
+    const result = await new AnalysisService(locals.supabase).analyzeText(text, mode, userId);
 
     return new Response(JSON.stringify(result), {
       status: 200,
