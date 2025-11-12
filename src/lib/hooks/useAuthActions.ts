@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { authClient, AuthClientError } from "@/lib/clients/auth";
+import { validateReturnUrl } from "@/lib/utils";
 import type {
   LoginFormData,
   SignupFormData,
@@ -19,7 +20,7 @@ export function useAuthActions() {
 
       const urlParams = new URLSearchParams(window.location.search);
       const returnUrl = urlParams.get("returnUrl");
-      const redirectUrl = returnUrl ? decodeURIComponent(returnUrl) : "/";
+      const redirectUrl = validateReturnUrl(returnUrl) ?? "/";
 
       window.location.href = redirectUrl;
     } catch (error) {
