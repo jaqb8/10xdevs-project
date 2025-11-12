@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+import { usePendingAnalysisStore } from "../stores/pending-analysis.store";
+import { useAnalysisModeStore } from "../stores/analysis-mode.store";
 import type { TextAnalysisDto, CreateLearningItemCommand, ApiErrorResponse, AnalysisMode } from "../../types";
 
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
@@ -44,6 +46,45 @@ function mapErrorCodeToMessage(error: ApiErrorResponse): string {
 
 export function useTextAnalysis() {
   const [state, setState] = useState<AnalyzeViewState>(INITIAL_STATE);
+  const { pendingAnalysis, clearPendingAnalysis } = usePendingAnalysisStore();
+  const { setMode } = useAnalysisModeStore();
+  const hasRestoredRef = useRef(false);
+
+  useEffect(() => {
+    if (hasRestoredRef.current) {
+      return;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const shouldRestore = urlParams.get("restoreAnalysis") === "true";
+
+    if (!shouldRestore || !pendingAnalysis) {
+      return;
+    }
+
+    try {
+      setState({
+        status: "success",
+        text: pendingAnalysis.originalText,
+        result: pendingAnalysis.result,
+        error: null,
+        isCurrentResultSaved: false,
+      });
+
+      setMode(pendingAnalysis.mode);
+
+      clearPendingAnalysis();
+
+      const newUrl = new URL(window.location.href);
+      newUrl.searchParams.delete("restoreAnalysis");
+      window.history.replaceState({}, "", newUrl.toString());
+
+      hasRestoredRef.current = true;
+    } catch (error) {
+      console.error("Error restoring analysis state:", error);
+      clearPendingAnalysis();
+    }
+  }, [pendingAnalysis, clearPendingAnalysis, setMode]);
 
   const setText = (text: string) => {
     setState((prev) => ({ ...prev, text }));
@@ -64,12 +105,6 @@ export function useTextAnalysis() {
         },
         body: JSON.stringify({ text: state.text, mode }),
       });
-
-      if (response.status === 401) {
-        // eslint-disable-next-line react-compiler/react-compiler
-        window.location.href = "/login";
-        return;
-      }
 
       if (!response.ok) {
         const errorData: ApiErrorResponse = await response.json();
@@ -117,6 +152,7 @@ export function useTextAnalysis() {
       });
 
       if (response.status === 401) {
+        // eslint-disable-next-line react-compiler/react-compiler
         window.location.href = "/login";
         return;
       }

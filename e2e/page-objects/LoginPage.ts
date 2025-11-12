@@ -31,4 +31,18 @@ export class LoginPage {
   async waitForRedirect() {
     await this.page.waitForURL("/");
   }
+
+  async hasReturnUrl(): Promise<boolean> {
+    const url = this.page.url();
+    return url.includes("returnUrl=");
+  }
+
+  async getReturnUrl(): Promise<string | null> {
+    const url = new URL(this.page.url());
+    return url.searchParams.get("returnUrl");
+  }
+
+  async waitForRedirectWithReturnUrl() {
+    await this.page.waitForURL((url) => url.searchParams.has("restoreAnalysis"));
+  }
 }

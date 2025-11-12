@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { authClient, AuthClientError } from "@/lib/clients/auth";
+import { validateReturnUrl } from "@/lib/utils";
 import type {
   LoginFormData,
   SignupFormData,
@@ -16,7 +17,12 @@ export function useAuthActions() {
     try {
       await authClient.login(data);
       toast.success("Zalogowano pomyślnie!");
-      window.location.href = "/";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnUrl = urlParams.get("returnUrl");
+      const redirectUrl = validateReturnUrl(returnUrl) ?? "/";
+
+      window.location.href = redirectUrl;
     } catch (error) {
       if (error instanceof AuthClientError) {
         toast.error(error.message);

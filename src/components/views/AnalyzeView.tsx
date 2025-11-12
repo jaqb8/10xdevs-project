@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 import { useTextAnalysis } from "../../lib/hooks/useTextAnalysis";
 import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
+import { usePendingAnalysisStore } from "../../lib/stores/pending-analysis.store";
 import { AnalysisForm } from "../features/AnalysisForm";
 import { AnalysisResult } from "../features/AnalysisResult";
 import { toast } from "sonner";
@@ -11,12 +12,20 @@ const MAX_TEXT_LENGTH = 500;
 export function AnalyzeView() {
   const { state, setText, analyzeText, saveResult, clear } = useTextAnalysis();
   const mode = useAnalysisModeStore((state) => state.mode);
+  const { clearPendingAnalysis } = usePendingAnalysisStore();
 
   useEffect(() => {
     if (state.error) {
       toast.error(state.error);
     }
   }, [state.error]);
+
+  useEffect(() => {
+    return () => {
+      console.log("Clearing pending analysis");
+      clearPendingAnalysis();
+    };
+  }, [clearPendingAnalysis]);
 
   useEffect(() => {
     if (state.isCurrentResultSaved) {
