@@ -16,7 +16,12 @@ export function useAuthActions() {
     try {
       await authClient.login(data);
       toast.success("Zalogowano pomyślnie!");
-      window.location.href = "/";
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const returnUrl = urlParams.get("returnUrl");
+      const redirectUrl = returnUrl ? decodeURIComponent(returnUrl) : "/";
+
+      window.location.href = redirectUrl;
     } catch (error) {
       if (error instanceof AuthClientError) {
         toast.error(error.message);

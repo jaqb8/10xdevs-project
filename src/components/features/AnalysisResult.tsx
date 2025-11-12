@@ -7,6 +7,7 @@ import { TextDiff } from "@/components/shared/TextDiff";
 import { AnalysisModeBadge } from "@/components/shared/AnalysisModeBadge";
 import { BookPlus, CheckCircle2, UserPlus } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { usePendingAnalysisStore } from "@/lib/stores/pending-analysis.store";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
 import type { TextAnalysisDto, CreateLearningItemCommand, AnalysisMode } from "../../types";
 import { cn } from "@/lib/utils";
@@ -21,12 +22,22 @@ interface AnalysisResultProps {
 
 export function AnalysisResult({ isLoading, analysisResult, isSaved, analysisMode, onSave }: AnalysisResultProps) {
   const { isAuth } = useAuthStore();
+  const { setPendingAnalysis } = usePendingAnalysisStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
 
   const handleSave = useCallback(() => {
     if (!isAuth) {
-      window.location.href = "/login";
+      if (analysisResult && !analysisResult.is_correct) {
+        setPendingAnalysis({
+          result: analysisResult,
+          mode: analysisMode,
+          originalText: analysisResult.original_text,
+          timestamp: Date.now(),
+        });
+      }
+      const returnUrl = encodeURIComponent("/?restoreAnalysis=true");
+      window.location.href = `/login?returnUrl=${returnUrl}`;
       return;
     }
 
@@ -40,7 +51,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, analysisMod
       };
       onSave(command);
     }
-  }, [analysisResult, onSave, isAuth, analysisMode]);
+  }, [analysisResult, onSave, isAuth, analysisMode, setPendingAnalysis]);
 
   const shouldShowSaveButton = isAuthFeatureEnabled && isLearningItemsFeatureEnabled;
 
