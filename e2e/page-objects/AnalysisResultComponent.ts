@@ -63,4 +63,13 @@ export class AnalysisResultComponent {
   async waitForSaveButton() {
     await this.saveButton.waitFor({ state: "visible" });
   }
+
+  async clickLoginToSave() {
+    await this.saveButton.click();
+  }
+
+  async isRestored(): Promise<boolean> {
+    const url = new URL(this.page.url());
+    return !url.searchParams.has("restoreAnalysis");
+  }
 }

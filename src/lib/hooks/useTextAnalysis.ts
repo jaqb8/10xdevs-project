@@ -152,6 +152,7 @@ export function useTextAnalysis() {
       });
 
       if (response.status === 401) {
+        // eslint-disable-next-line react-compiler/react-compiler
         window.location.href = "/login";
         return;
       }
