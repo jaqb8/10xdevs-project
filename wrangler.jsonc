@@ -1,44 +1,23 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  // Cloudflare Pages configuration for Language Learning Buddy
-  // This file is used by Wrangler CLI for deployment configuration
-  // Note: Project name is passed via CLI (--project-name) as it's required for Pages deployments
-
-  // Compatibility date for Cloudflare Workers runtime
-  // This controls which features and runtime behaviors are available to your Worker.
-  // Cloudflare introduces new features and fixes over time, and they're only enabled
-  // for Workers with a compatibility_date equal to or later than the feature's introduction date.
-  // This ensures backward compatibility and allows you to control when changes are applied.
+  "name": "10xdevs-project",
   "compatibility_date": "2025-11-13",
-
-  // Build output directory (matches Astro build output)
   "pages_build_output_dir": "dist",
-
-  // Environment-specific configurations
-  // Use --env=staging or --env=production in deployment commands
   "env": {
-    // Staging environment configuration
-    "staging": {
-      "name": "language-learning-buddy-staging",
+    "preview": {
+      "name": "10xdevs-project-preview",
       "compatibility_date": "2025-11-13",
-      // Observability configuration for monitoring and debugging
       "observability": {
         "enabled": true,
-        // Head sampling rate: 1.0 = 100% of requests logged, 0.5 = 50%, etc.
-        // Set to 1.0 for staging to capture all requests for debugging
         "head_sampling_rate": 1.0,
       },
     },
 
-    // Production environment configuration
     "production": {
-      "name": "language-learning-buddy",
+      "name": "10xdevs-project",
       "compatibility_date": "2025-11-13",
-      // Observability configuration for monitoring and debugging
       "observability": {
         "enabled": true,
-        // Head sampling rate: 1.0 = 100% of requests logged
-        // You can reduce this (e.g., 0.1 = 10%) for production to manage costs
         "head_sampling_rate": 1.0,
       },
     },
