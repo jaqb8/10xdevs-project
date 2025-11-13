@@ -34,7 +34,8 @@ describe("events", () => {
         {
           user_id: "test-user-id",
           email_domain: "example.com",
-        }
+        },
+        undefined
       );
     });
 
@@ -48,7 +49,8 @@ describe("events", () => {
         {
           user_id: "test-user-id",
           email_domain: undefined,
-        }
+        },
+        undefined
       );
     });
   });
@@ -65,7 +67,8 @@ describe("events", () => {
         {
           user_id: "test-user-id",
           email_domain: "example.com",
-        }
+        },
+        undefined
       );
     });
 
@@ -79,7 +82,8 @@ describe("events", () => {
         {
           user_id: "test-user-id",
           email_domain: undefined,
-        }
+        },
+        undefined
       );
     });
   });
@@ -94,7 +98,8 @@ describe("events", () => {
         ANALYTICS_EVENTS.USER_LOGOUT,
         {
           user_id: "test-user-id",
-        }
+        },
+        undefined
       );
     });
   });
@@ -113,7 +118,8 @@ describe("events", () => {
           user_id: "test-user-id",
           mode: "grammar_and_spelling",
           text_length: 100,
-        }
+        },
+        undefined
       );
     });
 
@@ -130,7 +136,8 @@ describe("events", () => {
           user_id: "test-user-id",
           mode: "colloquial_speech",
           text_length: 200,
-        }
+        },
+        undefined
       );
     });
   });
@@ -151,7 +158,8 @@ describe("events", () => {
           mode: "grammar_and_spelling",
           text_length: 100,
           is_correct: true,
-        }
+        },
+        undefined
       );
     });
 
@@ -170,7 +178,8 @@ describe("events", () => {
           mode: "grammar_and_spelling",
           text_length: 100,
           is_correct: false,
-        }
+        },
+        undefined
       );
     });
   });
@@ -191,7 +200,8 @@ describe("events", () => {
           mode: "grammar_and_spelling",
           text_length: 100,
           error_message: "Analysis failed",
-        }
+        },
+        undefined
       );
     });
   });
@@ -212,7 +222,8 @@ describe("events", () => {
           item_id: "item-123",
           mode: "grammar_and_spelling",
           analysis_id: "analysis-456",
-        }
+        },
+        undefined
       );
     });
 
@@ -229,8 +240,8 @@ describe("events", () => {
           user_id: "test-user-id",
           item_id: "item-123",
           mode: "colloquial_speech",
-          analysis_id: undefined,
-        }
+        },
+        undefined
       );
     });
   });
@@ -249,7 +260,8 @@ describe("events", () => {
           user_id: "test-user-id",
           item_id: "item-123",
           mode: "grammar_and_spelling",
-        }
+        },
+        undefined
       );
     });
   });
@@ -272,9 +284,9 @@ describe("events", () => {
           max_requests: 10,
           window_ms: 60000,
           time_until_reset: 5000,
-        }
+        },
+        undefined
       );
     });
   });
 });
-
