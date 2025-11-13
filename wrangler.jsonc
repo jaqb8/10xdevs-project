@@ -1,18 +1,24 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "10xdevs-project",
+  "main": "./dist/_worker.js/index.js",
   "compatibility_date": "2025-03-10",
-  "pages_build_output_dir": "dist",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist",
+  },
   "observability": {
     "enabled": true,
     "head_sampling_rate": 1.0,
   },
   "env": {
-    "preview": {
-      "name": "10xdevs-project-preview",
+    "staging": {
+      "name": "10xdevs-project-staging",
     },
     "production": {
       "name": "10xdevs-project",
     },
   },
+  "preview_urls": true,
 }

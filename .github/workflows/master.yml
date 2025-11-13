@@ -97,7 +97,7 @@ jobs:
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=production
+          command: pages deploy --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --env=production
 
   create-release:
     name: Create Release
