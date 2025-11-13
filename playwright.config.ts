@@ -59,14 +59,14 @@ export default defineConfig({
         storageState: "playwright/.auth/user.json",
       },
       dependencies: ["setup"],
-      testMatch: /^(?!.*analysis-restore\.spec\.ts).*\.spec\.ts$/,
+      testMatch: /^(?!.*(analysis-restore|unauthenticated)\.spec\.ts).*\.spec\.ts$/,
     },
     {
       name: "chromium-unauthenticated",
       use: {
         ...devices["Desktop Chrome"],
       },
-      testMatch: /analysis-restore\.spec\.ts/,
+      testMatch: /(analysis-restore|unauthenticated)\.spec\.ts/,
     },
   ],
 
