@@ -51,7 +51,10 @@ const ANALYSIS_PROMPTS: Record<AnalysisMode, string> = {
 export class AnalysisService {
   private useMocks: boolean;
 
-  constructor(private readonly supabase: SupabaseClient) {
+  constructor(
+    private readonly supabase: SupabaseClient,
+    private readonly waitUntil?: (promise: Promise<unknown>) => void
+  ) {
     this.useMocks = USE_MOCKS;
   }
 
@@ -69,11 +72,14 @@ export class AnalysisService {
   }
 
   private async analyzeWithAI(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
-    trackTextAnalysisRequested({
-      user_id: userId,
-      mode,
-      text_length: text.length,
-    });
+    trackTextAnalysisRequested(
+      {
+        user_id: userId,
+        mode,
+        text_length: text.length,
+      },
+      this.waitUntil
+    );
 
     const systemPrompt = ANALYSIS_PROMPTS[mode];
 
@@ -87,23 +93,36 @@ export class AnalysisService {
         maxTokens: 1000,
       });
 
-      trackTextAnalysisCompleted({
-        user_id: userId,
-        mode,
-        text_length: text.length,
-        is_correct: result.is_correct,
-      });
+      trackTextAnalysisCompleted(
+        {
+          user_id: userId,
+          mode,
+          text_length: text.length,
+          is_correct: result.is_correct,
+        },
+        this.waitUntil
+      );
 
-      return result;
+      if (result.is_correct) {
+        return result;
+      }
+
+      return {
+        ...result,
+        translation: result.translation ?? null,
+      };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
 
-      trackTextAnalysisFailed({
-        user_id: userId,
-        mode,
-        text_length: text.length,
-        error_message: errorMessage,
-      });
+      trackTextAnalysisFailed(
+        {
+          user_id: userId,
+          mode,
+          text_length: text.length,
+          error_message: errorMessage,
+        },
+        this.waitUntil
+      );
 
       if (error instanceof OpenRouterConfigurationError) {
         console.error("OpenRouter configuration error:", error.message);

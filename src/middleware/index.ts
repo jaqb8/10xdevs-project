@@ -44,13 +44,16 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
     if (!analysisRateLimiter.isAllowed(userId)) {
       const timeUntilReset = analysisRateLimiter.getTimeUntilReset(userId);
 
-      trackRateLimitExceeded({
-        user_id: userId,
-        endpoint: url.pathname,
-        max_requests: analysisRateLimiter.getMaxRequests(),
-        window_ms: analysisRateLimiter.getWindowMs(),
-        time_until_reset: timeUntilReset,
-      });
+      trackRateLimitExceeded(
+        {
+          user_id: userId,
+          endpoint: url.pathname,
+          max_requests: analysisRateLimiter.getMaxRequests(),
+          window_ms: analysisRateLimiter.getWindowMs(),
+          time_until_reset: timeUntilReset,
+        },
+        locals.waitUntil
+      );
 
       return createErrorResponse("rate_limit_error", 429, {
         time_until_reset: timeUntilReset,

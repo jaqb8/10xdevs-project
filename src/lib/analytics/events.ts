@@ -46,44 +46,70 @@ export interface RateLimitExceededProperties extends Record<string, unknown> {
   time_until_reset: number;
 }
 
-export function trackUserSignup(props: UserAuthEventProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.USER_SIGNUP, {
-    ...props,
-    email_domain: props.email_domain,
-  });
+export function trackUserSignup(props: UserAuthEventProperties, waitUntil?: (promise: Promise<unknown>) => void) {
+  captureServerEvent(
+    ANALYTICS_EVENTS.USER_SIGNUP,
+    {
+      ...props,
+      email_domain: props.email_domain,
+    },
+    waitUntil
+  );
 }
 
-export function trackUserLogin(props: UserAuthEventProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.USER_LOGIN, {
-    ...props,
-    email_domain: props.email_domain,
-  });
+export function trackUserLogin(props: UserAuthEventProperties, waitUntil?: (promise: Promise<unknown>) => void) {
+  captureServerEvent(
+    ANALYTICS_EVENTS.USER_LOGIN,
+    {
+      ...props,
+      email_domain: props.email_domain,
+    },
+    waitUntil
+  );
 }
 
-export function trackUserLogout(props: UserAuthEventProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.USER_LOGOUT, props);
+export function trackUserLogout(props: UserAuthEventProperties, waitUntil?: (promise: Promise<unknown>) => void) {
+  captureServerEvent(ANALYTICS_EVENTS.USER_LOGOUT, props, waitUntil);
 }
 
-export function trackTextAnalysisRequested(props: TextAnalysisEventProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.TEXT_ANALYSIS_REQUESTED, props);
+export function trackTextAnalysisRequested(
+  props: TextAnalysisEventProperties,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
+  captureServerEvent(ANALYTICS_EVENTS.TEXT_ANALYSIS_REQUESTED, props, waitUntil);
 }
 
-export function trackTextAnalysisCompleted(props: TextAnalysisCompletedProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.TEXT_ANALYSIS_COMPLETED, props);
+export function trackTextAnalysisCompleted(
+  props: TextAnalysisCompletedProperties,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
+  captureServerEvent(ANALYTICS_EVENTS.TEXT_ANALYSIS_COMPLETED, props, waitUntil);
 }
 
-export function trackTextAnalysisFailed(props: TextAnalysisFailedProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.TEXT_ANALYSIS_FAILED, props);
+export function trackTextAnalysisFailed(
+  props: TextAnalysisFailedProperties,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
+  captureServerEvent(ANALYTICS_EVENTS.TEXT_ANALYSIS_FAILED, props, waitUntil);
 }
 
-export function trackLearningItemAdded(props: LearningItemEventProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.LEARNING_ITEM_ADDED, props);
+export function trackLearningItemAdded(
+  props: LearningItemEventProperties,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
+  captureServerEvent(ANALYTICS_EVENTS.LEARNING_ITEM_ADDED, props, waitUntil);
 }
 
-export function trackLearningItemRemoved(props: LearningItemEventProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.LEARNING_ITEM_REMOVED, props);
+export function trackLearningItemRemoved(
+  props: LearningItemEventProperties,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
+  captureServerEvent(ANALYTICS_EVENTS.LEARNING_ITEM_REMOVED, props, waitUntil);
 }
 
-export function trackRateLimitExceeded(props: RateLimitExceededProperties) {
-  captureServerEvent(ANALYTICS_EVENTS.RATE_LIMIT_EXCEEDED, props);
+export function trackRateLimitExceeded(
+  props: RateLimitExceededProperties,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
+  captureServerEvent(ANALYTICS_EVENTS.RATE_LIMIT_EXCEEDED, props, waitUntil);
 }

@@ -12,7 +12,7 @@ const loginSchema = z.object({
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals, waitUntil }) => {
   if (!isFeatureEnabled("auth")) {
     return createErrorResponse("feature_not_available", 404);
   }
@@ -45,10 +45,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       email: data.user.email!,
     };
 
-    trackUserLogin({
-      user_id: userDto.id,
-      email_domain: userDto.email.split("@")[1],
-    });
+    trackUserLogin(
+      {
+        user_id: userDto.id,
+        email_domain: userDto.email.split("@")[1],
+      },
+      waitUntil
+    );
 
     return new Response(JSON.stringify({ user: userDto }), {
       status: 200,
