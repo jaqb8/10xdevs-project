@@ -1,25 +1,18 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "10xdevs-project",
-  "compatibility_date": "2025-11-13",
+  "compatibility_date": "2025-03-10",
   "pages_build_output_dir": "dist",
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1.0,
+  },
   "env": {
     "preview": {
       "name": "10xdevs-project-preview",
-      "compatibility_date": "2025-11-13",
-      "observability": {
-        "enabled": true,
-        "head_sampling_rate": 1.0,
-      },
     },
-
     "production": {
       "name": "10xdevs-project",
-      "compatibility_date": "2025-11-13",
-      "observability": {
-        "enabled": true,
-        "head_sampling_rate": 1.0,
-      },
     },
   },
 }
