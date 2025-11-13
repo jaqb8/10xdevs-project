@@ -88,6 +88,8 @@ jobs:
           USE_MOCKS: ${{ vars.USE_MOCKS }}
           ASTRO_SITE: ${{ vars.ASTRO_SITE }}
           APP_NAME: ${{ vars.APP_NAME }}
+          POSTHOG_PROJECT_API_KEY: ${{ secrets.POSTHOG_PROJECT_API_KEY }}
+          PUBLIC_POSTHOG_PROJECT_API_KEY: ${{ secrets.PUBLIC_POSTHOG_PROJECT_API_KEY }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages

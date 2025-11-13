@@ -5,12 +5,14 @@ import type {
   LearningItemDto,
   PaginatedResponseDto,
   PaginationDto,
+  AnalysisMode,
 } from "../../../types";
 import {
   LearningItemsDatabaseError,
   LearningItemNotFoundError,
   LearningItemForbiddenError,
 } from "./learning-items.errors";
+import { trackLearningItemAdded, trackLearningItemRemoved } from "@/lib/analytics/events";
 
 export class LearningItemsService {
   constructor(private readonly supabase: SupabaseClient) {}
@@ -51,7 +53,7 @@ export class LearningItemsService {
 
     const { data, error } = await this.supabase
       .from("learning_items")
-      .select("id, original_sentence, corrected_sentence, explanation, analysis_mode, created_at")
+      .select("id, original_sentence, corrected_sentence, explanation, analysis_mode, created_at, translation")
       .eq("user_id", userId)
       .order("created_at", { ascending: false })
       .range(offset, offset + pageSize - 1);
@@ -94,13 +96,19 @@ export class LearningItemsService {
       throw new LearningItemsDatabaseError();
     }
 
+    trackLearningItemAdded({
+      user_id: userId,
+      item_id: data.id,
+      mode: itemData.analysis_mode as AnalysisMode,
+    });
+
     return data;
   }
 
   async deleteLearningItem(id: string, userId: string): Promise<void> {
     const { data: existingItem, error: fetchError } = await this.supabase
       .from("learning_items")
-      .select("user_id")
+      .select("user_id, analysis_mode")
       .eq("id", id)
       .single();
 
@@ -126,5 +134,11 @@ export class LearningItemsService {
       console.error("Database error in deleteLearningItem (delete):", deleteError);
       throw new LearningItemsDatabaseError(deleteError);
     }
+
+    trackLearningItemRemoved({
+      user_id: userId,
+      item_id: id,
+      mode: existingItem.analysis_mode as AnalysisMode,
+    });
   }
 }

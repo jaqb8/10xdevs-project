@@ -3,6 +3,7 @@ import { defineMiddleware } from "astro:middleware";
 import { createSupabaseServerInstance, DEFAULT_USER_ID } from "../db/supabase.client.ts";
 import { analysisRateLimiter } from "../lib/rate-limiter.ts";
 import { createErrorResponse } from "@/lib/api-helpers.ts";
+import { trackRateLimitExceeded } from "@/lib/analytics/events";
 
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
@@ -42,6 +43,15 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
 
     if (!analysisRateLimiter.isAllowed(userId)) {
       const timeUntilReset = analysisRateLimiter.getTimeUntilReset(userId);
+
+      trackRateLimitExceeded({
+        user_id: userId,
+        endpoint: url.pathname,
+        max_requests: analysisRateLimiter.getMaxRequests(),
+        window_ms: analysisRateLimiter.getWindowMs(),
+        time_until_reset: timeUntilReset,
+      });
+
       return createErrorResponse("rate_limit_error", 429, {
         time_until_reset: timeUntilReset,
       });

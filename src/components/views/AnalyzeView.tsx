@@ -1,21 +1,31 @@
 import { useCallback, useEffect } from "react";
 import { useTextAnalysis } from "../../lib/hooks/useTextAnalysis";
 import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
+import { usePendingAnalysisStore } from "../../lib/stores/pending-analysis.store";
 import { AnalysisForm } from "../features/AnalysisForm";
 import { AnalysisResult } from "../features/AnalysisResult";
 import { toast } from "sonner";
+import type { CreateLearningItemCommand } from "../../types";
 
 const MAX_TEXT_LENGTH = 500;
 
 export function AnalyzeView() {
   const { state, setText, analyzeText, saveResult, clear } = useTextAnalysis();
   const mode = useAnalysisModeStore((state) => state.mode);
+  const { clearPendingAnalysis } = usePendingAnalysisStore();
 
   useEffect(() => {
     if (state.error) {
       toast.error(state.error);
     }
   }, [state.error]);
+
+  useEffect(() => {
+    return () => {
+      console.log("Clearing pending analysis");
+      clearPendingAnalysis();
+    };
+  }, [clearPendingAnalysis]);
 
   useEffect(() => {
     if (state.isCurrentResultSaved) {
@@ -30,9 +40,12 @@ export function AnalyzeView() {
     }
   }, [state.isCurrentResultSaved]);
 
-  const handleSave = useCallback(() => {
-    saveResult(mode);
-  }, [saveResult, mode]);
+  const handleSave = useCallback(
+    (command: CreateLearningItemCommand) => {
+      saveResult(command);
+    },
+    [saveResult]
+  );
 
   return (
     <main className="mx-auto max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
@@ -61,6 +74,7 @@ export function AnalyzeView() {
             isLoading={state.status === "loading"}
             analysisResult={state.result}
             isSaved={state.isCurrentResultSaved}
+            analysisMode={mode}
             onSave={handleSave}
           />
         </section>

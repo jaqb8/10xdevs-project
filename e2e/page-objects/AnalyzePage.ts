@@ -32,4 +32,13 @@ export class AnalyzePage {
       await this.result.saveToLearningList();
     }
   }
+
+  async getTextInputValue(): Promise<string> {
+    return await this.form.textInput.inputValue();
+  }
+
+  async hasRestoreAnalysisParam(): Promise<boolean> {
+    const url = new URL(this.page.url());
+    return url.searchParams.get("restoreAnalysis") === "true";
+  }
 }

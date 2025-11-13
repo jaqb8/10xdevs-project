@@ -105,6 +105,24 @@ export class RateLimiter {
   }
 
   /**
+   * Gets the maximum number of requests allowed per window.
+   *
+   * @returns Maximum number of requests
+   */
+  getMaxRequests(): number {
+    return this.maxRequests;
+  }
+
+  /**
+   * Gets the time window in milliseconds.
+   *
+   * @returns Time window in milliseconds
+   */
+  getWindowMs(): number {
+    return this.windowMs;
+  }
+
+  /**
    * Clears all rate limit data for the given identifier.
    * Useful for testing or administrative purposes.
    *

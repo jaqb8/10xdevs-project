@@ -47,12 +47,20 @@ export class AnalysisFormComponent {
   }
 
   async selectMode(mode: "grammar" | "colloquial") {
-    await this.modeSelector.click();
-
+    const currentMode = await this.getSelectedMode();
     const modeLabel = mode === "grammar" ? "Gramatyka i ortografia" : "Mowa potoczna";
 
-    await this.page.locator('[role="listbox"]').waitFor({ state: "visible" });
-    await this.page.locator('[role="option"]').filter({ hasText: modeLabel }).click();
+    if (currentMode?.includes(modeLabel)) {
+      return;
+    }
+
+    await this.modeSelector.click();
+
+    const modeTestId = mode === "grammar" ? "mode-grammar" : "mode-colloquial";
+    const modeOption = this.page.locator(`[data-test-id="${modeTestId}"]`);
+
+    await modeOption.waitFor({ state: "visible", timeout: 10000 });
+    await modeOption.click();
   }
 
   async getSelectedMode() {

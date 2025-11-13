@@ -4,27 +4,40 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextDiff } from "@/components/shared/TextDiff";
+import { AnalysisModeBadge } from "@/components/shared/AnalysisModeBadge";
 import { BookPlus, CheckCircle2, UserPlus } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { usePendingAnalysisStore } from "@/lib/stores/pending-analysis.store";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
-import type { TextAnalysisDto, CreateLearningItemCommand } from "../../types";
+import type { TextAnalysisDto, CreateLearningItemCommand, AnalysisMode } from "../../types";
 import { cn } from "@/lib/utils";
 
 interface AnalysisResultProps {
   isLoading: boolean;
   analysisResult: TextAnalysisDto | null;
   isSaved: boolean;
+  analysisMode: AnalysisMode;
   onSave: (item: CreateLearningItemCommand) => void;
 }
 
-export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: AnalysisResultProps) {
+export function AnalysisResult({ isLoading, analysisResult, isSaved, analysisMode, onSave }: AnalysisResultProps) {
   const { isAuth } = useAuthStore();
+  const { setPendingAnalysis } = usePendingAnalysisStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
 
   const handleSave = useCallback(() => {
     if (!isAuth) {
-      window.location.href = "/login";
+      if (analysisResult && !analysisResult.is_correct) {
+        setPendingAnalysis({
+          result: analysisResult,
+          mode: analysisMode,
+          originalText: analysisResult.original_text,
+          timestamp: Date.now(),
+        });
+      }
+      const returnUrl = encodeURIComponent("/?restoreAnalysis=true");
+      window.location.href = `/login?returnUrl=${returnUrl}`;
       return;
     }
 
@@ -33,11 +46,12 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
         original_sentence: analysisResult.original_text,
         corrected_sentence: analysisResult.corrected_text,
         explanation: analysisResult.explanation,
-        analysis_mode: "grammar_and_spelling",
+        analysis_mode: analysisMode,
+        translation: analysisResult.translation ?? null,
       };
       onSave(command);
     }
-  }, [analysisResult, onSave, isAuth]);
+  }, [analysisResult, onSave, isAuth, analysisMode, setPendingAnalysis]);
 
   const shouldShowSaveButton = isAuthFeatureEnabled && isLearningItemsFeatureEnabled;
 
@@ -84,12 +98,17 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, onSave }: A
   return (
     <Card role="article" aria-label="Wynik analizy - znaleziono błędy" data-test-id="analysis-result-with-errors">
       <CardHeader>
-        <CardTitle>
+        <CardTitle className="flex items-center gap-2">
           <h2 className="text-lg font-semibold">Wynik analizy</h2>
+          <AnalysisModeBadge mode={analysisMode} className="text-xs" />
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <TextDiff originalText={analysisResult.original_text} correctedText={analysisResult.corrected_text} />
+        <TextDiff
+          originalText={analysisResult.original_text}
+          correctedText={analysisResult.corrected_text}
+          translation={analysisResult.translation}
+        />
 
         <div className="space-y-2">
           <h3 className="text-sm font-semibold px-2">Wyjaśnienie:</h3>

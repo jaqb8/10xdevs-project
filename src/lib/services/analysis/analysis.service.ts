@@ -19,6 +19,11 @@ import {
   AnalysisNetworkError,
   AnalysisUnknownError,
 } from "./analysis.errors";
+import {
+  trackTextAnalysisRequested,
+  trackTextAnalysisCompleted,
+  trackTextAnalysisFailed,
+} from "@/lib/analytics/events";
 import { z } from "zod";
 import grammarPrompt from "@/lib/prompts/grammar-analysis.prompt.md?raw";
 import colloquialPrompt from "@/lib/prompts/colloquial-speech.prompt.md?raw";
@@ -34,6 +39,7 @@ const TextAnalysisSchema = z.discriminatedUnion("is_correct", [
     original_text: z.string(),
     corrected_text: z.string(),
     explanation: z.string(),
+    translation: z.string().nullable().optional(),
   }),
 ]);
 
@@ -49,12 +55,12 @@ export class AnalysisService {
     this.useMocks = USE_MOCKS;
   }
 
-  async analyzeText(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
+  async analyzeText(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
     if (this.useMocks) {
       return this.analyzeMocked(text, mode);
     }
 
-    return this.analyzeWithAI(text, mode);
+    return this.analyzeWithAI(text, mode, userId);
   }
 
   private async analyzeMocked(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
@@ -62,11 +68,17 @@ export class AnalysisService {
     return getMockAnalysis(text, mode);
   }
 
-  private async analyzeWithAI(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
+  private async analyzeWithAI(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
+    trackTextAnalysisRequested({
+      user_id: userId,
+      mode,
+      text_length: text.length,
+    });
+
     const systemPrompt = ANALYSIS_PROMPTS[mode];
 
     try {
-      return await openRouterService.getChatCompletion({
+      const result = await openRouterService.getChatCompletion({
         model: "x-ai/grok-4-fast",
         systemMessage: systemPrompt,
         userMessage: text,
@@ -74,7 +86,25 @@ export class AnalysisService {
         temperature: 0.3,
         maxTokens: 1000,
       });
+
+      trackTextAnalysisCompleted({
+        user_id: userId,
+        mode,
+        text_length: text.length,
+        is_correct: result.is_correct,
+      });
+
+      return result;
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+
+      trackTextAnalysisFailed({
+        user_id: userId,
+        mode,
+        text_length: text.length,
+        error_message: errorMessage,
+      });
+
       if (error instanceof OpenRouterConfigurationError) {
         console.error("OpenRouter configuration error:", error.message);
         throw new AnalysisConfigurationError();

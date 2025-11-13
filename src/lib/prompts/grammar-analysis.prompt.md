@@ -16,6 +16,7 @@ Jeśli tekst zawiera błędy gramatyczne:
 - Skup się na błędach gramatycznych, nie na stylu czy słownictwie.
 - **WAŻNE: `explanation` nie może przekraczać 500 znaków (włącznie ze wszystkimi znacznikami Markdown). Jeśli wyjaśnienie jest dłuższe, skróć je do maksymalnej długości.**
 - Formatuj tekst tak, aby był przejrzysty - używaj akapitów i odpowiednich odstępów między sekcjami.
+- **Dodatkowo, przetłumacz poprawiony tekst (`corrected_text`) na język polski i umieść tłumaczenie w polu `translation`. Tłumaczenie powinno być naturalne i oddawać sens poprawionego tekstu.**
 
 Odpowiadaj wyłącznie w formacie JSON zgodnym z dostarczonym schematem.
 
@@ -26,6 +27,7 @@ Schemat odpowiedzi:
   "is_correct": true,
   "original_text": "The original text",
   "corrected_text": "The corrected text",
-  "explanation": "The explanation of the correction"
+  "explanation": "The explanation of the correction",
+  "translation": "Tłumaczenie poprawionego tekstu na polski"
 }
 ```
