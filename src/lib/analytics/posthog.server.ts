@@ -19,8 +19,8 @@ function getPosthogInstance(): PostHog | null {
   try {
     posthogInstance = new PostHog(apiKey, {
       host,
-      flushAt: 20,
-      flushInterval: 10000,
+      flushAt: 1,
+      flushInterval: 0,
     });
     return posthogInstance;
   } catch (error) {
@@ -33,9 +33,11 @@ const noOpClient = {
   capture: () => {
     // no-op
   },
+  captureImmediate: () => Promise.resolve(),
   identify: () => {
     // no-op
   },
+  identifyImmediate: () => Promise.resolve(),
   shutdown: () => Promise.resolve(),
 };
 
@@ -44,42 +46,82 @@ export function getPosthog() {
   return instance || noOpClient;
 }
 
-export async function captureServerEvent<T extends Record<string, unknown>>(eventName: string, properties?: T) {
+export function captureServerEvent<T extends Record<string, unknown>>(
+  eventName: string,
+  properties?: T,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
   const posthog = getPosthog();
   if (posthog === noOpClient) {
     return;
   }
 
-  try {
-    await posthog.capture({
+  const capturePromise = (posthog as PostHog)
+    .captureImmediate({
       distinctId: (properties?.user_id as string) || "anonymous",
       event: eventName,
       properties,
+    })
+    .catch((error) => {
+      console.error("Failed to capture PostHog event:", error);
     });
-  } catch (error) {
-    console.error("Failed to capture PostHog event:", error);
+
+  if (waitUntil) {
+    waitUntil(capturePromise);
+  } else {
+    capturePromise.catch(() => {
+      // Error already logged above
+    });
   }
 }
 
-export async function identifyServerUser(userId: string, traits?: Record<string, unknown>) {
+export function identifyServerUser(
+  userId: string,
+  traits?: Record<string, unknown>,
+  waitUntil?: (promise: Promise<unknown>) => void
+) {
   const posthog = getPosthog();
   if (posthog === noOpClient) {
     return;
   }
 
-  try {
-    await posthog.identify({
+  const identifyPromise = (posthog as PostHog)
+    .identifyImmediate({
       distinctId: userId,
       properties: traits,
+    })
+    .catch((error) => {
+      console.error("Failed to identify PostHog user:", error);
     });
-  } catch (error) {
-    console.error("Failed to identify PostHog user:", error);
+
+  if (waitUntil) {
+    waitUntil(identifyPromise);
+  } else {
+    identifyPromise.catch(() => {
+      // Error already logged above
+    });
   }
 }
 
-export async function shutdownPosthog() {
-  if (posthogInstance) {
-    await posthogInstance.shutdown();
-    posthogInstance = null;
+export function shutdownPosthog(waitUntil?: (promise: Promise<unknown>) => void) {
+  if (!posthogInstance) {
+    return;
+  }
+
+  const shutdownPromise = posthogInstance
+    .shutdown()
+    .then(() => {
+      posthogInstance = null;
+    })
+    .catch((error) => {
+      console.error("Failed to shutdown PostHog:", error);
+    });
+
+  if (waitUntil) {
+    waitUntil(shutdownPromise);
+  } else {
+    shutdownPromise.catch(() => {
+      // Error already logged above
+    });
   }
 }

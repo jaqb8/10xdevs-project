@@ -15,7 +15,10 @@ import {
 import { trackLearningItemAdded, trackLearningItemRemoved } from "@/lib/analytics/events";
 
 export class LearningItemsService {
-  constructor(private readonly supabase: SupabaseClient) {}
+  constructor(
+    private readonly supabase: SupabaseClient,
+    private readonly waitUntil?: (promise: Promise<unknown>) => void
+  ) {}
 
   async getLearningItems(
     userId: string,
@@ -96,11 +99,14 @@ export class LearningItemsService {
       throw new LearningItemsDatabaseError();
     }
 
-    trackLearningItemAdded({
-      user_id: userId,
-      item_id: data.id,
-      mode: itemData.analysis_mode as AnalysisMode,
-    });
+    trackLearningItemAdded(
+      {
+        user_id: userId,
+        item_id: data.id,
+        mode: itemData.analysis_mode as AnalysisMode,
+      },
+      this.waitUntil
+    );
 
     return data;
   }
@@ -135,10 +141,13 @@ export class LearningItemsService {
       throw new LearningItemsDatabaseError(deleteError);
     }
 
-    trackLearningItemRemoved({
-      user_id: userId,
-      item_id: id,
-      mode: existingItem.analysis_mode as AnalysisMode,
-    });
+    trackLearningItemRemoved(
+      {
+        user_id: userId,
+        item_id: id,
+        mode: existingItem.analysis_mode as AnalysisMode,
+      },
+      this.waitUntil
+    );
   }
 }

@@ -34,7 +34,7 @@ const idParamSchema = z.string().uuid({ message: "validation_error_invalid_uuid"
  * - 404: Learning item not found
  * - 500: Internal server error
  */
-export const DELETE: APIRoute = async ({ params, locals }) => {
+export const DELETE: APIRoute = async ({ params, locals, waitUntil }) => {
   if (!isFeatureEnabled("learning-items")) {
     return createErrorResponse("feature_not_available", 404);
   }
@@ -58,7 +58,7 @@ export const DELETE: APIRoute = async ({ params, locals }) => {
 
     const validatedId = validationResult.data;
 
-    await new LearningItemsService(locals.supabase).deleteLearningItem(validatedId, locals.user.id);
+    await new LearningItemsService(locals.supabase, waitUntil).deleteLearningItem(validatedId, locals.user.id);
 
     return new Response(null, { status: 204 });
   } catch (error) {

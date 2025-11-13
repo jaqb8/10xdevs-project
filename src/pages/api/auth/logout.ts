@@ -5,7 +5,7 @@ import { isFeatureEnabled } from "@/features/feature-flags.service";
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ locals, redirect }) => {
+export const POST: APIRoute = async ({ locals, redirect, waitUntil }) => {
   if (!isFeatureEnabled("auth")) {
     return createErrorResponse("feature_not_available", 404);
   }
@@ -13,9 +13,12 @@ export const POST: APIRoute = async ({ locals, redirect }) => {
     const userId = locals.user?.id;
 
     if (userId) {
-      trackUserLogout({
-        user_id: userId,
-      });
+      trackUserLogout(
+        {
+          user_id: userId,
+        },
+        waitUntil
+      );
     }
 
     const { error } = await locals.supabase.auth.signOut();

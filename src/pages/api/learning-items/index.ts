@@ -63,7 +63,7 @@ const createLearningItemSchema = z.object({
  *   }
  * }
  */
-export const GET: APIRoute = async ({ locals, url }) => {
+export const GET: APIRoute = async ({ locals, url, waitUntil }) => {
   if (!isFeatureEnabled("learning-items")) {
     return createErrorResponse("feature_not_available", 404);
   }
@@ -86,7 +86,11 @@ export const GET: APIRoute = async ({ locals, url }) => {
 
     const { page, pageSize } = validationResult.data;
 
-    const result = await new LearningItemsService(locals.supabase).getLearningItems(locals.user.id, page, pageSize);
+    const result = await new LearningItemsService(locals.supabase, waitUntil).getLearningItems(
+      locals.user.id,
+      page,
+      pageSize
+    );
 
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -130,7 +134,7 @@ export const GET: APIRoute = async ({ locals, url }) => {
  *   "created_at": "2025-10-26T10:05:00Z"
  * }
  */
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals, waitUntil }) => {
   if (!isFeatureEnabled("learning-items")) {
     return createErrorResponse("feature_not_available", 404);
   }
@@ -147,7 +151,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return createValidationErrorResponse(validationResult.error);
     }
 
-    const result = await new LearningItemsService(locals.supabase).createLearningItem(
+    const result = await new LearningItemsService(locals.supabase, waitUntil).createLearningItem(
       validationResult.data,
       locals.user.id
     );

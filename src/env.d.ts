@@ -8,7 +8,14 @@ declare global {
     interface Locals {
       supabase: SupabaseClient;
       user: UserViewModel | null;
+      waitUntil?: (promise: Promise<unknown>) => void;
     }
+  }
+}
+
+declare module "astro" {
+  interface APIContext {
+    waitUntil?: (promise: Promise<unknown>) => void;
   }
 }
 

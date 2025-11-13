@@ -12,7 +12,7 @@ const signupSchema = z.object({
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request, locals, waitUntil }) => {
   if (!isFeatureEnabled("auth")) {
     return createErrorResponse("feature_not_available", 404);
   }
@@ -49,10 +49,13 @@ export const POST: APIRoute = async ({ request, locals }) => {
       created_at: data.user.created_at,
     };
 
-    trackUserSignup({
-      user_id: userDto.id,
-      email_domain: userDto.email.split("@")[1],
-    });
+    trackUserSignup(
+      {
+        user_id: userDto.id,
+        email_domain: userDto.email.split("@")[1],
+      },
+      waitUntil
+    );
 
     return new Response(JSON.stringify({ user: userDto }), {
       status: 201,
