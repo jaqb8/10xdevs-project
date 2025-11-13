@@ -15,9 +15,23 @@
   "env": {
     "staging": {
       "name": "10xdevs-project-staging",
+      "vars": {
+        "SUPABASE_URL": "https://ktnthoafylnotwieeowv.supabase.co",
+        "USE_MOCKS": false,
+        "RATE_LIMIT_MAX_REQUESTS": 10,
+        "RATE_LIMIT_WINDOW_MS": 60000,
+        "PUBLIC_ENV_NAME": "integration",
+      },
     },
     "production": {
       "name": "10xdevs-project",
+      "vars": {
+        "SUPABASE_URL": "https://jyllkxpxiimsktbzhtvr.supabase.co",
+        "USE_MOCKS": false,
+        "RATE_LIMIT_MAX_REQUESTS": 10,
+        "RATE_LIMIT_WINDOW_MS": 60000,
+        "PUBLIC_ENV_NAME": "production",
+      },
     },
   },
   "preview_urls": true,
