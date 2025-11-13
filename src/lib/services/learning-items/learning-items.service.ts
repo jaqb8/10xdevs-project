@@ -12,7 +12,6 @@ import {
   LearningItemNotFoundError,
   LearningItemForbiddenError,
 } from "./learning-items.errors";
-import { trackLearningItemAdded, trackLearningItemRemoved } from "@/lib/analytics/events";
 
 export class LearningItemsService {
   constructor(
@@ -99,15 +98,6 @@ export class LearningItemsService {
       throw new LearningItemsDatabaseError();
     }
 
-    trackLearningItemAdded(
-      {
-        user_id: userId,
-        item_id: data.id,
-        mode: itemData.analysis_mode as AnalysisMode,
-      },
-      this.waitUntil
-    );
-
     return data;
   }
 
@@ -140,14 +130,5 @@ export class LearningItemsService {
       console.error("Database error in deleteLearningItem (delete):", deleteError);
       throw new LearningItemsDatabaseError(deleteError);
     }
-
-    trackLearningItemRemoved(
-      {
-        user_id: userId,
-        item_id: id,
-        mode: existingItem.analysis_mode as AnalysisMode,
-      },
-      this.waitUntil
-    );
   }
 }

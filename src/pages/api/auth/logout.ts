@@ -1,26 +1,14 @@
 import type { APIRoute } from "astro";
 import { createErrorResponse } from "@/lib/api-helpers";
-import { trackUserLogout } from "@/lib/analytics/events";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ locals, redirect, waitUntil }) => {
+export const POST: APIRoute = async ({ locals, redirect }) => {
   if (!isFeatureEnabled("auth")) {
     return createErrorResponse("feature_not_available", 404);
   }
   try {
-    const userId = locals.user?.id;
-
-    if (userId) {
-      trackUserLogout(
-        {
-          user_id: userId,
-        },
-        waitUntil
-      );
-    }
-
     const { error } = await locals.supabase.auth.signOut();
 
     if (error) {

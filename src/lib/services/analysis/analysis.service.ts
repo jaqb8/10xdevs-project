@@ -19,11 +19,6 @@ import {
   AnalysisNetworkError,
   AnalysisUnknownError,
 } from "./analysis.errors";
-import {
-  trackTextAnalysisRequested,
-  trackTextAnalysisCompleted,
-  trackTextAnalysisFailed,
-} from "@/lib/analytics/events";
 import { z } from "zod";
 import grammarPrompt from "@/lib/prompts/grammar-analysis.prompt.md?raw";
 import colloquialPrompt from "@/lib/prompts/colloquial-speech.prompt.md?raw";
@@ -72,15 +67,6 @@ export class AnalysisService {
   }
 
   private async analyzeWithAI(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
-    trackTextAnalysisRequested(
-      {
-        user_id: userId,
-        mode,
-        text_length: text.length,
-      },
-      this.waitUntil
-    );
-
     const systemPrompt = ANALYSIS_PROMPTS[mode];
 
     try {
@@ -93,16 +79,6 @@ export class AnalysisService {
         maxTokens: 1000,
       });
 
-      trackTextAnalysisCompleted(
-        {
-          user_id: userId,
-          mode,
-          text_length: text.length,
-          is_correct: result.is_correct,
-        },
-        this.waitUntil
-      );
-
       if (result.is_correct) {
         return result;
       }
@@ -112,18 +88,6 @@ export class AnalysisService {
         translation: result.translation ?? null,
       };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-
-      trackTextAnalysisFailed(
-        {
-          user_id: userId,
-          mode,
-          text_length: text.length,
-          error_message: errorMessage,
-        },
-        this.waitUntil
-      );
-
       if (error instanceof OpenRouterConfigurationError) {
         console.error("OpenRouter configuration error:", error.message);
         throw new AnalysisConfigurationError();

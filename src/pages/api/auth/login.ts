@@ -1,7 +1,6 @@
 import type { APIRoute } from "astro";
 import { z } from "zod";
 import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-helpers";
-import { trackUserLogin } from "@/lib/analytics/events";
 import type { SignedInUserDto } from "@/types";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
 
@@ -44,14 +43,6 @@ export const POST: APIRoute = async ({ request, locals, waitUntil }) => {
       id: data.user.id,
       email: data.user.email!,
     };
-
-    trackUserLogin(
-      {
-        user_id: userDto.id,
-        email_domain: userDto.email.split("@")[1],
-      },
-      waitUntil
-    );
 
     return new Response(JSON.stringify({ user: userDto }), {
       status: 200,
