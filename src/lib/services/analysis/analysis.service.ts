@@ -1,4 +1,3 @@
-import type { SupabaseClient } from "@/db/supabase.client";
 import type { AnalysisMode, TextAnalysisDto } from "../../../types";
 import { getMockAnalysis } from "./analysis.mocks";
 import { openRouterService } from "../openrouter";
@@ -46,19 +45,16 @@ const ANALYSIS_PROMPTS: Record<AnalysisMode, string> = {
 export class AnalysisService {
   private useMocks: boolean;
 
-  constructor(
-    private readonly supabase: SupabaseClient,
-    private readonly waitUntil?: (promise: Promise<unknown>) => void
-  ) {
+  constructor() {
     this.useMocks = USE_MOCKS;
   }
 
-  async analyzeText(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
+  async analyzeText(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     if (this.useMocks) {
       return this.analyzeMocked(text, mode);
     }
 
-    return this.analyzeWithAI(text, mode, userId);
+    return this.analyzeWithAI(text, mode);
   }
 
   private async analyzeMocked(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
@@ -66,7 +62,7 @@ export class AnalysisService {
     return getMockAnalysis(text, mode);
   }
 
-  private async analyzeWithAI(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
+  private async analyzeWithAI(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     const systemPrompt = ANALYSIS_PROMPTS[mode];
 
     try {

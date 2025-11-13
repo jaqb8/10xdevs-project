@@ -5,7 +5,6 @@ import type {
   LearningItemDto,
   PaginatedResponseDto,
   PaginationDto,
-  AnalysisMode,
 } from "../../../types";
 import {
   LearningItemsDatabaseError,
@@ -14,10 +13,7 @@ import {
 } from "./learning-items.errors";
 
 export class LearningItemsService {
-  constructor(
-    private readonly supabase: SupabaseClient,
-    private readonly waitUntil?: (promise: Promise<unknown>) => void
-  ) {}
+  constructor(private readonly supabase: SupabaseClient) {}
 
   async getLearningItems(
     userId: string,

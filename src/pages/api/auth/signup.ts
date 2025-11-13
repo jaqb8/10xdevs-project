@@ -11,7 +11,7 @@ const signupSchema = z.object({
 
 export const prerender = false;
 
-export const POST: APIRoute = async ({ request, locals, waitUntil }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   if (!isFeatureEnabled("auth")) {
     return createErrorResponse("feature_not_available", 404);
   }
