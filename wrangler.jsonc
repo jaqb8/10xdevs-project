@@ -1,0 +1,38 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "10xdevs-project",
+  "main": "./dist/_worker.js/index.js",
+  "compatibility_date": "2025-03-10",
+  "compatibility_flags": ["nodejs_compat"],
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./dist",
+  },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1.0,
+  },
+  "env": {
+    "staging": {
+      "name": "10xdevs-project-staging",
+      "vars": {
+        "SUPABASE_URL": "https://ktnthoafylnotwieeowv.supabase.co",
+        "USE_MOCKS": false,
+        "RATE_LIMIT_MAX_REQUESTS": 10,
+        "RATE_LIMIT_WINDOW_MS": 60000,
+        "PUBLIC_ENV_NAME": "integration",
+      },
+    },
+    "production": {
+      "name": "10xdevs-project",
+      "vars": {
+        "SUPABASE_URL": "https://jyllkxpxiimsktbzhtvr.supabase.co",
+        "USE_MOCKS": false,
+        "RATE_LIMIT_MAX_REQUESTS": 10,
+        "RATE_LIMIT_WINDOW_MS": 60000,
+        "PUBLIC_ENV_NAME": "production",
+      },
+    },
+  },
+  "preview_urls": true,
+}

@@ -1,4 +1,3 @@
-import type { SupabaseClient } from "@/db/supabase.client";
 import type { AnalysisMode, TextAnalysisDto } from "../../../types";
 import { getMockAnalysis } from "./analysis.mocks";
 import { openRouterService } from "../openrouter";
@@ -19,11 +18,6 @@ import {
   AnalysisNetworkError,
   AnalysisUnknownError,
 } from "./analysis.errors";
-import {
-  trackTextAnalysisRequested,
-  trackTextAnalysisCompleted,
-  trackTextAnalysisFailed,
-} from "@/lib/analytics/events";
 import { z } from "zod";
 import grammarPrompt from "@/lib/prompts/grammar-analysis.prompt.md?raw";
 import colloquialPrompt from "@/lib/prompts/colloquial-speech.prompt.md?raw";
@@ -51,16 +45,16 @@ const ANALYSIS_PROMPTS: Record<AnalysisMode, string> = {
 export class AnalysisService {
   private useMocks: boolean;
 
-  constructor(private readonly supabase: SupabaseClient) {
+  constructor() {
     this.useMocks = USE_MOCKS;
   }
 
-  async analyzeText(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
+  async analyzeText(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     if (this.useMocks) {
       return this.analyzeMocked(text, mode);
     }
 
-    return this.analyzeWithAI(text, mode, userId);
+    return this.analyzeWithAI(text, mode);
   }
 
   private async analyzeMocked(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
@@ -68,13 +62,7 @@ export class AnalysisService {
     return getMockAnalysis(text, mode);
   }
 
-  private async analyzeWithAI(text: string, mode: AnalysisMode, userId?: string): Promise<TextAnalysisDto> {
-    trackTextAnalysisRequested({
-      user_id: userId,
-      mode,
-      text_length: text.length,
-    });
-
+  private async analyzeWithAI(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
     const systemPrompt = ANALYSIS_PROMPTS[mode];
 
     try {
@@ -87,24 +75,15 @@ export class AnalysisService {
         maxTokens: 1000,
       });
 
-      trackTextAnalysisCompleted({
-        user_id: userId,
-        mode,
-        text_length: text.length,
-        is_correct: result.is_correct,
-      });
+      if (result.is_correct) {
+        return result;
+      }
 
-      return result;
+      return {
+        ...result,
+        translation: result.translation ?? null,
+      };
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-
-      trackTextAnalysisFailed({
-        user_id: userId,
-        mode,
-        text_length: text.length,
-        error_message: errorMessage,
-      });
-
       if (error instanceof OpenRouterConfigurationError) {
         console.error("OpenRouter configuration error:", error.message);
         throw new AnalysisConfigurationError();

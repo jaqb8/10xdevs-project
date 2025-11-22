@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages
+name: Deploy to Cloudflare Workers
 
 on:
   push:
@@ -49,7 +49,7 @@ jobs:
         run: npm run test
 
   deploy:
-    name: Deploy to Cloudflare Pages
+    name: Deploy to Cloudflare Workers
     runs-on: ubuntu-latest
     needs: [lint, unit-test]
     environment: production
@@ -88,16 +88,14 @@ jobs:
           USE_MOCKS: ${{ vars.USE_MOCKS }}
           ASTRO_SITE: ${{ vars.ASTRO_SITE }}
           APP_NAME: ${{ vars.APP_NAME }}
-          POSTHOG_PROJECT_API_KEY: ${{ secrets.POSTHOG_PROJECT_API_KEY }}
-          PUBLIC_POSTHOG_PROJECT_API_KEY: ${{ secrets.PUBLIC_POSTHOG_PROJECT_API_KEY }}
         run: npm run build
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }}
+          command: deploy --env=production
 
   create-release:
     name: Create Release

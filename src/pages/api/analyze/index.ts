@@ -23,9 +23,8 @@ const analyzeTextSchema = z.object({
     .default("grammar_and_spelling"),
 });
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
-    const userId = locals.user?.id;
     const body = await request.json();
     const validationResult = analyzeTextSchema.safeParse(body);
 
@@ -35,7 +34,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const { text, mode } = validationResult.data;
 
-    const result = await new AnalysisService(locals.supabase).analyzeText(text, mode, userId);
+    const result = await new AnalysisService().analyzeText(text, mode);
 
     return new Response(JSON.stringify(result), {
       status: 200,
