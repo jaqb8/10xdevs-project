@@ -1,4 +1,4 @@
-name: Deploy to Cloudflare Pages (Preview)
+name: Deploy to Cloudflare Workers (Preview)
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
 
 jobs:
   deploy:
-    name: Deploy to Cloudflare Pages (Preview)
+    name: Deploy to Cloudflare Workers (Preview)
     runs-on: ubuntu-latest
     environment: integration
     steps:
@@ -47,11 +47,9 @@ jobs:
           USE_MOCKS: false
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           APP_NAME: ${{ vars.APP_NAME }}
-          POSTHOG_PROJECT_API_KEY: ${{ secrets.POSTHOG_PROJECT_API_KEY }}
-          PUBLIC_POSTHOG_PROJECT_API_KEY: ${{ secrets.PUBLIC_POSTHOG_PROJECT_API_KEY }}
         run: npm run build
 
-      - name: Deploy to Cloudflare Pages
+      - name: Deploy to Cloudflare Workers
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
