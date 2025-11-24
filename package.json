@@ -17,6 +17,7 @@
     "supabase:status": "supabase status",
     "supabase:restart": "supabase restart",
     "supabase:migration:up": "supabase migration up",
+    "supabase:gen-types": "supabase gen types typescript --local > src/db/database.types.ts",
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",

@@ -8,6 +8,27 @@ export interface Database {
   };
   public: {
     Tables: {
+      anonymous_daily_usage: {
+        Row: {
+          ip_hash: string;
+          request_count: number;
+          updated_at: string;
+          usage_date: string;
+        };
+        Insert: {
+          ip_hash: string;
+          request_count?: number;
+          updated_at?: string;
+          usage_date: string;
+        };
+        Update: {
+          ip_hash?: string;
+          request_count?: number;
+          updated_at?: string;
+          usage_date?: string;
+        };
+        Relationships: [];
+      };
       learning_items: {
         Row: {
           analysis_mode: string;

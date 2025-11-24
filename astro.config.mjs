@@ -25,6 +25,7 @@ export default defineConfig({
       USE_MOCKS: envField.boolean({ context: "server", access: "public", default: true }),
       RATE_LIMIT_MAX_REQUESTS: envField.number({ context: "server", access: "public", default: 10 }),
       RATE_LIMIT_WINDOW_MS: envField.number({ context: "server", access: "public", default: 60000 }),
+      ANONYMOUS_DAILY_QUOTA: envField.number({ context: "server", access: "public", default: 5 }),
     },
     validateSecrets: true,
   },
