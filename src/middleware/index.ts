@@ -17,14 +17,14 @@ function getClientIP(request: Request): string {
     return cfConnectingIP;
   }
 
-  const xForwardedFor = headers.get("X-Forwarded-For");
-  if (xForwardedFor) {
-    return xForwardedFor.split(",")[0].trim();
-  }
-
   const xRealIP = headers.get("X-Real-IP");
   if (xRealIP) {
     return xRealIP;
+  }
+
+  const xForwardedFor = headers.get("X-Forwarded-For");
+  if (xForwardedFor) {
+    return xForwardedFor.split(",")[0].trim();
   }
 
   return "unknown";

@@ -24,12 +24,13 @@ const INITIAL_STATE: AnalyzeViewState = {
 function formatResetTime(resetAt: string): string {
   try {
     const resetDate = new Date(resetAt);
-    const now = new Date();
 
-    const resetUTCDate = new Date(
-      Date.UTC(resetDate.getUTCFullYear(), resetDate.getUTCMonth(), resetDate.getUTCDate())
-    );
-    const nowUTCDate = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+    const dateString = resetDate.toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    });
 
     const timeString = resetDate.toLocaleTimeString("pl-PL", {
       hour: "2-digit",
@@ -37,25 +38,9 @@ function formatResetTime(resetAt: string): string {
       timeZone: "UTC",
     });
 
-    const diffDays = Math.floor((resetUTCDate.getTime() - nowUTCDate.getTime()) / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-      return `dzisiaj o ${timeString} UTC`;
-    }
-
-    if (diffDays === 1) {
-      return `jutro o ${timeString} UTC`;
-    }
-
-    const dateString = resetDate.toLocaleDateString("pl-PL", {
-      day: "numeric",
-      month: "long",
-      timeZone: "UTC",
-    });
-
     return `${dateString} o ${timeString} UTC`;
   } catch {
-    return "jutro o 00:00 UTC";
+    return "wkrótce";
   }
 }
 

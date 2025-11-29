@@ -64,7 +64,16 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      increment_anonymous_daily_usage: {
+        Args: {
+          p_ip_hash: string;
+          p_usage_date: string;
+          p_limit: number;
+        };
+        Returns: Json;
+      };
+    };
     Enums: {
       analysis_mode: "grammar_and_spelling" | "colloquial_speech";
     };

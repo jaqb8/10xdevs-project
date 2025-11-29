@@ -1,10 +1,6 @@
 import type { SupabaseClient } from "../../../db/supabase.client";
 import { DailyQuotaDatabaseError } from "./daily-quota.errors";
-
-const ANONYMOUS_DAILY_QUOTA =
-  typeof import.meta.env !== "undefined" && import.meta.env.ANONYMOUS_DAILY_QUOTA
-    ? Number(import.meta.env.ANONYMOUS_DAILY_QUOTA)
-    : 5;
+import { ANONYMOUS_DAILY_QUOTA, ANONYMOUS_IP_SALT } from "astro:env/server";
 
 /**
  * Service for managing daily analysis quota for unauthenticated users.
@@ -23,66 +19,43 @@ export class DailyQuotaService {
   async checkAndIncrementAnonymousUsage(ip: string): Promise<{ allowed: boolean; remaining: number; resetAt: string }> {
     const ipHash = await this.hashIP(ip);
     const today = this.getTodayUTC();
-
-    const { data: existingRecord, error: selectError } = await this.supabase
-      .from("anonymous_daily_usage")
-      .select("request_count")
-      .eq("ip_hash", ipHash)
-      .eq("usage_date", today)
-      .single();
-
-    if (selectError && selectError.code !== "PGRST116") {
-      console.error("Database error in checkAndIncrementAnonymousUsage (select):", selectError);
-      throw new DailyQuotaDatabaseError(selectError);
-    }
-
-    const currentCount = existingRecord?.request_count ?? 0;
-
     const resetAt = this.getNextMidnightUTC();
 
-    if (currentCount >= ANONYMOUS_DAILY_QUOTA) {
-      return {
-        allowed: false,
-        remaining: 0,
-        resetAt,
-      };
+    const { data, error } = await this.supabase.rpc("increment_anonymous_daily_usage", {
+      p_ip_hash: ipHash,
+      p_usage_date: today,
+      p_limit: ANONYMOUS_DAILY_QUOTA,
+    });
+
+    if (error) {
+      console.error("Database error in checkAndIncrementAnonymousUsage (rpc):", error);
+      throw new DailyQuotaDatabaseError(error);
     }
 
-    const newCount = currentCount + 1;
-
-    const { error: upsertError } = await this.supabase.from("anonymous_daily_usage").upsert(
-      {
-        ip_hash: ipHash,
-        usage_date: today,
-        request_count: newCount,
-        updated_at: new Date().toISOString(),
-      },
-      {
-        onConflict: "ip_hash,usage_date",
-      }
-    );
-
-    if (upsertError) {
-      console.error("Database error in checkAndIncrementAnonymousUsage (upsert):", upsertError);
-      throw new DailyQuotaDatabaseError(upsertError);
-    }
+    const result = data as { allowed: boolean; current_usage: number };
 
     return {
-      allowed: true,
-      remaining: Math.max(0, ANONYMOUS_DAILY_QUOTA - newCount),
+      allowed: result.allowed,
+      remaining: Math.max(0, ANONYMOUS_DAILY_QUOTA - result.current_usage),
       resetAt,
     };
   }
 
   /**
-   * Hashes the IP address using SHA-256 for privacy protection.
+   * Hashes the IP address using SHA-256 with a salt for privacy protection.
    *
    * @param ip - Client IP address
    * @returns Hashed IP address as hex string
    */
   private async hashIP(ip: string): Promise<string> {
+    const salt = ANONYMOUS_IP_SALT;
+
+    if (salt === "default-insecure-salt") {
+      console.warn("WARNING: ANONYMOUS_IP_SALT is not set. Using default insecure salt.");
+    }
+
     const encoder = new TextEncoder();
-    const data = encoder.encode(ip);
+    const data = encoder.encode(ip + salt);
     const hashBuffer = await crypto.subtle.digest("SHA-256", data);
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
