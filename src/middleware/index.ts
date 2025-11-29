@@ -72,7 +72,6 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
       }
     } else {
       const clientIP = getClientIP(request);
-      console.log("clientIP", clientIP);
       const dailyQuotaService = new DailyQuotaService(supabase);
 
       try {
