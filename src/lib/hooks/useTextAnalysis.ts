@@ -21,6 +21,29 @@ const INITIAL_STATE: AnalyzeViewState = {
   isCurrentResultSaved: false,
 };
 
+function formatResetTime(resetAt: string): string {
+  try {
+    const resetDate = new Date(resetAt);
+
+    const dateString = resetDate.toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+
+    const timeString = resetDate.toLocaleTimeString("pl-PL", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "UTC",
+    });
+
+    return `${dateString} o ${timeString} UTC`;
+  } catch {
+    return "wkrótce";
+  }
+}
+
 function mapErrorCodeToMessage(error: ApiErrorResponse): string {
   const { error_code, data } = error;
   const errorMessages: Record<string, string> = {
@@ -30,6 +53,7 @@ function mapErrorCodeToMessage(error: ApiErrorResponse): string {
     authentication_error: "Błąd uwierzytelniania. Skontaktuj się z pomocą techniczną.",
     authentication_error_unauthorized: "Musisz być zalogowany, aby wykonać tę operację.",
     rate_limit_error: `Przekroczono limit zapytań. Spróbuj ponownie za ${Math.ceil(((data?.time_until_reset as number) ?? 0) / 1000)} sekund.`,
+    daily_quota_exceeded: `Przekroczono dzienny limit analiz dla niezalogowanych użytkowników. Limit zostanie zresetowany ${formatResetTime((data?.reset_at as string) ?? "")}. Zaloguj się, aby uzyskać więcej analiz.`,
     invalid_request_error: "Nieprawidłowe żądanie. Sprawdź wprowadzone dane.",
     validation_error: "Nie udało się przetworzyć odpowiedzi AI. Spróbuj ponownie.",
     network_error: "Błąd sieci. Sprawdź połączenie i spróbuj ponownie.",
