@@ -87,6 +87,7 @@ jobs:
           echo "E2E_PASSWORD=${{ secrets.E2E_PASSWORD }}" >> .env.test
           echo "E2E_USER_ID=${{ secrets.E2E_USER_ID }}" >> .env.test
           echo "PUBLIC_ENV_NAME=${{ vars.ENV_NAME }}" >> .env.test
+          echo "ANONYMOUS_DAILY_QUOTA=${{ vars.ANONYMOUS_DAILY_QUOTA }}" >> .env.test
 
       - name: Run E2E tests
         run: npm run test:e2e
