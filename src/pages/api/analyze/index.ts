@@ -23,7 +23,7 @@ const analyzeTextSchema = z.object({
     .default("grammar_and_spelling"),
 });
 
-export const POST: APIRoute = async ({ request }) => {
+export const POST: APIRoute = async ({ request, locals }) => {
   try {
     const body = await request.json();
     const validationResult = analyzeTextSchema.safeParse(body);
@@ -36,9 +36,17 @@ export const POST: APIRoute = async ({ request }) => {
 
     const result = await new AnalysisService().analyzeText(text, mode);
 
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+
+    if (locals.analysisQuota) {
+      headers["X-Daily-Quota-Remaining"] = locals.analysisQuota.remaining.toString();
+      headers["X-Daily-Quota-Reset-At"] = locals.analysisQuota.resetAt;
+      headers["X-Daily-Quota-Limit"] = locals.analysisQuota.limit.toString();
+    }
+
     return new Response(JSON.stringify(result), {
       status: 200,
-      headers: { "Content-Type": "application/json" },
+      headers,
     });
   } catch (error) {
     if (error instanceof AnalysisConfigurationError) {

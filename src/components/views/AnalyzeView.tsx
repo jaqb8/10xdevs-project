@@ -2,6 +2,8 @@ import { useCallback, useEffect } from "react";
 import { useTextAnalysis } from "../../lib/hooks/useTextAnalysis";
 import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
 import { usePendingAnalysisStore } from "../../lib/stores/pending-analysis.store";
+import { useAuthStore } from "../../lib/stores/auth.store";
+import { formatResetTime } from "../../lib/utils";
 import { AnalysisForm } from "../features/AnalysisForm";
 import { AnalysisResult } from "../features/AnalysisResult";
 import { toast } from "sonner";
@@ -10,9 +12,10 @@ import type { CreateLearningItemCommand } from "../../types";
 const MAX_TEXT_LENGTH = 500;
 
 export function AnalyzeView() {
-  const { state, setText, analyzeText, saveResult, clear } = useTextAnalysis();
+  const { state, quota, setText, analyzeText, saveResult, clear } = useTextAnalysis();
   const mode = useAnalysisModeStore((state) => state.mode);
   const { clearPendingAnalysis } = usePendingAnalysisStore();
+  const isAuth = useAuthStore((state) => state.isAuth);
 
   useEffect(() => {
     if (state.error) {
@@ -66,6 +69,8 @@ export function AnalyzeView() {
           isLoading={state.status === "loading"}
           isAnalyzing={state.status === "loading"}
           maxLength={MAX_TEXT_LENGTH}
+          quota={!isAuth ? quota : null}
+          formatResetTime={formatResetTime}
         />
       </section>
       {(state.status === "loading" || state.result) && (

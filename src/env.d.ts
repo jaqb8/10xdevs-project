@@ -8,6 +8,7 @@ declare global {
     interface Locals {
       supabase: SupabaseClient;
       user: UserViewModel | null;
+      analysisQuota: { remaining: number; resetAt: string; limit: number } | null;
     }
   }
 }

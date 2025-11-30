@@ -4,31 +4,12 @@ import { createSupabaseServerInstance, DEFAULT_USER_ID } from "../db/supabase.cl
 import { analysisRateLimiter } from "../lib/rate-limiter.ts";
 import { DailyQuotaService } from "../lib/services/daily-quota";
 import { createErrorResponse } from "@/lib/api-helpers.ts";
+import { getClientIP } from "@/lib/utils.ts";
+import { ANONYMOUS_DAILY_QUOTA } from "astro:env/server";
 
 const AUTH_PAGES = ["/login", "/signup", "/forgot-password"];
 
 const PRIVATE_PATHS = ["/learning-list"];
-
-function getClientIP(request: Request): string {
-  const headers = request.headers;
-
-  const cfConnectingIP = headers.get("CF-Connecting-IP");
-  if (cfConnectingIP) {
-    return cfConnectingIP;
-  }
-
-  const xRealIP = headers.get("X-Real-IP");
-  if (xRealIP) {
-    return xRealIP;
-  }
-
-  const xForwardedFor = headers.get("X-Forwarded-For");
-  if (xForwardedFor) {
-    return xForwardedFor.split(",")[0].trim();
-  }
-
-  return "unknown";
-}
 
 export const onRequest = defineMiddleware(async ({ locals, cookies, url, request, redirect }, next) => {
   const supabase = createSupabaseServerInstance({
@@ -70,6 +51,8 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
           time_until_reset: timeUntilReset,
         });
       }
+
+      locals.analysisQuota = null;
     } else {
       const clientIP = getClientIP(request);
       const dailyQuotaService = new DailyQuotaService(supabase);
@@ -78,16 +61,30 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
         const result = await dailyQuotaService.checkAndIncrementAnonymousUsage(clientIP);
 
         if (!result.allowed) {
+          locals.analysisQuota = {
+            remaining: result.remaining,
+            resetAt: result.resetAt,
+            limit: ANONYMOUS_DAILY_QUOTA,
+          };
           return createErrorResponse("daily_quota_exceeded", 429, {
             remaining: result.remaining,
             reset_at: result.resetAt,
+            limit: ANONYMOUS_DAILY_QUOTA,
           });
         }
+
+        locals.analysisQuota = {
+          remaining: result.remaining,
+          resetAt: result.resetAt,
+          limit: ANONYMOUS_DAILY_QUOTA,
+        };
       } catch (error) {
         console.error("Error checking daily quota:", error);
         return createErrorResponse("unknown_error", 500);
       }
     }
+  } else {
+    locals.analysisQuota = null;
   }
 
   return next();
