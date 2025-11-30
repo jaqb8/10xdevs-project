@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { usePendingAnalysisStore } from "../stores/pending-analysis.store";
 import { useAnalysisModeStore } from "../stores/analysis-mode.store";
+import { useAuthStore } from "../stores/auth.store";
+import { formatResetTime } from "../utils";
 import type { TextAnalysisDto, CreateLearningItemCommand, ApiErrorResponse, AnalysisMode } from "../../types";
 
 type AnalysisStatus = "idle" | "loading" | "success" | "error";
@@ -13,6 +15,12 @@ interface AnalyzeViewState {
   isCurrentResultSaved: boolean;
 }
 
+interface QuotaStatus {
+  remaining: number;
+  resetAt: string;
+  limit: number;
+}
+
 const INITIAL_STATE: AnalyzeViewState = {
   status: "idle",
   text: "",
@@ -20,29 +28,6 @@ const INITIAL_STATE: AnalyzeViewState = {
   error: null,
   isCurrentResultSaved: false,
 };
-
-function formatResetTime(resetAt: string): string {
-  try {
-    const resetDate = new Date(resetAt);
-
-    const dateString = resetDate.toLocaleDateString("pl-PL", {
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      timeZone: "UTC",
-    });
-
-    const timeString = resetDate.toLocaleTimeString("pl-PL", {
-      hour: "2-digit",
-      minute: "2-digit",
-      timeZone: "UTC",
-    });
-
-    return `${dateString} o ${timeString} UTC`;
-  } catch {
-    return "wkrótce";
-  }
-}
 
 function mapErrorCodeToMessage(error: ApiErrorResponse): string {
   const { error_code, data } = error;
@@ -70,9 +55,36 @@ function mapErrorCodeToMessage(error: ApiErrorResponse): string {
 
 export function useTextAnalysis() {
   const [state, setState] = useState<AnalyzeViewState>(INITIAL_STATE);
+  const [quota, setQuota] = useState<QuotaStatus | null>(null);
   const { pendingAnalysis, clearPendingAnalysis } = usePendingAnalysisStore();
   const { setMode } = useAnalysisModeStore();
+  const isAuth = useAuthStore((state) => state.isAuth);
   const hasRestoredRef = useRef(false);
+
+  const checkQuota = useCallback(async () => {
+    if (isAuth) {
+      setQuota(null);
+      return;
+    }
+
+    try {
+      const response = await fetch("/api/analyze/quota");
+      if (response.ok) {
+        const data = await response.json();
+        if (data.remaining !== null && data.resetAt !== null && data.limit !== null) {
+          setQuota({
+            remaining: data.remaining,
+            resetAt: data.resetAt,
+            limit: data.limit,
+          });
+        } else {
+          setQuota(null);
+        }
+      }
+    } catch (error) {
+      console.error("Error checking quota:", error);
+    }
+  }, [isAuth]);
 
   useEffect(() => {
     if (hasRestoredRef.current) {
@@ -110,6 +122,10 @@ export function useTextAnalysis() {
     }
   }, [pendingAnalysis, clearPendingAnalysis, setMode]);
 
+  useEffect(() => {
+    checkQuota();
+  }, [checkQuota]);
+
   const setText = (text: string) => {
     setState((prev) => ({ ...prev, text }));
   };
@@ -132,6 +148,23 @@ export function useTextAnalysis() {
 
       if (!response.ok) {
         const errorData: ApiErrorResponse = await response.json();
+
+        if (errorData.error_code === "daily_quota_exceeded") {
+          const resetAt = (errorData.data?.reset_at as string) ?? "";
+          const limit = (errorData.data?.limit as number) ?? 0;
+          setQuota({
+            remaining: 0,
+            resetAt,
+            limit,
+          });
+          setState((prev) => ({
+            ...prev,
+            status: "error",
+            error: null,
+          }));
+          return;
+        }
+
         const errorMessage = mapErrorCodeToMessage(errorData);
 
         setState((prev) => ({
@@ -143,6 +176,18 @@ export function useTextAnalysis() {
       }
 
       const result: TextAnalysisDto = await response.json();
+
+      const remainingHeader = response.headers.get("X-Daily-Quota-Remaining");
+      const resetAtHeader = response.headers.get("X-Daily-Quota-Reset-At");
+      const limitHeader = response.headers.get("X-Daily-Quota-Limit");
+
+      if (remainingHeader !== null && resetAtHeader !== null && limitHeader !== null) {
+        setQuota({
+          remaining: parseInt(remainingHeader, 10),
+          resetAt: resetAtHeader,
+          limit: parseInt(limitHeader, 10),
+        });
+      }
 
       setState((prev) => ({
         ...prev,
@@ -211,6 +256,7 @@ export function useTextAnalysis() {
 
   return {
     state,
+    quota,
     setText,
     analyzeText,
     saveResult,
