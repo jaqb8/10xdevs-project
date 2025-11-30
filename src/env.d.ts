@@ -19,7 +19,8 @@ interface ImportMetaEnv {
   readonly USE_MOCKS?: string;
   readonly RATE_LIMIT_MAX_REQUESTS?: string;
   readonly RATE_LIMIT_WINDOW_MS?: string;
-  // more env variables...
+  readonly ANONYMOUS_DAILY_QUOTA: string;
+  readonly ANONYMOUS_IP_SALT: string;
 }
 
 interface ImportMeta {

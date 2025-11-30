@@ -1,1 +1,1 @@
-[ ] Zaimplementować dzienny limit analiz tekstu dla użytkowników niezalogowanych
+[x] Zaimplementować dzienny limit analiz tekstu dla użytkowników niezalogowanych

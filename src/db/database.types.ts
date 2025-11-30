@@ -8,6 +8,27 @@ export interface Database {
   };
   public: {
     Tables: {
+      anonymous_daily_usage: {
+        Row: {
+          ip_hash: string;
+          request_count: number;
+          updated_at: string;
+          usage_date: string;
+        };
+        Insert: {
+          ip_hash: string;
+          request_count?: number;
+          updated_at?: string;
+          usage_date: string;
+        };
+        Update: {
+          ip_hash?: string;
+          request_count?: number;
+          updated_at?: string;
+          usage_date?: string;
+        };
+        Relationships: [];
+      };
       learning_items: {
         Row: {
           analysis_mode: string;
@@ -43,7 +64,16 @@ export interface Database {
       };
     };
     Views: Record<never, never>;
-    Functions: Record<never, never>;
+    Functions: {
+      increment_anonymous_daily_usage: {
+        Args: {
+          p_ip_hash: string;
+          p_usage_date: string;
+          p_limit: number;
+        };
+        Returns: Json;
+      };
+    };
     Enums: {
       analysis_mode: "grammar_and_spelling" | "colloquial_speech";
     };
