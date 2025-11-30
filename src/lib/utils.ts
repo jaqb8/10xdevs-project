@@ -6,6 +6,63 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 /**
+ * Extracts the client IP address from request headers.
+ * Checks headers in order: CF-Connecting-IP, X-Real-IP, X-Forwarded-For.
+ *
+ * @param request - The Request object containing headers
+ * @returns The client IP address or "unknown" if not found
+ */
+export function getClientIP(request: Request): string {
+  const headers = request.headers;
+
+  const cfConnectingIP = headers.get("CF-Connecting-IP");
+  if (cfConnectingIP) {
+    return cfConnectingIP;
+  }
+
+  const xRealIP = headers.get("X-Real-IP");
+  if (xRealIP) {
+    return xRealIP;
+  }
+
+  const xForwardedFor = headers.get("X-Forwarded-For");
+  if (xForwardedFor) {
+    return xForwardedFor.split(",")[0].trim();
+  }
+
+  return "unknown";
+}
+
+/**
+ * Formats a UTC timestamp as a human-readable date and time string in Polish locale.
+ *
+ * @param resetAt - ISO timestamp string (UTC)
+ * @returns Formatted string like "26 listopada 2025 o 00:00 UTC" or "wkrótce" on error
+ */
+export function formatResetTime(resetAt: string): string {
+  try {
+    const resetDate = new Date(resetAt);
+
+    const dateString = resetDate.toLocaleDateString("pl-PL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      timeZone: "UTC",
+    });
+
+    const timeString = resetDate.toLocaleTimeString("pl-PL", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "UTC",
+    });
+
+    return `${dateString} o ${timeString} UTC`;
+  } catch {
+    return "wkrótce";
+  }
+}
+
+/**
  * Validates and normalizes a return URL to prevent open redirect attacks.
  * Only allows relative paths starting with '/' and disallows:
  * - Absolute URLs (with protocol like http://, https://, javascript:, etc.)

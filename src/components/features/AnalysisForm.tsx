@@ -1,8 +1,16 @@
 import { useCallback } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Brain, Loader2 } from "lucide-react";
 import { AnalysisModeSelector } from "./AnalysisModeSelector";
+import { cn } from "@/lib/utils";
+
+interface QuotaStatus {
+  remaining: number;
+  resetAt: string;
+  limit: number;
+}
 
 interface AnalysisFormProps {
   text: string;
@@ -12,6 +20,8 @@ interface AnalysisFormProps {
   isLoading: boolean;
   isAnalyzing: boolean;
   maxLength: number;
+  quota?: QuotaStatus | null;
+  formatResetTime: (resetAt: string) => string;
 }
 
 export function AnalysisForm({
@@ -22,10 +32,12 @@ export function AnalysisForm({
   isLoading,
   isAnalyzing,
   maxLength,
+  quota,
+  formatResetTime,
 }: AnalysisFormProps) {
   const isOverLimit = text.length > maxLength;
-  const isDisabled = isLoading || text.trim().length === 0 || isOverLimit;
-  const isClearDisabled = isLoading || text.trim().length === 0;
+  const isQuotaExceeded = quota !== null && quota !== undefined && quota.remaining === 0;
+  const isDisabled = isLoading || text.trim().length === 0 || isOverLimit || isQuotaExceeded;
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -55,7 +67,7 @@ export function AnalysisForm({
           value={text}
           onChange={handleTextChange}
           placeholder="Wpisz tutaj swój tekst w języku angielskim..."
-          disabled={isAnalyzing}
+          disabled={isAnalyzing || isQuotaExceeded}
           rows={8}
           className="text-lg md:text-lg"
           aria-describedby="char-count char-count-helper"
@@ -80,8 +92,35 @@ export function AnalysisForm({
             {text.length} / {maxLength}
           </p>
         </div>
-        <AnalysisModeSelector />
+        <AnalysisModeSelector disabled={isQuotaExceeded} />
       </div>
+
+      {quota && quota.remaining === 0 && (
+        <Alert variant="destructive">
+          <AlertTitle>Przekroczono dzienny limit analiz</AlertTitle>
+          <AlertDescription>
+            <p>
+              Przekroczono dzienny limit {quota.limit} analiz dla niezalogowanych użytkowników. Limit zostanie
+              zresetowany {formatResetTime(quota.resetAt)}.{" "}
+              <a
+                href="/login"
+                onClick={(e) => {
+                  e.preventDefault();
+                  window.location.href = "/login";
+                }}
+                className={cn(
+                  "font-semibold underline underline-offset-4",
+                  "hover:no-underline transition-all",
+                  "cursor-pointer focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 rounded-sm",
+                  "text-destructive hover:text-destructive/80"
+                )}
+              >
+                Zaloguj się, aby uzyskać nielimitowany dostęp do analizy tekstu.
+              </a>
+            </p>
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="flex flex-col gap-2">
         <Button
@@ -105,7 +144,7 @@ export function AnalysisForm({
         <Button
           type="button"
           onClick={onClear}
-          disabled={isClearDisabled}
+          disabled={false}
           variant="outline"
           className="w-full text-lg"
           size="lg"

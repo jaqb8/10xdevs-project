@@ -42,6 +42,40 @@ export class DailyQuotaService {
   }
 
   /**
+   * Gets the current quota status without incrementing the usage counter.
+   * Used for checking quota status on page load or before making a request.
+   *
+   * @param ip - Client IP address (will be hashed internally)
+   * @returns Object with `remaining` count and `resetAt` timestamp
+   * @throws DailyQuotaDatabaseError if database operation fails
+   */
+  async getAnonymousQuotaStatus(ip: string): Promise<{ remaining: number; resetAt: string }> {
+    const ipHash = await this.hashIP(ip);
+    const today = this.getTodayUTC();
+    const resetAt = this.getNextMidnightUTC();
+
+    const { data, error } = await this.supabase
+      .from("anonymous_daily_usage")
+      .select("request_count")
+      .eq("ip_hash", ipHash)
+      .eq("usage_date", today)
+      .maybeSingle();
+
+    if (error) {
+      console.error("Database error in getAnonymousQuotaStatus:", error);
+      throw new DailyQuotaDatabaseError(error);
+    }
+
+    const currentUsage = data?.request_count ?? 0;
+    const remaining = Math.max(0, ANONYMOUS_DAILY_QUOTA - currentUsage);
+
+    return {
+      remaining,
+      resetAt,
+    };
+  }
+
+  /**
    * Hashes the IP address using SHA-256 with a salt for privacy protection.
    *
    * @param ip - Client IP address

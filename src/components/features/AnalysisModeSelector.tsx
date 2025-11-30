@@ -14,11 +14,18 @@ const ANALYSIS_MODE_DESCRIPTIONS: Record<AnalysisMode, string> = {
   [ANALYSIS_MODES.COLLOQUIAL_SPEECH]: "Twój tekst zostanie sprawdzony pod kątem naturalności i stylu potocznego.",
 };
 
-export function AnalysisModeSelector() {
+interface AnalysisModeSelectorProps {
+  disabled?: boolean;
+}
+
+export function AnalysisModeSelector({ disabled = false }: AnalysisModeSelectorProps) {
   const mode = useAnalysisModeStore((state) => state.mode);
   const setMode = useAnalysisModeStore((state) => state.setMode);
 
   const handleValueChange = (value: string) => {
+    if (disabled) {
+      return;
+    }
     if (value === ANALYSIS_MODES.GRAMMAR_AND_SPELLING || value === ANALYSIS_MODES.COLLOQUIAL_SPEECH) {
       setMode(value as AnalysisMode);
     }
@@ -35,7 +42,7 @@ export function AnalysisModeSelector() {
           {ANALYSIS_MODE_DESCRIPTIONS[mode]}
         </p>
       </div>
-      <Select value={mode} onValueChange={handleValueChange}>
+      <Select value={mode} onValueChange={handleValueChange} disabled={disabled}>
         <SelectTrigger size="md" id="analysis-mode" className="w-full text-base" data-test-id="analysis-mode-selector">
           <SelectValue />
         </SelectTrigger>
