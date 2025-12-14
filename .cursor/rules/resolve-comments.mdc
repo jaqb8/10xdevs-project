@@ -1,0 +1,194 @@
+---
+alwaysApply: false
+---
+
+## Resolve PR Comments
+
+### Purpose
+
+This rule helps the agent automatically fetch comments from the latest open Pull Request, analyze them, and apply the required code changes.
+
+### Procedure
+
+#### 1. Fetch information about the latest open PR
+
+First, find the latest open Pull Request in the repository:
+
+```bash
+# Get list of open PRs and select the newest one
+gh pr list --state open --limit 1 --json number,title,headRefName,url
+```
+
+Save the PR number (`number`) for further use.
+
+#### 2. Fetch comments from PR
+
+Fetch all comments from the PR, including:
+
+- Review comments (inline and general)
+- Discussion comments
+- Code line comments
+
+```bash
+# Fetch all review comments
+gh pr view <PR_NUMBER> --json reviews --jq '.reviews[] | {id, body, state, author, createdAt, comments: .comments}'
+
+# Fetch inline comments on code lines
+gh api repos/:owner/:repo/pulls/<PR_NUMBER>/comments --paginate
+
+# Fetch discussion comments
+gh pr view <PR_NUMBER> --json comments --jq '.comments[] | {id, body, author, createdAt, path, line}'
+```
+
+Alternatively, use a single query that returns all comments:
+
+```bash
+gh pr view <PR_NUMBER> --json reviews,comments --jq '.'
+```
+
+#### 3. Analyze comments
+
+Analyze the fetched comments and identify:
+
+- **Comments requiring code changes** - indicate errors, improvements, or requirements
+- **Informational comments** - do not require changes, only confirmation
+- **Already resolved comments** - check if changes have already been applied to the code
+
+For each comment requiring action:
+
+1. **Identify file and location** - check `path` and `line` in the comment
+2. **Understand context** - read the relevant code section in the file
+3. **Determine required changes** - based on the comment content
+4. **Verify current state** - check if the problem still exists
+
+#### 4. Applying changes
+
+For each comment requiring changes:
+
+1. **Read the relevant file** - use `read_file` to read the file indicated in the comment
+2. **Apply changes** - implement fixes according to suggestions from the comment
+3. **Maintain consistency** - ensure changes are consistent with:
+   - Project coding conventions
+   - Application architecture
+   - Existing code patterns
+4. **Check dependencies** - ensure changes don't break other parts of the code
+
+#### 5. Verify changes
+
+After applying changes:
+
+1. **Check linter** - run `read_lints` for modified files
+2. **Verify logic** - ensure changes resolve the problem indicated in the comment
+3. **Check tests** - if there are tests related to the modified code, ensure they still pass
+
+### Example workflow
+
+```bash
+# 1. Find the latest open PR
+PR_NUMBER=$(gh pr list --state open --limit 1 --json number -q '.[0].number')
+
+# 2. Fetch comments
+gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
+
+# 3. Analyze comments (agent performs this automatically)
+# 4. Apply code changes (agent performs this automatically)
+# 5. Verify changes (agent performs this automatically)
+```
+
+### Best practices
+
+#### ✅ Do
+
+- **Read full context** - not just the line indicated in the comment, but also surrounding code
+- **Understand intent** - make sure you understand what the reviewer wants to achieve
+- **Maintain code style** - use existing conventions and patterns
+- **Test changes** - if possible, verify that changes work correctly
+- **Communicate** - if a comment is unclear, ask for clarification or apply the best solution
+
+#### ❌ Don't
+
+- **Don't make changes without understanding** - if a comment is unclear, it's better to ask than guess
+- **Don't ignore context** - changes should be consistent with the rest of the code
+- **Don't break existing functionality** - ensure changes don't introduce regressions
+- **Don't skip validation** - always check linter and tests after applying changes
+
+### Handling different types of comments
+
+#### Inline comments (on code lines)
+
+- Usually indicate a specific problem in a code line
+- May suggest specific changes or fixes
+- Often contain suggestions regarding style, performance, or logic
+
+**Example action:**
+
+1. Find the file and line indicated in the comment
+2. Read the code around that line
+3. Apply the suggested change or fix
+4. Verify that the change resolves the problem
+
+#### Review comments (general)
+
+- May indicate broader architectural issues
+- May require changes in multiple files
+- Often contain suggestions regarding code structure
+
+**Example action:**
+
+1. Read the entire review comment
+2. Identify all files that may require changes
+3. Apply changes systematically
+4. Verify that all suggestions have been addressed
+
+#### Discussion comments
+
+- May contain questions or explanations
+- May require responses instead of code changes
+- Often are continuations of earlier discussions
+
+**Example action:**
+
+1. Determine if the comment requires code changes or just a response
+2. If it requires changes, apply them according to the instructions above
+3. If it only requires a response, consider adding an explanatory comment
+
+### GitHub CLI integration
+
+Make sure you have access to GitHub CLI (`gh`) and are logged in:
+
+```bash
+# Check login status
+gh auth status
+
+# If not logged in, log in
+gh auth login
+```
+
+### Automation
+
+If you want to automate the process, you can use the following script:
+
+```bash
+#!/bin/bash
+# resolve-pr-comments.sh
+
+PR_NUMBER=$(gh pr list --state open --limit 1 --json number -q '.[0].number')
+
+if [ -z "$PR_NUMBER" ]; then
+  echo "No open PRs"
+  exit 1
+fi
+
+echo "Fetching comments from PR #$PR_NUMBER..."
+gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
+
+echo "Comments saved to pr_comments.json"
+echo "Analyze the file and apply required changes"
+```
+
+### Final notes
+
+- **Prioritize** - start with the most important comments (e.g., regarding security or errors)
+- **Be systematic** - go through comments one by one
+- **Document changes** - if you're making significant changes, consider adding a code comment
+- **Communicate progress** - if you can't resolve a comment, inform about it
