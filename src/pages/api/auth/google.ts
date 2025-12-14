@@ -35,7 +35,6 @@ export const GET: APIRoute = async ({ url, locals, redirect, request }) => {
       return createErrorResponse("authentication_error", 400);
     }
 
-    console.log(data);
     return redirect(data.url, 302);
   } catch (error) {
     console.error("Unexpected Google OAuth error:", error);
