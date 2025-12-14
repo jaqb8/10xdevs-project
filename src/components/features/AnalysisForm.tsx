@@ -1,10 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Brain, Loader2 } from "lucide-react";
+import { Brain, Loader2, Copy, Check } from "lucide-react";
 import { AnalysisModeSelector } from "./AnalysisModeSelector";
 import { cn } from "@/lib/utils";
+import { toast } from "sonner";
 
 interface QuotaStatus {
   remaining: number;
@@ -35,9 +36,11 @@ export function AnalysisForm({
   quota,
   formatResetTime,
 }: AnalysisFormProps) {
+  const [copied, setCopied] = useState(false);
   const isOverLimit = text.length > maxLength;
   const isQuotaExceeded = quota !== null && quota !== undefined && quota.remaining === 0;
   const isDisabled = isLoading || text.trim().length === 0 || isOverLimit || isQuotaExceeded;
+  const hasText = text.trim().length > 0;
 
   const handleTextChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -55,6 +58,20 @@ export function AnalysisForm({
     },
     [isDisabled, onSubmit]
   );
+
+  const handleCopy = useCallback(async () => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success("Skopiowano do schowka!");
+      setTimeout(() => {
+        setCopied(false);
+      }, 2000);
+    } catch (error) {
+      console.error("Failed to copy text:", error);
+      toast.error("Nie udało się skopiować tekstu");
+    }
+  }, [text]);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4" aria-label="Formularz analizy tekstu">
@@ -83,14 +100,33 @@ export function AnalysisForm({
             {isOverLimit && "Przekroczono limit znaków. "}
             {text.trim().length === 0 && text.length === 0 && "Pole nie może być puste."}
           </p>
-          <p
-            id="char-count"
-            className={`text-sm font-medium tabular-nums ${isOverLimit ? "text-destructive" : "text-muted-foreground"}`}
-            aria-live="polite"
-            role="status"
-          >
-            {text.length} / {maxLength}
-          </p>
+          <div className="flex items-center gap-2">
+            {hasText && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={handleCopy}
+                className="h-7 w-7"
+                aria-label="Kopiuj tekst do schowka"
+                data-test-id="copy-text-button"
+              >
+                {copied ? (
+                  <Check className="size-3.5 text-green-600 dark:text-green-500" aria-hidden="true" />
+                ) : (
+                  <Copy className="size-3.5" aria-hidden="true" />
+                )}
+              </Button>
+            )}
+            <p
+              id="char-count"
+              className={`text-sm font-medium tabular-nums ${isOverLimit ? "text-destructive" : "text-muted-foreground"}`}
+              aria-live="polite"
+              role="status"
+            >
+              {text.length} / {maxLength}
+            </p>
+          </div>
         </div>
         <AnalysisModeSelector disabled={isQuotaExceeded} />
       </div>
