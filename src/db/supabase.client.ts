@@ -17,9 +17,19 @@ function parseCookieHeader(cookieHeader: string): { name: string; value: string 
   });
 }
 
-export const createSupabaseServerInstance = (context: { headers: Headers; cookies: AstroCookies }) => {
+export const createSupabaseServerInstance = (context: { headers: Headers; cookies: AstroCookies; url?: URL }) => {
+  const isHttps =
+    context.url?.protocol === "https:" ||
+    context.headers.get("X-Forwarded-Proto") === "https" ||
+    context.headers.get("CF-Visitor")?.includes('"scheme":"https"');
+
+  const dynamicCookieOptions: CookieOptionsWithName = {
+    ...cookieOptions,
+    secure: isHttps !== undefined ? isHttps : cookieOptions.secure,
+  };
+
   const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
-    cookieOptions,
+    cookieOptions: dynamicCookieOptions,
     cookies: {
       getAll() {
         return parseCookieHeader(context.headers.get("Cookie") ?? "");

@@ -1,5 +1,6 @@
 import type { APIRoute } from "astro";
 import { createErrorResponse } from "@/lib/api-helpers";
+import { validateReturnUrl } from "@/lib/utils";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
 
 export const prerender = false;
@@ -22,7 +23,10 @@ export const GET: APIRoute = async ({ url, locals, redirect }) => {
       return createErrorResponse(error.code || "authentication_error", 400);
     }
 
-    return redirect("/", 302);
+    const returnUrl = url.searchParams.get("returnUrl");
+    const redirectUrl = validateReturnUrl(returnUrl) ?? "/";
+
+    return redirect(redirectUrl, 302);
   } catch (error) {
     console.error("Unexpected callback error:", error);
     return createErrorResponse("unknown_error", 500);
