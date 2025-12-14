@@ -21,11 +21,11 @@ export const createSupabaseServerInstance = (context: { headers: Headers; cookie
   const isHttps =
     context.url?.protocol === "https:" ||
     context.headers.get("X-Forwarded-Proto") === "https" ||
-    context.headers.get("CF-Visitor")?.includes('"scheme":"https"');
+    context.headers.get("CF-Visitor")?.includes('"scheme":"https"') === true;
 
   const dynamicCookieOptions: CookieOptionsWithName = {
     ...cookieOptions,
-    secure: isHttps !== undefined ? isHttps : cookieOptions.secure,
+    secure: isHttps,
   };
 
   const supabase = createServerClient<Database>(SUPABASE_URL, SUPABASE_PUBLIC_KEY, {
