@@ -27,6 +27,7 @@ const TextAnalysisSchema = z.discriminatedUnion("is_correct", [
   z.object({
     is_correct: z.literal(true),
     original_text: z.string(),
+    translation: z.string().nullable().optional(),
   }),
   z.object({
     is_correct: z.literal(false),
@@ -76,7 +77,10 @@ export class AnalysisService {
       });
 
       if (result.is_correct) {
-        return result;
+        return {
+          ...result,
+          translation: result.translation ?? null,
+        };
       }
 
       return {
