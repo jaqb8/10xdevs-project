@@ -12,7 +12,7 @@ export class LoginPage {
     this.page = page;
     this.emailInput = page.locator("#email");
     this.passwordInput = page.locator("#password");
-    this.submitButton = page.getByRole("button", { name: /zaloguj się/i });
+    this.submitButton = page.locator('[data-test-id="login-submit-button"]');
     this.forgotPasswordLink = page.getByRole("link", { name: /zapomniałeś hasła/i });
     this.signupLink = page.getByRole("link", { name: /zarejestruj się/i });
   }
