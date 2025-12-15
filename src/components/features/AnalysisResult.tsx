@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextDiff } from "@/components/shared/TextDiff";
 import { AnalysisModeBadge } from "@/components/shared/AnalysisModeBadge";
-import { BookPlus, CheckCircle2, UserPlus } from "lucide-react";
+import { BookPlus, CheckCircle2, UserPlus, Languages } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePendingAnalysisStore } from "@/lib/stores/pending-analysis.store";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
@@ -82,13 +82,29 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, analysisMod
   if (analysisResult.is_correct) {
     return (
       <Card role="status" aria-label="Wynik analizy - tekst poprawny" data-test-id="analysis-result-correct">
-        <CardContent className="pt-6">
-          <div className="flex flex-col items-center justify-center space-y-4 py-8 text-center">
+        <CardContent>
+          <div className="flex flex-col items-center justify-center space-y-4 py-2 text-center">
             <CheckCircle2 className="size-12 text-green-600 dark:text-green-500" aria-hidden="true" />
-            <div>
-              <h2 className="text-lg font-semibold">Świetna robota!</h2>
+            <div className="space-y-2">
+              <h2 className="text-xl font-semibold">Świetna robota!</h2>
               <p className="text-muted-foreground text-sm">Twój tekst nie wymaga poprawek.</p>
             </div>
+            {analysisResult.translation && (
+              <div className="flex flex-col items-center gap-2 pt-4 max-w-2xl w-full">
+                <div className="border-t border-border w-full pt-6">
+                  <h3 className="text-sm font-semibold text-muted-foreground flex items-center gap-1.5 justify-center">
+                    <Languages className="size-4" aria-hidden="true" />
+                    Tłumaczenie:
+                  </h3>
+                  <div
+                    className="text-sm font-thin leading-relaxed text-foreground/80 italic mt-2"
+                    data-test-id="analysis-result-translation"
+                  >
+                    {analysisResult.translation}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
