@@ -3,6 +3,7 @@ import type { TextAnalysisDto, AnalysisMode } from "../../../types";
 export const correctTextMock: TextAnalysisDto = {
   is_correct: true,
   original_text: "I am a student.",
+  translation: "Jestem studentem.",
 };
 
 export const incorrectTextMock: TextAnalysisDto = {
@@ -50,6 +51,7 @@ export const unnaturalPhrasingMock: TextAnalysisDto = {
 export const naturalColloquialTextMock: TextAnalysisDto = {
   is_correct: true,
   original_text: "Hey, what's up? Want to grab some coffee?",
+  translation: "Hej, co słychać? Chcesz napić się kawy?",
 };
 
 export function getMockAnalysis(text: string, mode: AnalysisMode): TextAnalysisDto {
@@ -80,6 +82,7 @@ export function getMockAnalysis(text: string, mode: AnalysisMode): TextAnalysisD
     return {
       is_correct: true,
       original_text: text,
+      translation: null,
     };
   }
 
@@ -108,11 +111,13 @@ export function getMockAnalysis(text: string, mode: AnalysisMode): TextAnalysisD
     return {
       is_correct: true,
       original_text: text,
+      translation: null,
     };
   }
 
   return {
     is_correct: true,
     original_text: text,
+    translation: null,
   };
 }

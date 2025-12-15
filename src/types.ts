@@ -72,6 +72,7 @@ export type TextAnalysisDto =
   | {
       is_correct: true;
       original_text: string;
+      translation: string | null;
     }
   | {
       is_correct: false;
