@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, type ChangeEvent } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export function AnalysisContextInput({
   const isOverLimit = analysisContext.length > maxLength;
 
   const handleContextChange = useCallback(
-    (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    (e: ChangeEvent<HTMLTextAreaElement>) => {
       onAnalysisContextChange(e.target.value);
     },
     [onAnalysisContextChange]
