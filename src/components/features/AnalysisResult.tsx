@@ -17,10 +17,18 @@ interface AnalysisResultProps {
   analysisResult: TextAnalysisDto | null;
   isSaved: boolean;
   analysisMode: AnalysisMode;
+  analysisContext?: string;
   onSave: (item: CreateLearningItemCommand) => void;
 }
 
-export function AnalysisResult({ isLoading, analysisResult, isSaved, analysisMode, onSave }: AnalysisResultProps) {
+export function AnalysisResult({
+  isLoading,
+  analysisResult,
+  isSaved,
+  analysisMode,
+  analysisContext,
+  onSave,
+}: AnalysisResultProps) {
   const { isAuth } = useAuthStore();
   const { setPendingAnalysis } = usePendingAnalysisStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
@@ -33,6 +41,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, analysisMod
           result: analysisResult,
           mode: analysisMode,
           originalText: analysisResult.original_text,
+          analysisContext: analysisContext?.trim() || undefined,
           timestamp: Date.now(),
         });
       }
@@ -51,7 +60,7 @@ export function AnalysisResult({ isLoading, analysisResult, isSaved, analysisMod
       };
       onSave(command);
     }
-  }, [analysisResult, onSave, isAuth, analysisMode, setPendingAnalysis]);
+  }, [analysisResult, onSave, isAuth, analysisMode, analysisContext, setPendingAnalysis]);
 
   const shouldShowSaveButton = isAuthFeatureEnabled && isLearningItemsFeatureEnabled;
 

@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Brain, Loader2, Copy, Check } from "lucide-react";
 import { AnalysisModeSelector } from "./AnalysisModeSelector";
+import { AnalysisContextInput } from "./AnalysisContextInput";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -23,6 +24,9 @@ interface AnalysisFormProps {
   maxLength: number;
   quota?: QuotaStatus | null;
   formatResetTime: (resetAt: string) => string;
+  analysisContext?: string;
+  onAnalysisContextChange?: (analysisContext: string) => void;
+  isAuth?: boolean;
 }
 
 export function AnalysisForm({
@@ -35,6 +39,9 @@ export function AnalysisForm({
   maxLength,
   quota,
   formatResetTime,
+  analysisContext = "",
+  onAnalysisContextChange,
+  isAuth = false,
 }: AnalysisFormProps) {
   const [copied, setCopied] = useState(false);
   const isOverLimit = text.length > maxLength;
@@ -96,7 +103,14 @@ export function AnalysisForm({
           data-test-id="analysis-text-input"
         />
         <div className="flex items-center justify-between gap-2">
-          <p id="char-count-helper" className="text-muted-foreground text-xs">
+          <p
+            id="char-count-helper"
+            className={cn(
+              "text-xs",
+              isOverLimit && "text-destructive",
+              text.trim().length === 0 && text.length === 0 && "text-muted-foreground"
+            )}
+          >
             {isOverLimit && "Przekroczono limit znaków. "}
             {text.trim().length === 0 && text.length === 0 && "Pole nie może być puste."}
           </p>
@@ -128,6 +142,14 @@ export function AnalysisForm({
             </p>
           </div>
         </div>
+        {isAuth && onAnalysisContextChange && (
+          <AnalysisContextInput
+            analysisContext={analysisContext}
+            onAnalysisContextChange={onAnalysisContextChange}
+            maxLength={maxLength}
+            disabled={isAnalyzing || isQuotaExceeded}
+          />
+        )}
         <AnalysisModeSelector disabled={isQuotaExceeded} />
       </div>
 

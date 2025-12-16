@@ -50,12 +50,12 @@ export class AnalysisService {
     this.useMocks = USE_MOCKS;
   }
 
-  async analyzeText(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
+  async analyzeText(text: string, mode: AnalysisMode, analysisContext?: string): Promise<TextAnalysisDto> {
     if (this.useMocks) {
       return this.analyzeMocked(text, mode);
     }
 
-    return this.analyzeWithAI(text, mode);
+    return this.analyzeWithAI(text, mode, analysisContext);
   }
 
   private async analyzeMocked(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
@@ -63,25 +63,25 @@ export class AnalysisService {
     return getMockAnalysis(text, mode);
   }
 
-  private async analyzeWithAI(text: string, mode: AnalysisMode): Promise<TextAnalysisDto> {
+  private async analyzeWithAI(text: string, mode: AnalysisMode, analysisContext?: string): Promise<TextAnalysisDto> {
     const systemPrompt = ANALYSIS_PROMPTS[mode];
+
+    let userMessage: string;
+    if (analysisContext?.trim()) {
+      userMessage = `Tekst do analizy:\n${text}\n\nKontekst użytkownika:\n${analysisContext.trim()}`;
+    } else {
+      userMessage = text;
+    }
 
     try {
       const result = await openRouterService.getChatCompletion({
         model: "x-ai/grok-4-fast",
         systemMessage: systemPrompt,
-        userMessage: text,
+        userMessage,
         responseSchema: TextAnalysisSchema,
         temperature: 0.3,
         maxTokens: 1000,
       });
-
-      if (result.is_correct) {
-        return {
-          ...result,
-          translation: result.translation ?? null,
-        };
-      }
 
       return {
         ...result,
