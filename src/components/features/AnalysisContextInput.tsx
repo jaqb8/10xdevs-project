@@ -58,15 +58,15 @@ export function AnalysisContextInput({
         <div className="flex items-center gap-1">
           <Info className="size-3 shrink-0" />
           <p className="text-xs text-muted-foreground">
-            Podaj dodatkowe informacje o kontekście zdania, np. do kogo piszesz, w jakiej sytuacji. AI uwzględni te
-            informacje podczas analizy.
+            Podaj dodatkowy kontekst do analizowanego wyrażenia. Zostanie on uwzględniony podczas analizy pod kątem
+            odpowiedniego doboru słownictwa.
           </p>
         </div>
         <Textarea
           id="analysis-context-input"
           value={analysisContext}
           onChange={handleContextChange}
-          placeholder="Piszę email do mojego szefa..."
+          placeholder="Wpisz tutaj dodatkowy kontekst..."
           disabled={disabled}
           rows={4}
           className="text-base"
