@@ -12,7 +12,7 @@ import type { CreateLearningItemCommand } from "../../types";
 const MAX_TEXT_LENGTH = 500;
 
 export function AnalyzeView() {
-  const { state, quota, setText, analyzeText, saveResult, clear } = useTextAnalysis();
+  const { state, quota, setText, setAnalysisContext, analyzeText, saveResult, clear } = useTextAnalysis();
   const mode = useAnalysisModeStore((state) => state.mode);
   const { clearPendingAnalysis } = usePendingAnalysisStore();
   const isAuth = useAuthStore((state) => state.isAuth);
@@ -25,7 +25,6 @@ export function AnalyzeView() {
 
   useEffect(() => {
     return () => {
-      console.log("Clearing pending analysis");
       clearPendingAnalysis();
     };
   }, [clearPendingAnalysis]);
@@ -61,7 +60,6 @@ export function AnalyzeView() {
 
       <section aria-label="Formularz analizy tekstu">
         <AnalysisForm
-          key={`form-${state.status}`}
           text={state.text}
           onTextChange={setText}
           onSubmit={() => analyzeText(mode)}
@@ -71,6 +69,9 @@ export function AnalyzeView() {
           maxLength={MAX_TEXT_LENGTH}
           quota={!isAuth ? quota : null}
           formatResetTime={formatResetTime}
+          analysisContext={state.analysisContext}
+          onAnalysisContextChange={setAnalysisContext}
+          isAuth={isAuth}
         />
       </section>
       {(state.status === "loading" || state.result) && (
@@ -80,6 +81,7 @@ export function AnalyzeView() {
             analysisResult={state.result}
             isSaved={state.isCurrentResultSaved}
             analysisMode={mode}
+            analysisContext={state.analysisContext}
             onSave={handleSave}
           />
         </section>

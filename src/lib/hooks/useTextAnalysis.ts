@@ -10,6 +10,7 @@ type AnalysisStatus = "idle" | "loading" | "success" | "error";
 interface AnalyzeViewState {
   status: AnalysisStatus;
   text: string;
+  analysisContext: string;
   result: TextAnalysisDto | null;
   error: string | null;
   isCurrentResultSaved: boolean;
@@ -24,6 +25,7 @@ interface QuotaStatus {
 const INITIAL_STATE: AnalyzeViewState = {
   status: "idle",
   text: "",
+  analysisContext: "",
   result: null,
   error: null,
   isCurrentResultSaved: false,
@@ -48,6 +50,7 @@ function mapErrorCodeToMessage(error: ApiErrorResponse): string {
     validation_error_corrected_sentence_empty: "Poprawione zdanie jest wymagane.",
     validation_error_explanation_empty: "Wyjaśnienie jest wymagane.",
     validation_error_explanation_too_long: "Wyjaśnienie nie może przekraczać 500 znaków.",
+    validation_error_analysis_context_too_long: "Kontekst nie może przekraczać 500 znaków.",
   };
 
   return errorMessages[error_code] || "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.";
@@ -102,6 +105,7 @@ export function useTextAnalysis() {
       setState({
         status: "success",
         text: pendingAnalysis.originalText,
+        analysisContext: pendingAnalysis.analysisContext ?? "",
         result: pendingAnalysis.result,
         error: null,
         isCurrentResultSaved: false,
@@ -130,6 +134,10 @@ export function useTextAnalysis() {
     setState((prev) => ({ ...prev, text }));
   };
 
+  const setAnalysisContext = (analysisContext: string) => {
+    setState((prev) => ({ ...prev, analysisContext }));
+  };
+
   const analyzeText = async (mode: AnalysisMode) => {
     if (!state.text.trim()) {
       return;
@@ -138,12 +146,21 @@ export function useTextAnalysis() {
     setState((prev) => ({ ...prev, status: "loading", error: null }));
 
     try {
+      const requestBody: { text: string; mode: AnalysisMode; analysisContext?: string } = {
+        text: state.text,
+        mode,
+      };
+
+      if (state.analysisContext.trim()) {
+        requestBody.analysisContext = state.analysisContext.trim();
+      }
+
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ text: state.text, mode }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -258,6 +275,7 @@ export function useTextAnalysis() {
     state,
     quota,
     setText,
+    setAnalysisContext,
     analyzeText,
     saveResult,
     clear,
