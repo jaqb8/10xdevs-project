@@ -1,0 +1,8 @@
+export const USE_MOCKS = false;
+export const OPENROUTER_API_KEY = "mock-openrouter-api-key";
+export const ASTRO_SITE = "http://localhost:3000";
+export const APP_NAME = "Language Learning Buddy Test";
+export const SUPABASE_URL = "http://localhost:54321";
+export const SUPABASE_PUBLIC_KEY = "mock-supabase-key";
+export const ANONYMOUS_DAILY_QUOTA = 10;
+export const ANONYMOUS_IP_SALT = "mock-ip-salt";

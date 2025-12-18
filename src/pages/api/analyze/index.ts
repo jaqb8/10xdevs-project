@@ -15,12 +15,20 @@ import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-he
 export const prerender = false;
 
 const analyzeTextSchema = z.object({
-  text: z.string().min(1, "validation_error_text_empty").max(500, "validation_error_text_too_long").trim(),
+  text: z
+    .string()
+    .transform((val) => val.trim())
+    .pipe(z.string().min(1, "validation_error_text_empty").max(500, "validation_error_text_too_long")),
   mode: z
     .enum(["grammar_and_spelling", "colloquial_speech"], {
       message: "validation_error_invalid_mode",
     })
     .default("grammar_and_spelling"),
+  analysisContext: z
+    .string()
+    .max(500, "validation_error_analysis_context_too_long")
+    .optional()
+    .transform((val) => val?.trim() || undefined),
 });
 
 export const POST: APIRoute = async ({ request, locals }) => {
@@ -32,9 +40,9 @@ export const POST: APIRoute = async ({ request, locals }) => {
       return createValidationErrorResponse(validationResult.error);
     }
 
-    const { text, mode } = validationResult.data;
+    const { text, mode, analysisContext } = validationResult.data;
 
-    const result = await new AnalysisService().analyzeText(text, mode);
+    const result = await new AnalysisService().analyzeText(text, mode, analysisContext);
 
     const headers: Record<string, string> = { "Content-Type": "application/json" };
 

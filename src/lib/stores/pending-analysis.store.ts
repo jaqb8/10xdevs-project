@@ -6,6 +6,7 @@ export interface PendingAnalysisState {
   result: TextAnalysisDto;
   mode: AnalysisMode;
   originalText: string;
+  analysisContext?: string;
   timestamp?: number;
 }
 
