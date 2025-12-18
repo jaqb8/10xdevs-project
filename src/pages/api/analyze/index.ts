@@ -15,7 +15,10 @@ import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-he
 export const prerender = false;
 
 const analyzeTextSchema = z.object({
-  text: z.string().min(1, "validation_error_text_empty").max(500, "validation_error_text_too_long").trim(),
+  text: z
+    .string()
+    .transform((val) => val.trim())
+    .pipe(z.string().min(1, "validation_error_text_empty").max(500, "validation_error_text_too_long")),
   mode: z
     .enum(["grammar_and_spelling", "colloquial_speech"], {
       message: "validation_error_invalid_mode",
