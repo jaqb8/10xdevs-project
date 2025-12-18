@@ -2,7 +2,7 @@ import { useState, useCallback, type ChangeEvent } from "react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Info, ChevronDown } from "lucide-react";
+import { Info, ChevronDown, FileText } from "lucide-react";
 
 interface AnalysisContextInputProps {
   analysisContext: string;
@@ -44,7 +44,10 @@ export function AnalysisContextInput({
           aria-expanded={isOpen}
           aria-controls="analysis-context-content"
         >
-          <span className="text-sm font-medium">Kontekst (opcjonalne)</span>
+          <div className="flex items-center gap-2">
+            <FileText className="size-4" aria-hidden="true" />
+            <span className="text-sm font-medium">Kontekst (opcjonalne)</span>
+          </div>
           <ChevronDown
             className={`size-4 text-muted-foreground transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
             aria-hidden="true"
@@ -59,7 +62,7 @@ export function AnalysisContextInput({
           <Info className="size-3 shrink-0" />
           <p className="text-xs text-muted-foreground">
             Podaj dodatkowy kontekst do analizowanego wyrażenia. Zostanie on uwzględniony podczas analizy pod kątem
-            odpowiedniego doboru słownictwa.
+            odpowiedniego doboru słownictwa i gramatyki.
           </p>
         </div>
         <Textarea
