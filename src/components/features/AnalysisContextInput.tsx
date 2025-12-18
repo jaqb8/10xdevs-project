@@ -62,7 +62,7 @@ export function AnalysisContextInput({
           <Info className="size-3 shrink-0" />
           <p className="text-xs text-muted-foreground">
             Podaj dodatkowy kontekst do analizowanego wyrażenia. Zostanie on uwzględniony podczas analizy pod kątem
-            odpowiedniego doboru słownictwa.
+            odpowiedniego doboru słownictwa i gramatyki.
           </p>
         </div>
         <Textarea
