@@ -222,6 +222,7 @@ export interface PaginationViewModel extends PaginationDto {
 export interface UserViewModel {
   id: string;
   email: string;
+  avatarUrl: string | null;
 }
 
 // ============================================================================

@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
   NavigationMenu,
@@ -32,6 +33,11 @@ interface Navbar1Props {
   };
   menu?: MenuItem[];
 }
+
+const getInitials = (email: string): string => {
+  const name = email.split("@")[0];
+  return name.slice(0, 2).toUpperCase();
+};
 
 const Navbar1 = ({
   logo = {
@@ -69,14 +75,20 @@ const Navbar1 = ({
             </div>
           )}
         </div>
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
           {isAuthFeatureEnabled && (
             <>
               {user ? (
                 <>
-                  <span className="text-sm text-muted-foreground flex items-center" data-test-id="header-user-email">
-                    {user.email}
-                  </span>
+                  <div className="shadow-xs flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50">
+                    <Avatar className="size-6" data-test-id="header-user-avatar">
+                      <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
+                      <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                    </Avatar>
+                    <span className="text-sm text-muted-foreground" data-test-id="header-user-email">
+                      {user.email}
+                    </span>
+                  </div>
                   <form action="/api/auth/logout" method="POST">
                     <Button type="submit" variant="outline" size="sm" data-test-id="header-logout-button">
                       Wyloguj
@@ -132,9 +144,15 @@ const Navbar1 = ({
                     <>
                       {user ? (
                         <>
-                          <span className="text-md text-muted-foreground" data-test-id="header-user-email-mobile">
-                            {user.email}
-                          </span>
+                          <div className="flex items-center gap-3">
+                            <Avatar className="size-10" data-test-id="header-user-avatar-mobile">
+                              <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
+                              <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                            </Avatar>
+                            <span className="text-md text-muted-foreground" data-test-id="header-user-email-mobile">
+                              {user.email}
+                            </span>
+                          </div>
                           <form action="/api/auth/logout" method="POST">
                             <Button
                               type="submit"

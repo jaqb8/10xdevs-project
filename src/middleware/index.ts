@@ -28,6 +28,7 @@ export const onRequest = defineMiddleware(async ({ locals, cookies, url, request
     locals.user = {
       email: user.email!,
       id: user.id,
+      avatarUrl: user.user_metadata?.avatar_url ?? null,
     };
   } else {
     locals.user = null;
