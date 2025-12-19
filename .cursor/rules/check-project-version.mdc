@@ -21,7 +21,7 @@ Also, if there is no changelog in docs/v{version}/changelog.md file, create it b
 git log --pretty=format:"%h - %an, %ar : %s" v{previous-version}..v{current-version}
 ```
 
-Then, create the changelog file in the docs/v{version}/changelog.md file in english.
+Then, create the changelog file in the docs/versions/v{version}/changelog.md file in english.
 
 ```markdown
 # Language Learning Buddy v{version}
