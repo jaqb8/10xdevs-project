@@ -10,7 +10,6 @@ export function AuthInitializer({ user }: AuthInitializerProps) {
   const setUser = useAuthStore((state) => state.setUser);
 
   useEffect(() => {
-    console.log("AuthInitializer", user);
     setUser(user);
   }, [user, setUser]);
 
