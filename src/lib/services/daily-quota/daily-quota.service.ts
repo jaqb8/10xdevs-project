@@ -54,19 +54,17 @@ export class DailyQuotaService {
     const today = this.getTodayUTC();
     const resetAt = this.getNextMidnightUTC();
 
-    const { data, error } = await this.supabase
-      .from("anonymous_daily_usage")
-      .select("request_count")
-      .eq("ip_hash", ipHash)
-      .eq("usage_date", today)
-      .maybeSingle();
+    const { data, error } = await this.supabase.rpc("get_anonymous_quota_status", {
+      p_ip_hash: ipHash,
+      p_usage_date: today,
+    });
 
     if (error) {
-      console.error("Database error in getAnonymousQuotaStatus:", error);
+      console.error("Database error in getAnonymousQuotaStatus (rpc):", error);
       throw new DailyQuotaDatabaseError(error);
     }
 
-    const currentUsage = data?.request_count ?? 0;
+    const currentUsage = (data as number) ?? 0;
     const remaining = Math.max(0, ANONYMOUS_DAILY_QUOTA - currentUsage);
 
     return {
