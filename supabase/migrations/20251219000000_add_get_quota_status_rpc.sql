@@ -7,6 +7,7 @@ create or replace function get_anonymous_quota_status(
 returns int
 language plpgsql
 security definer
+set search_path = public, pg_temp
 as $$
 declare
   v_count int;
@@ -20,4 +21,9 @@ begin
   return coalesce(v_count, 0);
 end;
 $$;
+
+-- Restrict function execution to only intended roles
+revoke execute on function get_anonymous_quota_status(text, date) from public;
+grant execute on function get_anonymous_quota_status(text, date) to anon;
+grant execute on function get_anonymous_quota_status(text, date) to authenticated;
 

@@ -64,7 +64,12 @@ export class DailyQuotaService {
       throw new DailyQuotaDatabaseError(error);
     }
 
-    const currentUsage = (data as number) ?? 0;
+    if (typeof data !== "number") {
+      console.error("Unexpected RPC return type in getAnonymousQuotaStatus:", typeof data, data);
+      throw new DailyQuotaDatabaseError(new Error("Invalid response from get_anonymous_quota_status RPC"));
+    }
+
+    const currentUsage = data;
     const remaining = Math.max(0, ANONYMOUS_DAILY_QUOTA - currentUsage);
 
     return {
