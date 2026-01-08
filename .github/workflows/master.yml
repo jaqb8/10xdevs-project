@@ -134,7 +134,7 @@ jobs:
       - name: Read changelog
         id: changelog
         run: |
-          CHANGELOG_PATH="docs/v${{ steps.package-version.outputs.version }}/changelog.md"
+          CHANGELOG_PATH="docs/versions/v${{ steps.package-version.outputs.version }}/changelog.md"
           if [ -f "$CHANGELOG_PATH" ]; then
             echo "changelog<<EOF" >> $GITHUB_OUTPUT
             cat "$CHANGELOG_PATH" >> $GITHUB_OUTPUT
