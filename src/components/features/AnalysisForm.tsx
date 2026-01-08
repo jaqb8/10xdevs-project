@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
@@ -45,6 +45,13 @@ export function AnalysisForm({
   isAuth = false,
 }: AnalysisFormProps) {
   const [copied, setCopied] = useState(false);
+  const [modifierKey, setModifierKey] = useState("Ctrl");
+
+  useEffect(() => {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+    setModifierKey(isMac ? "⌘" : "Ctrl");
+  }, []);
+
   const isOverLimit = text.length > maxLength;
   const isQuotaExceeded = quota !== null && quota !== undefined && quota.remaining === 0;
   const isDisabled = isLoading || text.trim().length === 0 || isOverLimit || isQuotaExceeded;
@@ -209,9 +216,7 @@ export function AnalysisForm({
             <>
               <Brain className="size-4" /> Analizuj tekst
               <KbdGroup className="ml-2 hidden sm:inline-flex">
-                <Kbd>
-                  {typeof navigator !== "undefined" && navigator.platform?.toLowerCase().includes("mac") ? "⌘" : "Ctrl"}
-                </Kbd>
+                <Kbd>{modifierKey}</Kbd>
                 <Kbd>Enter</Kbd>
               </KbdGroup>
             </>
