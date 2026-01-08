@@ -1,6 +1,7 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Brain, Loader2, Copy, Check } from "lucide-react";
 import { AnalysisModeSelector } from "./AnalysisModeSelector";
@@ -44,6 +45,13 @@ export function AnalysisForm({
   isAuth = false,
 }: AnalysisFormProps) {
   const [copied, setCopied] = useState(false);
+  const [modifierKey, setModifierKey] = useState("Ctrl");
+
+  useEffect(() => {
+    const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
+    setModifierKey(isMac ? "⌘" : "Ctrl");
+  }, []);
+
   const isOverLimit = text.length > maxLength;
   const isQuotaExceeded = quota !== null && quota !== undefined && quota.remaining === 0;
   const isDisabled = isLoading || text.trim().length === 0 || isOverLimit || isQuotaExceeded;
@@ -54,6 +62,16 @@ export function AnalysisForm({
       onTextChange(e.target.value);
     },
     [onTextChange]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !isDisabled) {
+        e.preventDefault();
+        onSubmit();
+      }
+    },
+    [isDisabled, onSubmit]
   );
 
   const handleSubmit = useCallback(
@@ -90,6 +108,7 @@ export function AnalysisForm({
           id="text-input"
           value={text}
           onChange={handleTextChange}
+          onKeyDown={handleKeyDown}
           placeholder="Wpisz tutaj swój tekst w języku angielskim..."
           disabled={isAnalyzing || isQuotaExceeded}
           rows={8}
@@ -196,6 +215,10 @@ export function AnalysisForm({
           ) : (
             <>
               <Brain className="size-4" /> Analizuj tekst
+              <KbdGroup className="ml-2 hidden sm:inline-flex">
+                <Kbd>{modifierKey}</Kbd>
+                <Kbd>Enter</Kbd>
+              </KbdGroup>
             </>
           )}
         </Button>
