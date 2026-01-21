@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
@@ -44,6 +44,7 @@ export function AnalysisForm({
   onAnalysisContextChange,
   isAuth = false,
 }: AnalysisFormProps) {
+  const formRef = useRef<HTMLFormElement>(null);
   const [copied, setCopied] = useState(false);
   const [modifierKey, setModifierKey] = useState("Ctrl");
 
@@ -64,15 +65,20 @@ export function AnalysisForm({
     [onTextChange]
   );
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+  useEffect(() => {
+    const form = formRef.current;
+    if (!form) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !isDisabled) {
         e.preventDefault();
         onSubmit();
       }
-    },
-    [isDisabled, onSubmit]
-  );
+    };
+
+    form.addEventListener("keydown", handleKeyDown);
+    return () => form.removeEventListener("keydown", handleKeyDown);
+  }, [isDisabled, onSubmit]);
 
   const handleSubmit = useCallback(
     (e: React.FormEvent) => {
@@ -99,7 +105,7 @@ export function AnalysisForm({
   }, [text]);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4" aria-label="Formularz analizy tekstu">
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-4" aria-label="Formularz analizy tekstu">
       <div className="space-y-2">
         <label htmlFor="text-input" className="block text-md font-semibold">
           Wprowadź tekst do analizy
@@ -108,7 +114,6 @@ export function AnalysisForm({
           id="text-input"
           value={text}
           onChange={handleTextChange}
-          onKeyDown={handleKeyDown}
           placeholder="Wpisz tutaj swój tekst w języku angielskim..."
           disabled={isAnalyzing || isQuotaExceeded}
           rows={8}
