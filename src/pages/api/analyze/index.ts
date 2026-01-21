@@ -10,6 +10,7 @@ import {
   AnalysisNetworkError,
   AnalysisUnknownError,
 } from "@/lib/services/analysis";
+import { GamificationService } from "@/lib/services/gamification";
 import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-helpers";
 
 export const prerender = false;
@@ -43,6 +44,14 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const { text, mode, analysisContext } = validationResult.data;
 
     const result = await new AnalysisService().analyzeText(text, mode, analysisContext);
+
+    if (result.is_correct && locals.user) {
+      try {
+        await new GamificationService(locals.supabase).recordCorrectAnalysis(locals.user.id);
+      } catch (pointsError) {
+        console.error("Failed to record gamification point:", pointsError);
+      }
+    }
 
     const headers: Record<string, string> = { "Content-Type": "application/json" };
 

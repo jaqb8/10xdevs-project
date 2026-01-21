@@ -1,4 +1,5 @@
-import { Menu } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Menu, Trophy } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,9 +13,12 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/lib/stores/auth.store";
+import { usePointsStore } from "@/lib/stores/points.store";
 import { isFeatureEnabled } from "@/features/feature-flags.service";
 import { ModeToggle } from "@/components/shared/ModeToggle";
+import { cn } from "@/lib/utils";
 
 interface MenuItem {
   title: string;
@@ -52,8 +56,20 @@ const Navbar1 = ({
   ],
 }: Navbar1Props) => {
   const { user, isAuth } = useAuthStore();
+  const points = usePointsStore((state) => state.points);
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
+  const prevPointsRef = useRef<number | null>(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+
+  useEffect(() => {
+    if (points !== null && prevPointsRef.current !== null && points > prevPointsRef.current) {
+      setIsAnimating(true);
+      const timer = setTimeout(() => setIsAnimating(false), 800);
+      return () => clearTimeout(timer);
+    }
+    prevPointsRef.current = points;
+  }, [points]);
 
   const filteredMenu = isAuth && isLearningItemsFeatureEnabled ? menu : [];
 
@@ -80,6 +96,26 @@ const Navbar1 = ({
             <>
               {user ? (
                 <>
+                  {points !== null && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <div
+                          className={cn(
+                            "points-badge shadow-xs flex items-center gap-1.5 border rounded-full py-1 px-3 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800 cursor-pointer",
+                            isAnimating && "animate-scale"
+                          )}
+                          data-test-id="header-points-badge"
+                        >
+                          <Trophy className="size-4 text-amber-600 dark:text-amber-400" />
+                          <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{points}</span>
+                        </div>
+                      </TooltipTrigger>
+                      <TooltipContent side="bottom" className="max-w-xs text-center">
+                        Zdobywasz punkty za każdą analizę tekstu bez błędów. Im więcej punktów, tym lepiej opanowujesz
+                        język!
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                   <div className="shadow-xs flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50">
                     <Avatar className="size-6" data-test-id="header-user-avatar">
                       <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
@@ -153,6 +189,22 @@ const Navbar1 = ({
                               {user.email}
                             </span>
                           </div>
+                          {points !== null && (
+                            <div
+                              className="flex flex-col items-center gap-1 py-2 px-4 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800"
+                              data-test-id="header-points-badge-mobile"
+                            >
+                              <div className="flex items-center gap-2">
+                                <Trophy className="size-5 text-amber-600 dark:text-amber-400" />
+                                <span className="text-base font-medium text-amber-700 dark:text-amber-300">
+                                  {points} punktów
+                                </span>
+                              </div>
+                              <p className="text-xs text-amber-600/70 dark:text-amber-400/70">
+                                Punkty za analizy bez błędów
+                              </p>
+                            </div>
+                          )}
                           <form action="/api/auth/logout" method="POST">
                             <Button
                               type="submit"

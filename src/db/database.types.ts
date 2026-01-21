@@ -79,6 +79,24 @@ export interface Database {
         };
         Relationships: [];
       };
+      user_points: {
+        Row: {
+          user_id: string;
+          points: number;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          points?: number;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          points?: number;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {
@@ -86,9 +104,17 @@ export interface Database {
         Args: { p_ip_hash: string; p_usage_date: string };
         Returns: number;
       };
+      get_user_points_total: {
+        Args: { target_user_id: string };
+        Returns: number;
+      };
       increment_anonymous_daily_usage: {
         Args: { p_ip_hash: string; p_limit: number; p_usage_date: string };
         Returns: Json;
+      };
+      increment_user_points: {
+        Args: { target_user_id: string };
+        Returns: number;
       };
     };
     Enums: {
