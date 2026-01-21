@@ -109,9 +109,7 @@ export function AnalysisResult({
                   <Trophy className="size-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                   <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">+1 punkt!</span>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Zdobywasz punkty za każdą analizę bez błędów.
-                </p>
+                <p className="text-xs text-muted-foreground">Zdobywasz punkty za każdą analizę bez błędów.</p>
               </div>
             )}
             {analysisResult.translation && (
