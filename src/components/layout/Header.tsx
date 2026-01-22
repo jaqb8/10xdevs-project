@@ -16,7 +16,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/co
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePointsStore } from "@/lib/stores/points.store";
-import { isFeatureEnabled } from "@/features/feature-flags.service";
+import { isFeatureEnabled, isFeatureBeta } from "@/features/feature-flags.service";
 import { ModeToggle } from "@/components/shared/ModeToggle";
 import { cn } from "@/lib/utils";
 
@@ -59,13 +59,15 @@ const Navbar1 = ({
   const points = usePointsStore((state) => state.points);
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
+  const isGamificationEnabled = isFeatureEnabled("gamification");
+  const isGamificationBeta = isFeatureBeta("gamification");
   const prevPointsRef = useRef<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
   useEffect(() => {
     if (points !== null && prevPointsRef.current !== null && points > prevPointsRef.current) {
       setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 800);
+      const timer = setTimeout(() => setIsAnimating(false), 200);
       return () => clearTimeout(timer);
     }
     prevPointsRef.current = points;
@@ -96,18 +98,23 @@ const Navbar1 = ({
             <>
               {user ? (
                 <>
-                  {points !== null && (
+                  {isGamificationEnabled && points !== null && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div
                           className={cn(
-                            "points-badge shadow-xs flex items-center gap-1.5 border rounded-full py-1 px-3 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800 cursor-pointer",
+                            "points-badge shadow-xs flex items-center gap-2 border rounded-full h-8 px-3 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800 cursor-pointer",
                             isAnimating && "animate-scale"
                           )}
                           data-test-id="header-points-badge"
                         >
                           <Trophy className="size-4 text-amber-600 dark:text-amber-400" />
-                          <span className="text-sm font-medium text-amber-700 dark:text-amber-300">{points}</span>
+                          <span className="text-base font-medium text-amber-700 dark:text-amber-300">{points}</span>
+                          {isGamificationBeta && (
+                            <span className="text-[7px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
+                              beta
+                            </span>
+                          )}
                         </div>
                       </TooltipTrigger>
                       <TooltipContent side="bottom" className="max-w-xs text-center">
@@ -189,9 +196,9 @@ const Navbar1 = ({
                               {user.email}
                             </span>
                           </div>
-                          {points !== null && (
+                          {isGamificationEnabled && points !== null && (
                             <div
-                              className="flex flex-col items-center gap-1 py-2 px-4 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800"
+                              className="flex flex-col items-center gap-1 py-1 px-4 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800"
                               data-test-id="header-points-badge-mobile"
                             >
                               <div className="flex items-center gap-2">
@@ -199,6 +206,11 @@ const Navbar1 = ({
                                 <span className="text-base font-medium text-amber-700 dark:text-amber-300">
                                   {points} punktów
                                 </span>
+                                {isGamificationBeta && (
+                                  <span className="text-[7px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
+                                    beta
+                                  </span>
+                                )}
                               </div>
                               <p className="text-xs text-amber-600/70 dark:text-amber-400/70">
                                 Punkty za analizy bez błędów

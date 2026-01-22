@@ -8,7 +8,7 @@ import { AnalysisModeBadge } from "@/components/shared/AnalysisModeBadge";
 import { BookPlus, CheckCircle2, UserPlus, Languages, Trophy } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePendingAnalysisStore } from "@/lib/stores/pending-analysis.store";
-import { isFeatureEnabled } from "@/features/feature-flags.service";
+import { isFeatureEnabled, isFeatureBeta } from "@/features/feature-flags.service";
 import type { TextAnalysisDto, CreateLearningItemCommand, AnalysisMode } from "../../types";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +35,8 @@ export function AnalysisResult({
   const { setPendingAnalysis } = usePendingAnalysisStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
+  const isGamificationEnabled = isFeatureEnabled("gamification");
+  const isGamificationBeta = isFeatureBeta("gamification");
 
   const handleSave = useCallback(() => {
     if (!isAuth) {
@@ -100,7 +102,7 @@ export function AnalysisResult({
               <h2 className="text-xl font-semibold">Świetna robota!</h2>
               <p className="text-muted-foreground text-sm">Twój tekst nie wymaga poprawek.</p>
             </div>
-            {earnedPoint && (
+            {isGamificationEnabled && earnedPoint && (
               <div
                 className="flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500"
                 data-test-id="earned-point-badge"
@@ -108,6 +110,11 @@ export function AnalysisResult({
                 <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700">
                   <Trophy className="size-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                   <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">+1 punkt!</span>
+                  {isGamificationBeta && (
+                    <span className="text-[7px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
+                      beta
+                    </span>
+                  )}
                 </div>
                 <p className="text-xs text-muted-foreground">Zdobywasz punkty za każdą analizę bez błędów.</p>
               </div>

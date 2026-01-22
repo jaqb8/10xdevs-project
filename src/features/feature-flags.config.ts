@@ -1,18 +1,26 @@
-export type Feature = "auth" | "learning-items";
+export type Feature = "auth" | "learning-items" | "gamification";
 export type Environment = "local" | "integration" | "production";
 
-const featureFlagsConfig: Record<Environment, Record<Feature, boolean>> = {
+interface FeatureConfig {
+  enabled: boolean;
+  beta?: boolean;
+}
+
+const featureFlagsConfig: Record<Environment, Record<Feature, FeatureConfig>> = {
   local: {
-    auth: true,
-    "learning-items": true,
+    auth: { enabled: true },
+    "learning-items": { enabled: true },
+    gamification: { enabled: true, beta: true },
   },
   integration: {
-    auth: true,
-    "learning-items": true,
+    auth: { enabled: true },
+    "learning-items": { enabled: true },
+    gamification: { enabled: true, beta: true },
   },
   production: {
-    auth: true,
-    "learning-items": true,
+    auth: { enabled: true },
+    "learning-items": { enabled: true },
+    gamification: { enabled: true, beta: true },
   },
 };
 

@@ -4,6 +4,7 @@ import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
 import { usePendingAnalysisStore } from "../../lib/stores/pending-analysis.store";
 import { useAuthStore } from "../../lib/stores/auth.store";
 import { usePointsStore } from "../../lib/stores/points.store";
+import { isFeatureEnabled } from "../../features/feature-flags.service";
 import { formatResetTime } from "../../lib/utils";
 import { AnalysisForm } from "../features/AnalysisForm";
 import { AnalysisResult } from "../features/AnalysisResult";
@@ -18,6 +19,7 @@ export function AnalyzeView() {
   const { clearPendingAnalysis } = usePendingAnalysisStore();
   const isAuth = useAuthStore((state) => state.isAuth);
   const incrementPoints = usePointsStore((state) => state.incrementPoints);
+  const isGamificationEnabled = isFeatureEnabled("gamification");
   const lastResultRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -27,13 +29,13 @@ export function AnalyzeView() {
   }, [state.error]);
 
   useEffect(() => {
-    if (state.result?.is_correct && isAuth && state.resultTimestamp) {
+    if (isGamificationEnabled && state.result?.is_correct && isAuth && state.resultTimestamp) {
       if (lastResultRef.current !== state.resultTimestamp) {
         lastResultRef.current = state.resultTimestamp;
         incrementPoints();
       }
     }
-  }, [state.result, state.resultTimestamp, isAuth, incrementPoints]);
+  }, [state.result, state.resultTimestamp, isAuth, incrementPoints, isGamificationEnabled]);
 
   useEffect(() => {
     return () => {
@@ -95,7 +97,7 @@ export function AnalyzeView() {
             analysisMode={mode}
             analysisContext={state.analysisContext}
             onSave={handleSave}
-            earnedPoint={state.result?.is_correct === true && isAuth}
+            earnedPoint={isGamificationEnabled && state.result?.is_correct === true && isAuth}
           />
         </section>
       )}
