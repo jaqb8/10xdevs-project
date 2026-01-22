@@ -1,8 +1,10 @@
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { useTextAnalysis } from "../../lib/hooks/useTextAnalysis";
 import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
 import { usePendingAnalysisStore } from "../../lib/stores/pending-analysis.store";
 import { useAuthStore } from "../../lib/stores/auth.store";
+import { usePointsStore } from "../../lib/stores/points.store";
+import { isFeatureEnabled } from "../../features/feature-flags.service";
 import { formatResetTime } from "../../lib/utils";
 import { AnalysisForm } from "../features/AnalysisForm";
 import { AnalysisResult } from "../features/AnalysisResult";
@@ -16,12 +18,30 @@ export function AnalyzeView() {
   const mode = useAnalysisModeStore((state) => state.mode);
   const { clearPendingAnalysis } = usePendingAnalysisStore();
   const isAuth = useAuthStore((state) => state.isAuth);
+  const incrementPoints = usePointsStore((state) => state.incrementPoints);
+  const isGamificationEnabled = isFeatureEnabled("gamification");
+  const lastResultRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (state.error) {
       toast.error(state.error);
     }
   }, [state.error]);
+
+  useEffect(() => {
+    if (
+      isGamificationEnabled &&
+      state.result?.is_correct &&
+      isAuth &&
+      state.resultTimestamp &&
+      !state.isRestoredResult
+    ) {
+      if (lastResultRef.current !== state.resultTimestamp) {
+        lastResultRef.current = state.resultTimestamp;
+        incrementPoints();
+      }
+    }
+  }, [state.result, state.resultTimestamp, state.isRestoredResult, isAuth, incrementPoints, isGamificationEnabled]);
 
   useEffect(() => {
     return () => {
@@ -83,6 +103,7 @@ export function AnalyzeView() {
             analysisMode={mode}
             analysisContext={state.analysisContext}
             onSave={handleSave}
+            earnedPoint={isGamificationEnabled && state.result?.is_correct === true && isAuth}
           />
         </section>
       )}
