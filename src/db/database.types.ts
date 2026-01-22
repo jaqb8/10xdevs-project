@@ -105,7 +105,7 @@ export interface Database {
         Returns: number;
       };
       get_user_points_total: {
-        Args: { target_user_id: string };
+        Args: Record<string, never>;
         Returns: number;
       };
       increment_anonymous_daily_usage: {
@@ -113,7 +113,7 @@ export interface Database {
         Returns: Json;
       };
       increment_user_points: {
-        Args: { target_user_id: string };
+        Args: Record<string, never>;
         Returns: number;
       };
     };
