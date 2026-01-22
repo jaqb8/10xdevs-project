@@ -13,6 +13,7 @@ interface AnalyzeViewState {
   analysisContext: string;
   result: TextAnalysisDto | null;
   resultTimestamp: number | null;
+  isRestoredResult: boolean;
   error: string | null;
   isCurrentResultSaved: boolean;
 }
@@ -29,6 +30,7 @@ const INITIAL_STATE: AnalyzeViewState = {
   analysisContext: "",
   result: null,
   resultTimestamp: null,
+  isRestoredResult: false,
   error: null,
   isCurrentResultSaved: false,
 };
@@ -110,6 +112,7 @@ export function useTextAnalysis() {
         analysisContext: pendingAnalysis.analysisContext ?? "",
         result: pendingAnalysis.result,
         resultTimestamp: pendingAnalysis.timestamp,
+        isRestoredResult: true,
         error: null,
         isCurrentResultSaved: false,
       });
@@ -214,6 +217,7 @@ export function useTextAnalysis() {
         status: "success",
         result,
         resultTimestamp: Date.now(),
+        isRestoredResult: false,
         error: null,
         isCurrentResultSaved: false,
       }));

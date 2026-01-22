@@ -29,13 +29,19 @@ export function AnalyzeView() {
   }, [state.error]);
 
   useEffect(() => {
-    if (isGamificationEnabled && state.result?.is_correct && isAuth && state.resultTimestamp) {
+    if (
+      isGamificationEnabled &&
+      state.result?.is_correct &&
+      isAuth &&
+      state.resultTimestamp &&
+      !state.isRestoredResult
+    ) {
       if (lastResultRef.current !== state.resultTimestamp) {
         lastResultRef.current = state.resultTimestamp;
         incrementPoints();
       }
     }
-  }, [state.result, state.resultTimestamp, isAuth, incrementPoints, isGamificationEnabled]);
+  }, [state.result, state.resultTimestamp, state.isRestoredResult, isAuth, incrementPoints, isGamificationEnabled]);
 
   useEffect(() => {
     return () => {
