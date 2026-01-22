@@ -20,13 +20,23 @@ vi.mock("@/lib/services/openrouter", async (importOriginal) => {
   };
 });
 
+const mockRecordCorrectAnalysis = vi.fn();
+
+vi.mock("@/lib/services/gamification", () => ({
+  GamificationService: vi.fn().mockImplementation(() => ({
+    recordCorrectAnalysis: mockRecordCorrectAnalysis,
+  })),
+}));
+
 import { openRouterService } from "@/lib/services/openrouter";
+import { GamificationService } from "@/lib/services/gamification";
 
 interface MockAPIContext {
   request: Request;
   locals: {
     user: { id: string; email: string } | null;
     analysisQuota: { remaining: number; resetAt: string; limit: number } | null;
+    supabase: object;
   };
 }
 
@@ -46,18 +56,21 @@ function createRawRequest(body: string): Request {
   });
 }
 
+const mockSupabase = {};
+
 function createMockContext(request: Request, overrides?: Partial<MockAPIContext["locals"]>): MockAPIContext {
   return {
     request,
     locals: {
       user: null,
       analysisQuota: null,
+      supabase: mockSupabase,
       ...overrides,
     },
   };
 }
 
-describe("POST /api/analyze - integration tests", () => {
+describe("POST /api/analyze", () => {
   const mockCorrectResult: TextAnalysisDto = {
     is_correct: true,
     original_text: "Hello world.",
@@ -72,8 +85,11 @@ describe("POST /api/analyze - integration tests", () => {
     translation: "Zamierzam iść do domu.",
   };
 
+  const mockUser = { id: "user-123", email: "test@example.com" };
+
   beforeEach(() => {
     vi.clearAllMocks();
+    mockRecordCorrectAnalysis.mockResolvedValue(1);
   });
 
   describe("context handling in userMessage", () => {
@@ -739,6 +755,124 @@ Third line`;
       const colloquialPrompt = vi.mocked(openRouterService.getChatCompletion).mock.calls[0][0].systemMessage;
 
       expect(grammarPrompt).not.toBe(colloquialPrompt);
+    });
+  });
+
+  describe("gamification points integration", () => {
+    it("should record gamification point when analysis is correct and user is logged in", async () => {
+      const request = createMockRequest({
+        text: "Hello world.",
+        mode: "grammar_and_spelling",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      expect(GamificationService).toHaveBeenCalledWith(mockSupabase);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledTimes(1);
+    });
+
+    it("should NOT record gamification point when analysis has errors", async () => {
+      const request = createMockRequest({
+        text: "I gonna go home.",
+        mode: "grammar_and_spelling",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockErrorResult);
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+    });
+
+    it("should NOT record gamification point when user is not logged in", async () => {
+      const request = createMockRequest({
+        text: "Hello world.",
+        mode: "grammar_and_spelling",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
+
+      const response = await POST(createMockContext(request, { user: null }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+    });
+
+    it("should return successful response even if gamification service throws an error", async () => {
+      const request = createMockRequest({
+        text: "Hello world.",
+        mode: "grammar_and_spelling",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
+      mockRecordCorrectAnalysis.mockRejectedValue(new Error("Database connection failed"));
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      const body = await response.json();
+      expect(body.is_correct).toBe(true);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+    });
+
+    it("should record point for correct analysis with context", async () => {
+      const request = createMockRequest({
+        text: "Hello world.",
+        mode: "grammar_and_spelling",
+        analysisContext: "Formal email",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+    });
+
+    it("should record point for correct analysis in colloquial_speech mode", async () => {
+      const request = createMockRequest({
+        text: "Hey, what's up?",
+        mode: "colloquial_speech",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+    });
+
+    it("should NOT record point when validation fails", async () => {
+      const request = createMockRequest({
+        text: "",
+        mode: "grammar_and_spelling",
+      });
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(400);
+      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+    });
+
+    it("should NOT record point when analysis service throws an error", async () => {
+      const request = createMockRequest({
+        text: "Hello world.",
+        mode: "grammar_and_spelling",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockRejectedValue(new OpenRouterNetworkError());
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(500);
+      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
     });
   });
 });
