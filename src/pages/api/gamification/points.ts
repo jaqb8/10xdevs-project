@@ -11,7 +11,7 @@ export const GET: APIRoute = async ({ locals }) => {
 
   try {
     const gamificationService = new GamificationService(locals.supabase);
-    const total = await gamificationService.getUserPointsTotal(locals.user.id);
+    const total = await gamificationService.getUserPointsTotal();
 
     return new Response(JSON.stringify({ total }), {
       status: 200,

@@ -47,7 +47,7 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     if (result.is_correct && locals.user) {
       try {
-        await new GamificationService(locals.supabase).recordCorrectAnalysis(locals.user.id);
+        await new GamificationService(locals.supabase).recordCorrectAnalysis();
       } catch (pointsError) {
         console.error("Failed to record gamification point:", pointsError);
       }

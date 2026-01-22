@@ -12,15 +12,13 @@ export class GamificationService {
    * Records a point for a correct analysis.
    * Called when user successfully analyzes text without errors.
    * Uses atomic upsert to increment the user's points counter.
+   * The RPC uses auth.uid() internally to identify the current user.
    *
-   * @param userId - The authenticated user's ID
    * @returns The new total points after increment
    * @throws GamificationDatabaseError if database operation fails
    */
-  async recordCorrectAnalysis(userId: string): Promise<number> {
-    const { data, error } = await this.supabase.rpc("increment_user_points", {
-      target_user_id: userId,
-    });
+  async recordCorrectAnalysis(): Promise<number> {
+    const { data, error } = await this.supabase.rpc("increment_user_points");
 
     if (error) {
       console.error("Database error in recordCorrectAnalysis:", error);
@@ -36,16 +34,14 @@ export class GamificationService {
   }
 
   /**
-   * Gets the total number of points for a user.
+   * Gets the total number of points for the current authenticated user.
+   * The RPC uses auth.uid() internally to identify the current user.
    *
-   * @param userId - The authenticated user's ID
    * @returns The total number of points
    * @throws GamificationDatabaseError if database operation fails
    */
-  async getUserPointsTotal(userId: string): Promise<number> {
-    const { data, error } = await this.supabase.rpc("get_user_points_total", {
-      target_user_id: userId,
-    });
+  async getUserPointsTotal(): Promise<number> {
+    const { data, error } = await this.supabase.rpc("get_user_points_total");
 
     if (error) {
       console.error("Database error in getUserPointsTotal:", error);

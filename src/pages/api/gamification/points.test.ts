@@ -86,16 +86,15 @@ describe("GET /api/gamification/points", () => {
       expect(body.total).toBe(0);
     });
 
-    it("should call GamificationService with correct user id", async () => {
-      const userId = "user-789";
+    it("should call GamificationService without parameters (auth.uid used internally)", async () => {
       const context = createMockContext({
-        user: { id: userId, email: "test@example.com" },
+        user: { id: "user-789", email: "test@example.com" },
       });
       mockGetUserPointsTotal.mockResolvedValue(10);
 
       await GET(context as Parameters<typeof GET>[0]);
 
-      expect(mockGetUserPointsTotal).toHaveBeenCalledWith(userId);
+      expect(mockGetUserPointsTotal).toHaveBeenCalledWith();
     });
   });
 

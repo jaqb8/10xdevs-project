@@ -771,7 +771,7 @@ Third line`;
 
       expect(response.status).toBe(200);
       expect(GamificationService).toHaveBeenCalledWith(mockSupabase);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
       expect(mockRecordCorrectAnalysis).toHaveBeenCalledTimes(1);
     });
 
@@ -817,7 +817,7 @@ Third line`;
       expect(response.status).toBe(200);
       const body = await response.json();
       expect(body.is_correct).toBe(true);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
     });
 
     it("should record point for correct analysis with context", async () => {
@@ -832,7 +832,7 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
     });
 
     it("should record point for correct analysis in colloquial_speech mode", async () => {
@@ -846,7 +846,7 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith(mockUser.id);
+      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
     });
 
     it("should NOT record point when validation fails", async () => {
