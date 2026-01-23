@@ -6,44 +6,55 @@ alwaysApply: false
 
 ### Purpose
 
-This rule helps the agent automatically fetch comments from the latest open Pull Request, analyze them, and apply the required code changes.
+This rule helps the agent automatically fetch comments from the latest open Pull Request, analyze them, and apply the required code changes using **GitHub MCP tools**.
 
 ### Procedure
 
-#### 1. Fetch information about the latest open PR
+#### 1. Fetch information about the PR for current branch
 
-First, find the latest open Pull Request in the repository:
+First, get the current branch name:
 
 ```bash
-# Get list of open PRs and select the newest one
-gh pr list --state open --limit 1 --json number,title,headRefName,url
+git branch --show-current
 ```
+
+Then find the open Pull Request for this branch using MCP:
+
+```
+mcp_github_list_pull_requests(owner: "jaqb8", repo: "language-learning-buddy", state: "open", head: "jaqb8:<branch_name>")
+```
+
+The `head` parameter filters PRs by the source branch in format `owner:branch`.
 
 Save the PR number (`number`) for further use.
 
 #### 2. Fetch comments from PR
 
-Fetch all comments from the PR, including:
+Fetch all comments from the PR using the following MCP tools:
 
-- Review comments (inline and general)
-- Discussion comments
-- Code line comments
+**Review comments (inline comments on code lines):**
 
-```bash
-# Fetch all review comments
-gh pr view <PR_NUMBER> --json reviews --jq '.reviews[] | {id, body, state, author, createdAt, comments: .comments}'
-
-# Fetch inline comments on code lines
-gh api repos/:owner/:repo/pulls/<PR_NUMBER>/comments --paginate
-
-# Fetch discussion comments
-gh pr view <PR_NUMBER> --json comments --jq '.comments[] | {id, body, author, createdAt, path, line}'
+```
+mcp_github_pull_request_read(method: "get_review_comments", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: <PR_NUMBER>)
 ```
 
-Alternatively, use a single query that returns all comments:
+**General reviews:**
 
-```bash
-gh pr view <PR_NUMBER> --json reviews,comments --jq '.'
+```
+mcp_github_pull_request_read(method: "get_reviews", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: <PR_NUMBER>)
+```
+
+**Discussion comments:**
+
+```
+mcp_github_pull_request_read(method: "get_comments", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: <PR_NUMBER>)
+```
+
+**PR details and changed files:**
+
+```
+mcp_github_pull_request_read(method: "get", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: <PR_NUMBER>)
+mcp_github_pull_request_read(method: "get_files", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: <PR_NUMBER>)
 ```
 
 #### 3. Analyze comments
@@ -83,17 +94,41 @@ After applying changes:
 
 ### Example workflow
 
-```bash
-# 1. Find the latest open PR
-PR_NUMBER=$(gh pr list --state open --limit 1 --json number -q '.[0].number')
-
-# 2. Fetch comments
-gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
-
-# 3. Analyze comments (agent performs this automatically)
-# 4. Apply code changes (agent performs this automatically)
-# 5. Verify changes (agent performs this automatically)
 ```
+# 1. Get current branch name
+git branch --show-current
+# Returns e.g., "feature/my-feature"
+
+# 2. Find the open PR for this branch
+mcp_github_list_pull_requests(owner: "jaqb8", repo: "language-learning-buddy", state: "open", head: "jaqb8:feature/my-feature")
+# Returns PR with number, e.g., 58
+
+# 3. Fetch review comments (inline)
+mcp_github_pull_request_read(method: "get_review_comments", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: 58)
+
+# 4. Fetch general reviews
+mcp_github_pull_request_read(method: "get_reviews", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: 58)
+
+# 5. Fetch discussion comments
+mcp_github_pull_request_read(method: "get_comments", owner: "jaqb8", repo: "language-learning-buddy", pullNumber: 58)
+
+# 6. Analyze comments (agent performs this automatically)
+# 7. Apply code changes (agent performs this automatically)
+# 8. Verify changes (agent performs this automatically)
+```
+
+### MCP Tools Reference
+
+| Tool | Method | Description |
+|------|--------|-------------|
+| `mcp_github_list_pull_requests` | - | List PRs with filters (state, sort, direction) |
+| `mcp_github_pull_request_read` | `get` | Get PR details |
+| `mcp_github_pull_request_read` | `get_diff` | Get PR diff |
+| `mcp_github_pull_request_read` | `get_files` | Get list of changed files |
+| `mcp_github_pull_request_read` | `get_review_comments` | Get inline review comments on code |
+| `mcp_github_pull_request_read` | `get_reviews` | Get PR reviews |
+| `mcp_github_pull_request_read` | `get_comments` | Get discussion comments |
+| `mcp_github_pull_request_read` | `get_status` | Get CI/CD status |
 
 ### Best practices
 
@@ -104,6 +139,7 @@ gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
 - **Maintain code style** - use existing conventions and patterns
 - **Test changes** - if possible, verify that changes work correctly
 - **Communicate** - if a comment is unclear, ask for clarification or apply the best solution
+- **Use pagination** - for PRs with many comments, use `perPage` and `page` parameters
 
 #### ❌ Don't
 
@@ -116,22 +152,25 @@ gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
 
 #### Inline comments (on code lines)
 
-- Usually indicate a specific problem in a code line
-- May suggest specific changes or fixes
-- Often contain suggestions regarding style, performance, or logic
+Fetched via `get_review_comments` method. Each comment contains:
+- `path` - file path
+- `line` / `original_line` - line number
+- `body` - comment content
+- `diff_hunk` - code context
 
 **Example action:**
 
 1. Find the file and line indicated in the comment
-2. Read the code around that line
+2. Read the code around that line using `read_file`
 3. Apply the suggested change or fix
 4. Verify that the change resolves the problem
 
 #### Review comments (general)
 
-- May indicate broader architectural issues
-- May require changes in multiple files
-- Often contain suggestions regarding code structure
+Fetched via `get_reviews` method. Each review contains:
+- `state` - APPROVED, CHANGES_REQUESTED, COMMENTED
+- `body` - review summary
+- Associated inline comments
 
 **Example action:**
 
@@ -142,9 +181,7 @@ gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
 
 #### Discussion comments
 
-- May contain questions or explanations
-- May require responses instead of code changes
-- Often are continuations of earlier discussions
+Fetched via `get_comments` method. These are general PR comments not attached to specific code lines.
 
 **Example action:**
 
@@ -152,43 +189,10 @@ gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
 2. If it requires changes, apply them according to the instructions above
 3. If it only requires a response, consider adding an explanatory comment
 
-### GitHub CLI integration
-
-Make sure you have access to GitHub CLI (`gh`) and are logged in:
-
-```bash
-# Check login status
-gh auth status
-
-# If not logged in, log in
-gh auth login
-```
-
-### Automation
-
-If you want to automate the process, you can use the following script:
-
-```bash
-#!/bin/bash
-# resolve-pr-comments.sh
-
-PR_NUMBER=$(gh pr list --state open --limit 1 --json number -q '.[0].number')
-
-if [ -z "$PR_NUMBER" ]; then
-  echo "No open PRs"
-  exit 1
-fi
-
-echo "Fetching comments from PR #$PR_NUMBER..."
-gh pr view $PR_NUMBER --json reviews,comments > pr_comments.json
-
-echo "Comments saved to pr_comments.json"
-echo "Analyze the file and apply required changes"
-```
-
 ### Final notes
 
 - **Prioritize** - start with the most important comments (e.g., regarding security or errors)
 - **Be systematic** - go through comments one by one
 - **Document changes** - if you're making significant changes, consider adding a code comment
 - **Communicate progress** - if you can't resolve a comment, inform about it
+- **Check thread status** - review comments may have `isResolved` field indicating if the thread was resolved
