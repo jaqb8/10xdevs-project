@@ -17,5 +17,16 @@ export const isFeatureEnabled = (feature: Feature): boolean => {
     return false;
   }
 
-  return environmentConfig[feature] ?? false;
+  return environmentConfig[feature]?.enabled ?? false;
+};
+
+export const isFeatureBeta = (feature: Feature): boolean => {
+  const environment = getEnvironment();
+  const environmentConfig = featureFlagsConfig[environment];
+
+  if (!environmentConfig) {
+    return false;
+  }
+
+  return environmentConfig[feature]?.beta ?? false;
 };

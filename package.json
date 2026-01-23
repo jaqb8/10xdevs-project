@@ -1,7 +1,7 @@
 {
   "name": "10x-astro-starter",
   "type": "module",
-  "version": "1.6.4",
+  "version": "1.7.0",
   "scripts": {
     "dev": "astro dev",
     "dev:e2e": "astro dev --mode test",
@@ -43,6 +43,7 @@
     "@radix-ui/react-navigation-menu": "^1.2.14",
     "@radix-ui/react-select": "^2.2.6",
     "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-tooltip": "^1.2.8",
     "@supabase/ssr": "^0.7.0",
     "@supabase/supabase-js": "^2.75.0",
     "@tailwindcss/vite": "^4.1.13",
