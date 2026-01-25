@@ -1,9 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { Menu, Trophy } from "lucide-react";
+import { Menu, Trophy, ChevronDown, LogOut, Settings } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -18,6 +25,7 @@ import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePointsStore } from "@/lib/stores/points.store";
 import { isFeatureEnabled, isFeatureBeta } from "@/features/feature-flags.service";
 import { ModeToggle } from "@/components/shared/ModeToggle";
+import { UserMenuThemeToggle } from "@/components/shared/UserMenuThemeToggle";
 import { cn } from "@/lib/utils";
 
 interface MenuItem {
@@ -123,20 +131,50 @@ const Navbar1 = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  <div className="shadow-xs flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50">
-                    <Avatar className="size-6" data-test-id="header-user-avatar">
-                      <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
-                      <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-muted-foreground" data-test-id="header-user-email">
-                      {user.email}
-                    </span>
-                  </div>
-                  <form action="/api/auth/logout" method="POST">
-                    <Button type="submit" variant="outline" size="sm" data-test-id="header-logout-button">
-                      Wyloguj
-                    </Button>
-                  </form>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="shadow-xs cursor-pointer flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50 hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        data-test-id="header-user-menu-trigger"
+                      >
+                        <Avatar className="size-6" data-test-id="header-user-avatar">
+                          <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
+                          <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm text-muted-foreground font-medium" data-test-id="header-user-email">
+                          {user.email}
+                        </span>
+                        <ChevronDown className="size-3 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-56 mt-2 shadow-lg border"
+                      data-test-id="header-user-menu-content"
+                    >
+                      <DropdownMenuItem asChild>
+                        <a href="/settings" className="cursor-pointer" data-test-id="header-settings-button">
+                          <Settings className="size-4" />
+                          <span>Ustawienia</span>
+                        </a>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <UserMenuThemeToggle />
+                      <form action="/api/auth/logout" method="POST">
+                        <DropdownMenuItem
+                          asChild
+                          variant="destructive"
+                          className="cursor-pointer"
+                          data-test-id="header-logout-button"
+                        >
+                          <button type="submit" className="w-full flex items-center gap-2">
+                            <LogOut className="size-4" />
+                            <span>Wyloguj</span>
+                          </button>
+                        </DropdownMenuItem>
+                      </form>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               ) : (
                 <>
@@ -150,7 +188,7 @@ const Navbar1 = ({
               )}
             </>
           )}
-          <ModeToggle />
+          {!isAuth || !user ? <ModeToggle /> : null}
         </div>
       </nav>
 
