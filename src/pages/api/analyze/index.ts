@@ -46,21 +46,21 @@ export const POST: APIRoute = async ({ request, locals }) => {
 
     const result = await new AnalysisService().analyzeText(text, mode, analysisContext);
 
-    let pointsEnabled = true;
-    if (locals.user) {
+    if (result.is_correct && locals.user) {
+      let pointsEnabled = true;
       try {
         const settings = await new SettingsService(locals.supabase).getUserSettings();
         pointsEnabled = settings.pointsEnabled;
       } catch (settingsError) {
         console.error("Failed to load user settings:", settingsError);
       }
-    }
 
-    if (result.is_correct && locals.user && pointsEnabled) {
-      try {
-        await new GamificationService(locals.supabase).recordCorrectAnalysis();
-      } catch (pointsError) {
-        console.error("Failed to handle gamification points:", pointsError);
+      if (pointsEnabled) {
+        try {
+          await new GamificationService(locals.supabase).recordCorrectAnalysis();
+        } catch (pointsError) {
+          console.error("Failed to handle gamification points:", pointsError);
+        }
       }
     }
 
