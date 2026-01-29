@@ -97,6 +97,27 @@ export interface Database {
         };
         Relationships: [];
       };
+      user_settings: {
+        Row: {
+          user_id: string;
+          points_enabled: boolean;
+          context_enabled: boolean;
+          updated_at: string;
+        };
+        Insert: {
+          user_id: string;
+          points_enabled?: boolean;
+          context_enabled?: boolean;
+          updated_at?: string;
+        };
+        Update: {
+          user_id?: string;
+          points_enabled?: boolean;
+          context_enabled?: boolean;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<never, never>;
     Functions: {
@@ -108,6 +129,13 @@ export interface Database {
         Args: Record<string, never>;
         Returns: number;
       };
+      get_user_settings: {
+        Args: Record<string, never>;
+        Returns: {
+          points_enabled: boolean;
+          context_enabled: boolean;
+        }[];
+      };
       increment_anonymous_daily_usage: {
         Args: { p_ip_hash: string; p_limit: number; p_usage_date: string };
         Returns: Json;
@@ -115,6 +143,20 @@ export interface Database {
       increment_user_points: {
         Args: Record<string, never>;
         Returns: number;
+      };
+      reset_user_points: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
+      upsert_user_settings: {
+        Args: {
+          p_points_enabled?: boolean;
+          p_context_enabled?: boolean;
+        };
+        Returns: {
+          points_enabled: boolean;
+          context_enabled: boolean;
+        }[];
       };
     };
     Enums: {
