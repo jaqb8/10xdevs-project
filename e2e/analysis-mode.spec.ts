@@ -19,8 +19,9 @@ test.describe("Analysis Mode Selection and Functionality", () => {
     await page.waitForLoadState("networkidle");
     await expect(analyzePage.heading).toBeVisible();
 
-    // Assert - User is logged in
-    await expect(header.logoutButton).toBeVisible();
+    // Assert - User is logged in (wait for hydration)
+    await page.waitForSelector('[data-test-id="header-user-menu-trigger"]', { timeout: 10000 });
+    await expect(header.userMenuTrigger).toBeVisible();
 
     // Assert - Default mode is "Gramatyka i ortografia"
     const defaultMode = await analyzePage.form.getSelectedMode();

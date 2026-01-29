@@ -21,7 +21,7 @@ test.describe("Text Analysis and Save Flow", () => {
     await expect(analyzePage.heading).toBeVisible();
 
     // Assert - User is logged in
-    await expect(header.logoutButton).toBeVisible();
+    await expect(header.userMenuTrigger).toBeVisible();
 
     // Act - Fill and submit analysis
     await analyzePage.form.fillText(textWithError);

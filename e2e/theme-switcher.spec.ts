@@ -12,8 +12,10 @@ test.describe("Theme Switcher", () => {
   test("should toggle theme on desktop", async ({ page }) => {
     const initialTheme = await header.getCurrentTheme();
 
-    await header.toggleTheme();
-    await page.waitForTimeout(100);
+    // For logged in users, open user menu first
+    await header.openUserMenu();
+    await header.themeToggleMenuItem.click();
+    await page.waitForTimeout(300);
 
     const newTheme = await header.getCurrentTheme();
     expect(newTheme).not.toBe(initialTheme);
@@ -21,8 +23,10 @@ test.describe("Theme Switcher", () => {
     const storedTheme = await header.getStoredTheme();
     expect(storedTheme).toBe(newTheme);
 
-    await header.toggleTheme();
-    await page.waitForTimeout(100);
+    // Toggle back
+    await header.openUserMenu();
+    await header.themeToggleMenuItem.click();
+    await page.waitForTimeout(300);
 
     const revertedTheme = await header.getCurrentTheme();
     expect(revertedTheme).toBe(initialTheme);
@@ -83,14 +87,16 @@ test.describe("Theme Switcher", () => {
     const currentTheme = await header.getCurrentTheme();
     expect(currentTheme).toBe("light");
 
-    await expect(header.themeToggleButton).toBeVisible();
+    // For logged in users, check user menu is visible instead of direct theme toggle
+    await expect(header.userMenuTrigger).toBeVisible();
 
-    await header.toggleTheme();
-    await page.waitForTimeout(100);
+    await header.openUserMenu();
+    await header.themeToggleMenuItem.click();
+    await page.waitForTimeout(300);
 
     const newTheme = await header.getCurrentTheme();
     expect(newTheme).toBe("dark");
 
-    await expect(header.themeToggleButton).toBeVisible();
+    await expect(header.userMenuTrigger).toBeVisible();
   });
 });

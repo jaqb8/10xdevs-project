@@ -131,10 +131,10 @@ const Navbar1 = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  <DropdownMenu>
+                  <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
                       <button
-                        className="shadow-xs cursor-pointer flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50 hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        className="group shadow-xs cursor-pointer flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50 hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                         data-test-id="header-user-menu-trigger"
                       >
                         <Avatar className="size-6" data-test-id="header-user-avatar">
@@ -144,7 +144,7 @@ const Navbar1 = ({
                         <span className="text-sm text-muted-foreground font-medium" data-test-id="header-user-email">
                           {user.email}
                         </span>
-                        <ChevronDown className="size-3 text-muted-foreground transition-transform duration-200 data-[state=open]:rotate-180" />
+                        <ChevronDown className="size-3 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
                       </button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent
