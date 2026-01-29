@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,12 +33,21 @@ export function AnalysisResult({
   earnedPoint = false,
 }: AnalysisResultProps) {
   const resultRef = useRef<HTMLDivElement | null>(null);
+  const resultRef = useRef<HTMLDivElement | null>(null);
   const { isAuth } = useAuthStore();
   const { setPendingAnalysis } = usePendingAnalysisStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
   const gamificationFeatureEnabled = isFeatureEnabled("gamification");
   const gamificationBetaTagEnabled = isFeatureBeta("gamification");
+
+  useEffect(() => {
+    if (isLoading || !analysisResult) {
+      return;
+    }
+
+    resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [analysisResult, isLoading]);
 
   useEffect(() => {
     if (isLoading || !analysisResult) {
