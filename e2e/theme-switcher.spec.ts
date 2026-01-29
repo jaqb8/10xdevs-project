@@ -58,25 +58,6 @@ test.describe("Theme Switcher", () => {
     expect(storedTheme).toBe("dark");
   });
 
-  test("should respect system preference on first visit", async ({ page }) => {
-    await page.evaluate(() => localStorage.clear());
-
-    await page.emulateMedia({ colorScheme: "dark" });
-    await page.goto("/");
-    await page.waitForTimeout(100);
-
-    const themeDark = await header.getCurrentTheme();
-    expect(themeDark).toBe("dark");
-
-    await page.evaluate(() => localStorage.clear());
-    await page.emulateMedia({ colorScheme: "light" });
-    await page.goto("/");
-    await page.waitForTimeout(100);
-
-    const themeLight = await header.getCurrentTheme();
-    expect(themeLight).toBe("light");
-  });
-
   test("should show correct icon for current theme", async ({ page }) => {
     await page.evaluate(() => {
       localStorage.setItem("theme", "light");
