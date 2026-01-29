@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef } from "react";
-import { useCallback, useEffect, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -32,7 +31,6 @@ export function AnalysisResult({
   onSave,
   earnedPoint = false,
 }: AnalysisResultProps) {
-  const resultRef = useRef<HTMLDivElement | null>(null);
   const resultRef = useRef<HTMLDivElement | null>(null);
   const { isAuth } = useAuthStore();
   const { setPendingAnalysis } = usePendingAnalysisStore();
