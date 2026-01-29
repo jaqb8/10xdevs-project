@@ -47,12 +47,12 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const result = await new AnalysisService().analyzeText(text, mode, analysisContext);
 
     if (result.is_correct && locals.user) {
-      let pointsEnabled = true;
+      let pointsEnabled = false;
       try {
         const settings = await new SettingsService(locals.supabase).getUserSettings();
         pointsEnabled = settings.pointsEnabled;
       } catch (settingsError) {
-        console.error("Failed to load user settings:", settingsError);
+        console.error("Failed to load user settings, skipping points:", settingsError);
       }
 
       if (pointsEnabled) {
