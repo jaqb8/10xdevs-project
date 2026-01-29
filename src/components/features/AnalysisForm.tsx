@@ -8,6 +8,7 @@ import { AnalysisModeSelector } from "./AnalysisModeSelector";
 import { AnalysisContextInput } from "./AnalysisContextInput";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
+import { useSettingsStore } from "@/lib/stores/settings.store";
 
 interface QuotaStatus {
   remaining: number;
@@ -47,6 +48,8 @@ export function AnalysisForm({
   const formRef = useRef<HTMLFormElement>(null);
   const [copied, setCopied] = useState(false);
   const [modifierKey, setModifierKey] = useState("Ctrl");
+  const { contextEnabled, isLoaded } = useSettingsStore();
+  const isContextEnabled = !isLoaded || contextEnabled;
 
   useEffect(() => {
     const isMac = /Mac|iPhone|iPad|iPod/.test(navigator.userAgent);
@@ -166,7 +169,7 @@ export function AnalysisForm({
             </p>
           </div>
         </div>
-        {isAuth && onAnalysisContextChange && (
+        {isAuth && isContextEnabled && onAnalysisContextChange && (
           <AnalysisContextInput
             analysisContext={analysisContext}
             onAnalysisContextChange={onAnalysisContextChange}

@@ -32,6 +32,11 @@ export interface ApiErrorResponse {
   data?: Record<string, unknown>;
 }
 
+export interface UserSettings {
+  pointsEnabled: boolean;
+  contextEnabled: boolean;
+}
+
 /**
  * DTO for a learning item returned to the client.
  * It omits the `user_id` to avoid exposing it unnecessarily.

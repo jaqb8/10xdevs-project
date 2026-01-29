@@ -35,8 +35,8 @@ export function AnalysisResult({
   const { setPendingAnalysis } = usePendingAnalysisStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
-  const isGamificationEnabled = isFeatureEnabled("gamification");
-  const isGamificationBeta = isFeatureBeta("gamification");
+  const gamificationFeatureEnabled = isFeatureEnabled("gamification");
+  const gamificationBetaTagEnabled = isFeatureBeta("gamification");
 
   const handleSave = useCallback(() => {
     if (!isAuth) {
@@ -102,7 +102,7 @@ export function AnalysisResult({
               <h2 className="text-xl font-semibold">Świetna robota!</h2>
               <p className="text-muted-foreground text-sm">Twój tekst nie wymaga poprawek.</p>
             </div>
-            {isGamificationEnabled && earnedPoint && (
+            {gamificationFeatureEnabled && earnedPoint && (
               <div
                 className="flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500"
                 data-test-id="earned-point-badge"
@@ -110,7 +110,7 @@ export function AnalysisResult({
                 <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700">
                   <Trophy className="size-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
                   <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">+1 punkt!</span>
-                  {isGamificationBeta && (
+                  {gamificationBetaTagEnabled && (
                     <span className="text-[7px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
                       beta
                     </span>
