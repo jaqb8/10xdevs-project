@@ -8,23 +8,31 @@ export class HeaderComponent {
   readonly loginButton: Locator;
   readonly signupButton: Locator;
   readonly logoutButton: Locator;
+  readonly logoutButtonMobile: Locator;
   readonly userEmail: Locator;
+  readonly userAvatar: Locator;
+  readonly userMenuTrigger: Locator;
   readonly mobileMenuTrigger: Locator;
   readonly themeToggleButton: Locator;
   readonly themeToggleButtonMobile: Locator;
+  readonly themeToggleMenuItem: Locator;
 
   constructor(page: Page) {
     this.page = page;
     this.logo = page.getByRole("link", { name: /language learning buddy/i });
     this.analyzeLink = page.getByRole("link", { name: /^analiza$/i });
     this.learningListLink = page.getByRole("link", { name: /moja lista/i });
-    this.loginButton = page.getByRole("link", { name: /zaloguj/i });
-    this.signupButton = page.getByRole("link", { name: /zarejestruj/i });
-    this.logoutButton = page.getByRole("button", { name: /wyloguj/i });
-    this.userEmail = page.getByText(/.*@.*\..*/);
+    this.loginButton = page.getByTestId("header-login-button");
+    this.signupButton = page.getByTestId("header-signup-button");
+    this.logoutButton = page.getByTestId("header-logout-button");
+    this.logoutButtonMobile = page.getByTestId("header-logout-button-mobile");
+    this.userEmail = page.getByTestId("header-user-email");
+    this.userAvatar = page.getByTestId("header-user-avatar");
+    this.userMenuTrigger = page.getByTestId("header-user-menu-trigger");
     this.mobileMenuTrigger = page.getByTestId("header-mobile-menu-trigger");
-    this.themeToggleButton = page.locator("nav.hidden button[data-test-id='theme-toggle-button']");
+    this.themeToggleButton = page.locator("nav button[data-test-id='theme-toggle-button']");
     this.themeToggleButtonMobile = page.locator("div.block button[data-test-id='theme-toggle-button']");
+    this.themeToggleMenuItem = page.getByTestId("header-theme-toggle-menu-item");
   }
 
   async navigateToAnalyze() {
@@ -43,12 +51,22 @@ export class HeaderComponent {
     await this.signupButton.click();
   }
 
+  async openUserMenu() {
+    await this.userMenuTrigger.click();
+  }
+
   async logout() {
+    await this.openUserMenu();
     await this.logoutButton.click();
   }
 
+  async logoutMobile() {
+    await this.openMobileMenu();
+    await this.logoutButtonMobile.click();
+  }
+
   async isLoggedIn() {
-    return await this.logoutButton.isVisible();
+    return await this.userAvatar.isVisible();
   }
 
   async getUserEmail() {
@@ -60,11 +78,22 @@ export class HeaderComponent {
   }
 
   async toggleTheme() {
+    const isUserMenuVisible = await this.userMenuTrigger
+      .waitFor({ state: "visible", timeout: 1500 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (isUserMenuVisible) {
+      await this.openUserMenu();
+      await this.themeToggleMenuItem.click();
+      return;
+    }
+
     await this.themeToggleButton.click();
   }
 
   async toggleThemeMobile() {
-    await this.mobileMenuTrigger.click();
+    await this.openMobileMenu();
     await this.themeToggleButtonMobile.click();
   }
 
