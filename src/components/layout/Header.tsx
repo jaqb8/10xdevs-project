@@ -1,9 +1,15 @@
-import { useEffect, useRef, useState } from "react";
-import { Menu, Trophy } from "lucide-react";
+import { Menu, ChevronDown, LogOut, Settings } from "lucide-react";
 
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -13,12 +19,13 @@ import {
   NavigationMenuTrigger,
 } from "@/components/ui/navigation-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePointsStore } from "@/lib/stores/points.store";
+import { useSettingsStore } from "@/lib/stores/settings.store";
 import { isFeatureEnabled, isFeatureBeta } from "@/features/feature-flags.service";
 import { ModeToggle } from "@/components/shared/ModeToggle";
-import { cn } from "@/lib/utils";
+import { UserMenuThemeToggle } from "@/components/shared/UserMenuThemeToggle";
+import { GamificationBadge } from "@/components/features/gamification/GamificationBadge";
 
 interface MenuItem {
   title: string;
@@ -55,25 +62,19 @@ const Navbar1 = ({
     { title: "Moja lista", url: "/learning-list" },
   ],
 }: Navbar1Props) => {
-  const { user, isAuth } = useAuthStore();
+  const { user, isAuth, isAuthInitialized } = useAuthStore();
   const points = usePointsStore((state) => state.points);
+  const { pointsEnabled: pointsSettingEnabled, isLoaded: areSettingsLoaded } = useSettingsStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
-  const isGamificationEnabled = isFeatureEnabled("gamification");
-  const isGamificationBeta = isFeatureBeta("gamification");
-  const prevPointsRef = useRef<number | null>(null);
-  const [isAnimating, setIsAnimating] = useState(false);
-
-  useEffect(() => {
-    if (points !== null && prevPointsRef.current !== null && points > prevPointsRef.current) {
-      setIsAnimating(true);
-      const timer = setTimeout(() => setIsAnimating(false), 200);
-      return () => clearTimeout(timer);
-    }
-    prevPointsRef.current = points;
-  }, [points]);
+  const gamificationFeatureEnabled = isFeatureEnabled("gamification");
+  const gamificationBetaTagEnabled = isFeatureBeta("gamification");
 
   const filteredMenu = isAuth && isLearningItemsFeatureEnabled ? menu : [];
+  const shouldShowAuthControls = isAuthFeatureEnabled && isAuthInitialized;
+  const shouldShowPointsSkeleton = gamificationFeatureEnabled && !areSettingsLoaded;
+  const shouldShowPointsBadge =
+    gamificationFeatureEnabled && areSettingsLoaded && pointsSettingEnabled && points !== null;
 
   return (
     <section className="py-4">
@@ -94,49 +95,62 @@ const Navbar1 = ({
           )}
         </div>
         <div className="flex items-center gap-2">
-          {isAuthFeatureEnabled && (
+          {shouldShowAuthControls && (
             <>
               {user ? (
                 <>
-                  {isGamificationEnabled && points !== null && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div
-                          className={cn(
-                            "points-badge shadow-xs flex items-center gap-2 border rounded-full h-8 px-3 bg-amber-50 dark:bg-amber-950/50 border-amber-200 dark:border-amber-800 cursor-pointer",
-                            isAnimating && "animate-scale"
-                          )}
-                          data-test-id="header-points-badge"
-                        >
-                          <Trophy className="size-4 text-amber-600 dark:text-amber-400" />
-                          <span className="text-base font-medium text-amber-700 dark:text-amber-300">{points}</span>
-                          {isGamificationBeta && (
-                            <span className="text-[7px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
-                              beta
-                            </span>
-                          )}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent side="bottom" className="max-w-xs text-center">
-                        Zdobywasz punkty za każdą analizę tekstu bez błędów. Im więcej punktów, tym lepiej opanowujesz
-                        język!
-                      </TooltipContent>
-                    </Tooltip>
+                  {shouldShowPointsSkeleton && <GamificationBadge variant="desktop" isLoading />}
+                  {shouldShowPointsBadge && (
+                    <GamificationBadge
+                      variant="desktop"
+                      points={points ?? undefined}
+                      showBeta={gamificationBetaTagEnabled}
+                    />
                   )}
-                  <div className="shadow-xs flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50">
-                    <Avatar className="size-6" data-test-id="header-user-avatar">
-                      <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
-                      <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
-                    </Avatar>
-                    <span className="text-sm text-muted-foreground" data-test-id="header-user-email">
-                      {user.email}
-                    </span>
-                  </div>
-                  <form action="/api/auth/logout" method="POST">
-                    <Button type="submit" variant="outline" size="sm" data-test-id="header-logout-button">
-                      Wyloguj
-                    </Button>
-                  </form>
+                  <DropdownMenu modal={false}>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        className="group shadow-xs cursor-pointer flex items-center gap-2 border rounded-full py-1 pl-1 pr-3 dark:bg-secondary/50 hover:bg-accent/50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                        data-test-id="header-user-menu-trigger"
+                      >
+                        <Avatar className="size-6" data-test-id="header-user-avatar">
+                          <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
+                          <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                        </Avatar>
+                        <span className="text-sm text-muted-foreground font-medium" data-test-id="header-user-email">
+                          {user.email}
+                        </span>
+                        <ChevronDown className="size-3 text-muted-foreground transition-transform duration-200 group-data-[state=open]:rotate-180" />
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                      align="end"
+                      className="w-56 mt-2 shadow-lg border"
+                      data-test-id="header-user-menu-content"
+                    >
+                      <DropdownMenuItem asChild>
+                        <a href="/settings" className="cursor-pointer" data-test-id="header-settings-button">
+                          <Settings className="size-4" />
+                          <span>Ustawienia</span>
+                        </a>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <UserMenuThemeToggle />
+                      <form action="/api/auth/logout" method="POST">
+                        <DropdownMenuItem
+                          asChild
+                          variant="destructive"
+                          className="cursor-pointer"
+                          data-test-id="header-logout-button"
+                        >
+                          <button type="submit" className="w-full flex items-center gap-2">
+                            <LogOut className="size-4" />
+                            <span>Wyloguj</span>
+                          </button>
+                        </DropdownMenuItem>
+                      </form>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </>
               ) : (
                 <>
@@ -150,7 +164,7 @@ const Navbar1 = ({
               )}
             </>
           )}
-          <ModeToggle />
+          {shouldShowAuthControls && (!isAuth || !user) ? <ModeToggle /> : null}
         </div>
       </nav>
 
@@ -183,7 +197,7 @@ const Navbar1 = ({
                 )}
 
                 <div className="flex flex-col gap-3">
-                  {isAuthFeatureEnabled && (
+                  {shouldShowAuthControls && (
                     <>
                       {user ? (
                         <>
@@ -196,27 +210,25 @@ const Navbar1 = ({
                               {user.email}
                             </span>
                           </div>
-                          {isGamificationEnabled && points !== null && (
-                            <div
-                              className="flex flex-col items-center gap-1 py-1 px-4 rounded-full bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800"
-                              data-test-id="header-points-badge-mobile"
-                            >
-                              <div className="flex items-center gap-2">
-                                <Trophy className="size-5 text-amber-600 dark:text-amber-400" />
-                                <span className="text-base font-medium text-amber-700 dark:text-amber-300">
-                                  {points} punktów
-                                </span>
-                                {isGamificationBeta && (
-                                  <span className="text-[7px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
-                                    beta
-                                  </span>
-                                )}
-                              </div>
-                              <p className="text-xs text-amber-600/70 dark:text-amber-400/70">
-                                Punkty za analizy bez błędów
-                              </p>
-                            </div>
+                          {shouldShowPointsSkeleton && <GamificationBadge variant="mobile" isLoading />}
+                          {shouldShowPointsBadge && (
+                            <GamificationBadge
+                              variant="mobile"
+                              points={points ?? undefined}
+                              showBeta={gamificationBetaTagEnabled}
+                            />
                           )}
+                          <Button
+                            asChild
+                            variant="outline"
+                            className="w-full"
+                            data-test-id="header-settings-button-mobile"
+                          >
+                            <a href="/settings" className="flex items-center justify-center gap-2">
+                              <Settings className="size-4" />
+                              Ustawienia
+                            </a>
+                          </Button>
                           <form action="/api/auth/logout" method="POST">
                             <Button
                               type="submit"

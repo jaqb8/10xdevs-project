@@ -11,6 +11,7 @@ import {
   AnalysisUnknownError,
 } from "@/lib/services/analysis";
 import { GamificationService } from "@/lib/services/gamification";
+import { SettingsService } from "@/lib/services/settings";
 import { createErrorResponse, createValidationErrorResponse } from "@/lib/api-helpers";
 
 export const prerender = false;
@@ -46,10 +47,20 @@ export const POST: APIRoute = async ({ request, locals }) => {
     const result = await new AnalysisService().analyzeText(text, mode, analysisContext);
 
     if (result.is_correct && locals.user) {
+      let pointsEnabled = false;
       try {
-        await new GamificationService(locals.supabase).recordCorrectAnalysis();
-      } catch (pointsError) {
-        console.error("Failed to record gamification point:", pointsError);
+        const settings = await new SettingsService(locals.supabase).getUserSettings();
+        pointsEnabled = settings.pointsEnabled;
+      } catch (settingsError) {
+        console.error("Failed to load user settings, skipping points:", settingsError);
+      }
+
+      if (pointsEnabled) {
+        try {
+          await new GamificationService(locals.supabase).recordCorrectAnalysis();
+        } catch (pointsError) {
+          console.error("Failed to handle gamification points:", pointsError);
+        }
       }
     }
 

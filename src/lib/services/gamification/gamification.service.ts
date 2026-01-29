@@ -55,4 +55,18 @@ export class GamificationService {
 
     return data;
   }
+
+  /**
+   * Resets points for the current authenticated user.
+   *
+   * @throws GamificationDatabaseError if database operation fails
+   */
+  async resetUserPoints(): Promise<void> {
+    const { error } = await this.supabase.rpc("reset_user_points");
+
+    if (error) {
+      console.error("Database error in resetUserPoints:", error);
+      throw new GamificationDatabaseError(error);
+    }
+  }
 }

@@ -5,6 +5,7 @@ import Footer from "@/components/layout/Footer.astro";
 import { Toaster } from "@/components/ui/sonner";
 import { AuthInitializer } from "@/components/shared/AuthInitializer";
 import { PointsInitializer } from "@/components/shared/PointsInitializer";
+import { SettingsInitializer } from "@/components/shared/SettingsInitializer";
 
 interface Props {
   title?: string;
@@ -17,6 +18,7 @@ const { user } = Astro.locals;
 <Layout title={title}>
   <AuthInitializer user={user} client:only="react" />
   <PointsInitializer client:only="react" />
+  <SettingsInitializer client:only="react" />
   <Header client:load />
   <main class="flex-1">
     <slot />

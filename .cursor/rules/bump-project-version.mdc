@@ -37,15 +37,17 @@ Update the version in the following files:
 
 ### Creating changelog
 
-If there is no changelog in `docs/versions/v{version}/changelog.md` file, create it based on commits between the previous and current version.
+If there is no changelog in `docs/versions/v{version}/changelog.md` file, create it based on user-facing changes introduced in this version.
 
-Use GitHub MCP to get the commits:
+Focus on changes that affect the user experience, such as:
+- New features and functionality
+- Improvements to existing features
+- Bug fixes that impact user workflow
+- UI/UX changes
+- Performance improvements noticeable to users
+- Changes to user settings or preferences
 
-```
-mcp_github_list_commits(owner: "jaqb8", repo: "language-learning-buddy", sha: "v{previous-version}")
-```
-
-Compare with commits from the previous version tag to identify changes.
+Avoid technical details, implementation specifics, or internal refactoring that doesn't affect the user experience.
 
 Then, create the changelog file in the `docs/versions/v{version}/changelog.md` file in english:
 

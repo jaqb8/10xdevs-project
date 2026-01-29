@@ -21,10 +21,17 @@ vi.mock("@/lib/services/openrouter", async (importOriginal) => {
 });
 
 const mockRecordCorrectAnalysis = vi.fn();
+const mockGetUserSettings = vi.fn();
 
 vi.mock("@/lib/services/gamification", () => ({
   GamificationService: vi.fn().mockImplementation(() => ({
     recordCorrectAnalysis: mockRecordCorrectAnalysis,
+  })),
+}));
+
+vi.mock("@/lib/services/settings", () => ({
+  SettingsService: vi.fn().mockImplementation(() => ({
+    getUserSettings: mockGetUserSettings,
   })),
 }));
 
@@ -90,6 +97,7 @@ describe("POST /api/analyze", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockRecordCorrectAnalysis.mockResolvedValue(1);
+    mockGetUserSettings.mockResolvedValue({ pointsEnabled: true, contextEnabled: true });
   });
 
   describe("context handling in userMessage", () => {
@@ -775,6 +783,21 @@ Third line`;
       expect(mockRecordCorrectAnalysis).toHaveBeenCalledTimes(1);
     });
 
+    it("should NOT record gamification point when points are disabled in settings", async () => {
+      const request = createMockRequest({
+        text: "Hello world.",
+        mode: "grammar_and_spelling",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
+      mockGetUserSettings.mockResolvedValue({ pointsEnabled: false, contextEnabled: true });
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+    });
+
     it("should NOT record gamification point when analysis has errors", async () => {
       const request = createMockRequest({
         text: "I gonna go home.",
@@ -818,6 +841,21 @@ Third line`;
       const body = await response.json();
       expect(body.is_correct).toBe(true);
       expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
+    });
+
+    it("should skip gamification when settings service throws an error", async () => {
+      const request = createMockRequest({
+        text: "Hello world.",
+        mode: "grammar_and_spelling",
+      });
+
+      vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
+      mockGetUserSettings.mockRejectedValue(new Error("Settings RPC failed"));
+
+      const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
+
+      expect(response.status).toBe(200);
+      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
     });
 
     it("should record point for correct analysis with context", async () => {

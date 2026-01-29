@@ -4,9 +4,11 @@ import { useAnalysisModeStore } from "../../lib/stores/analysis-mode.store";
 import { usePendingAnalysisStore } from "../../lib/stores/pending-analysis.store";
 import { useAuthStore } from "../../lib/stores/auth.store";
 import { usePointsStore } from "../../lib/stores/points.store";
+import { useSettingsStore } from "../../lib/stores/settings.store";
 import { isFeatureEnabled } from "../../features/feature-flags.service";
 import { formatResetTime } from "../../lib/utils";
 import { AnalysisForm } from "../features/AnalysisForm";
+import { Skeleton } from "../ui/skeleton";
 import { AnalysisResult } from "../features/AnalysisResult";
 import { toast } from "sonner";
 import type { CreateLearningItemCommand } from "../../types";
@@ -19,8 +21,12 @@ export function AnalyzeView() {
   const { clearPendingAnalysis } = usePendingAnalysisStore();
   const isAuth = useAuthStore((state) => state.isAuth);
   const incrementPoints = usePointsStore((state) => state.incrementPoints);
-  const isGamificationEnabled = isFeatureEnabled("gamification");
+  const { pointsEnabled: pointsSettingEnabled, contextEnabled, isLoaded } = useSettingsStore();
+  const gamificationFeatureEnabled = isFeatureEnabled("gamification");
   const lastResultRef = useRef<number | null>(null);
+  const isPointsAwardingEnabled = !isLoaded || pointsSettingEnabled;
+  const isContextEnabled = !isLoaded || contextEnabled;
+  const shouldShowSettingsSkeleton = isAuth && !isLoaded;
 
   useEffect(() => {
     if (state.error) {
@@ -30,7 +36,8 @@ export function AnalyzeView() {
 
   useEffect(() => {
     if (
-      isGamificationEnabled &&
+      gamificationFeatureEnabled &&
+      isPointsAwardingEnabled &&
       state.result?.is_correct &&
       isAuth &&
       state.resultTimestamp &&
@@ -41,7 +48,21 @@ export function AnalyzeView() {
         incrementPoints();
       }
     }
-  }, [state.result, state.resultTimestamp, state.isRestoredResult, isAuth, incrementPoints, isGamificationEnabled]);
+  }, [
+    state.result,
+    state.resultTimestamp,
+    state.isRestoredResult,
+    isAuth,
+    incrementPoints,
+    gamificationFeatureEnabled,
+    isPointsAwardingEnabled,
+  ]);
+
+  useEffect(() => {
+    if (!isContextEnabled && state.analysisContext.trim().length > 0) {
+      setAnalysisContext("");
+    }
+  }, [isContextEnabled, state.analysisContext, setAnalysisContext]);
 
   useEffect(() => {
     return () => {
@@ -79,20 +100,36 @@ export function AnalyzeView() {
       </header>
 
       <section aria-label="Formularz analizy tekstu">
-        <AnalysisForm
-          text={state.text}
-          onTextChange={setText}
-          onSubmit={() => analyzeText(mode)}
-          onClear={clear}
-          isLoading={state.status === "loading"}
-          isAnalyzing={state.status === "loading"}
-          maxLength={MAX_TEXT_LENGTH}
-          quota={!isAuth ? quota : null}
-          formatResetTime={formatResetTime}
-          analysisContext={state.analysisContext}
-          onAnalysisContextChange={setAnalysisContext}
-          isAuth={isAuth}
-        />
+        {shouldShowSettingsSkeleton ? (
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Skeleton className="h-5 w-48" />
+              <Skeleton className="h-40 w-full" />
+              <div className="flex items-center justify-between gap-2">
+                <Skeleton className="h-4 w-36" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            </div>
+            <Skeleton className="h-20 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <AnalysisForm
+            text={state.text}
+            onTextChange={setText}
+            onSubmit={() => analyzeText(mode)}
+            onClear={clear}
+            isLoading={state.status === "loading"}
+            isAnalyzing={state.status === "loading"}
+            maxLength={MAX_TEXT_LENGTH}
+            quota={!isAuth ? quota : null}
+            formatResetTime={formatResetTime}
+            analysisContext={state.analysisContext}
+            onAnalysisContextChange={setAnalysisContext}
+            isAuth={isAuth}
+          />
+        )}
       </section>
       {(state.status === "loading" || state.result) && (
         <section aria-label="Wyniki analizy" aria-live="polite">
@@ -103,7 +140,9 @@ export function AnalyzeView() {
             analysisMode={mode}
             analysisContext={state.analysisContext}
             onSave={handleSave}
-            earnedPoint={isGamificationEnabled && state.result?.is_correct === true && isAuth}
+            earnedPoint={
+              gamificationFeatureEnabled && isPointsAwardingEnabled && state.result?.is_correct === true && isAuth
+            }
           />
         </section>
       )}
