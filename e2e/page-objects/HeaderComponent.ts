@@ -78,17 +78,18 @@ export class HeaderComponent {
   }
 
   async toggleTheme() {
-    // Check if user menu is available (logged in user)
-    const isUserMenuVisible = await this.userMenuTrigger.isVisible().catch(() => false);
-    
+    const isUserMenuVisible = await this.userMenuTrigger
+      .waitFor({ state: "visible", timeout: 1500 })
+      .then(() => true)
+      .catch(() => false);
+
     if (isUserMenuVisible) {
-      // For logged in users, theme toggle is inside user menu
       await this.openUserMenu();
       await this.themeToggleMenuItem.click();
-    } else {
-      // For non-logged in users, theme toggle is directly visible
-      await this.themeToggleButton.click();
+      return;
     }
+
+    await this.themeToggleButton.click();
   }
 
   async toggleThemeMobile() {
