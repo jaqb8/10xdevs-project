@@ -6,8 +6,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthInitializer } from "@/components/shared/AuthInitializer";
 import { PointsInitializer } from "@/components/shared/PointsInitializer";
 import { SettingsInitializer } from "@/components/shared/SettingsInitializer";
-import { GamificationService } from "@/lib/services/gamification";
-import { SettingsService } from "@/lib/services/settings";
+import { fetchInitialUserData } from "@/lib/fetch-initial-user-data";
 
 interface Props {
   title?: string;
@@ -16,21 +15,9 @@ interface Props {
 const { title = "Language Learning Buddy" } = Astro.props;
 const { user, supabase } = Astro.locals;
 
-let initialPoints: number | null = null;
-let initialSettings: { pointsEnabled: boolean; contextEnabled: boolean } | null = null;
-
-if (user) {
-  try {
-    const [points, settings] = await Promise.all([
-      new GamificationService(supabase).getUserPointsTotal(),
-      new SettingsService(supabase).getUserSettings(),
-    ]);
-    initialPoints = points;
-    initialSettings = settings;
-  } catch (error) {
-    console.error("Failed to fetch initial data:", error);
-  }
-}
+const { initialPoints, initialSettings } = user
+  ? await fetchInitialUserData(supabase)
+  : { initialPoints: null, initialSettings: null };
 ---
 
 <Layout title={title}>
