@@ -111,7 +111,7 @@ export function useTextAnalysis() {
         text: pendingAnalysis.originalText,
         analysisContext: pendingAnalysis.analysisContext ?? "",
         result: pendingAnalysis.result,
-        resultTimestamp: pendingAnalysis.timestamp,
+        resultTimestamp: pendingAnalysis.timestamp ?? null,
         isRestoredResult: true,
         error: null,
         isCurrentResultSaved: false,

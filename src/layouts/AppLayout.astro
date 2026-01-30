@@ -2,27 +2,32 @@
 import Layout from "./Layout.astro";
 import { Header } from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer.astro";
-import { Toaster } from "@/components/ui/sonner";
 import { AuthInitializer } from "@/components/shared/AuthInitializer";
 import { PointsInitializer } from "@/components/shared/PointsInitializer";
 import { SettingsInitializer } from "@/components/shared/SettingsInitializer";
+import { InitialUserDataErrorToast } from "@/components/shared/InitialUserDataErrorToast";
+import { fetchInitialUserData } from "@/lib/fetch-initial-user-data";
 
 interface Props {
   title?: string;
 }
 
 const { title = "Language Learning Buddy" } = Astro.props;
-const { user } = Astro.locals;
+const { user, supabase } = Astro.locals;
+
+const { initialPoints, initialSettings, status } = user
+  ? await fetchInitialUserData(supabase)
+  : { initialPoints: null, initialSettings: null, status: "unauthenticated" as const };
 ---
 
 <Layout title={title}>
   <AuthInitializer user={user} client:only="react" />
-  <PointsInitializer client:only="react" />
-  <SettingsInitializer client:only="react" />
+  <InitialUserDataErrorToast status={status} client:load />
+  <PointsInitializer initialPoints={initialPoints} status={status} client:only="react" />
+  <SettingsInitializer initialSettings={initialSettings} status={status} client:only="react" />
   <Header client:load />
   <main class="flex-1">
     <slot />
   </main>
   <Footer />
-  <Toaster richColors client:load />
 </Layout>
