@@ -1,32 +1,22 @@
 import { useEffect } from "react";
-import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePointsStore } from "@/lib/stores/points.store";
 
-export function PointsInitializer() {
-  const isAuth = useAuthStore((state) => state.isAuth);
+interface PointsInitializerProps {
+  initialPoints: number | null;
+}
+
+export function PointsInitializer({ initialPoints }: PointsInitializerProps) {
   const initializePoints = usePointsStore((state) => state.initializePoints);
   const clearPoints = usePointsStore((state) => state.clearPoints);
 
   useEffect(() => {
-    if (!isAuth) {
+    if (initialPoints === null) {
       clearPoints();
       return;
     }
 
-    const fetchPoints = async () => {
-      try {
-        const response = await fetch("/api/gamification/points");
-        if (response.ok) {
-          const data = await response.json();
-          initializePoints(data.total);
-        }
-      } catch (error) {
-        console.error("Failed to fetch points:", error);
-      }
-    };
-
-    fetchPoints();
-  }, [isAuth, initializePoints, clearPoints]);
+    initializePoints(initialPoints);
+  }, [initialPoints, initializePoints, clearPoints]);
 
   return null;
 }

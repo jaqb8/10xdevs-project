@@ -6,19 +6,37 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthInitializer } from "@/components/shared/AuthInitializer";
 import { PointsInitializer } from "@/components/shared/PointsInitializer";
 import { SettingsInitializer } from "@/components/shared/SettingsInitializer";
+import { GamificationService } from "@/lib/services/gamification";
+import { SettingsService } from "@/lib/services/settings";
 
 interface Props {
   title?: string;
 }
 
 const { title = "Language Learning Buddy" } = Astro.props;
-const { user } = Astro.locals;
+const { user, supabase } = Astro.locals;
+
+let initialPoints: number | null = null;
+let initialSettings: { pointsEnabled: boolean; contextEnabled: boolean } | null = null;
+
+if (user) {
+  try {
+    const [points, settings] = await Promise.all([
+      new GamificationService(supabase).getUserPointsTotal(),
+      new SettingsService(supabase).getUserSettings(),
+    ]);
+    initialPoints = points;
+    initialSettings = settings;
+  } catch (error) {
+    console.error("Failed to fetch initial data:", error);
+  }
+}
 ---
 
 <Layout title={title}>
   <AuthInitializer user={user} client:only="react" />
-  <PointsInitializer client:only="react" />
-  <SettingsInitializer client:only="react" />
+  <PointsInitializer initialPoints={initialPoints} client:only="react" />
+  <SettingsInitializer initialSettings={initialSettings} client:only="react" />
   <Header client:load />
   <main class="flex-1">
     <slot />
