@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import type {
   LearningItemDto,
   LearningItemViewModel,
@@ -24,6 +24,11 @@ function mapErrorCodeToMessage(errorCode: string): string {
   };
 
   return errorMessages[errorCode] || "Wystąpił nieoczekiwany błąd.";
+}
+
+interface UseLearningItemsOptions {
+  initialData?: PaginatedResponseDto<LearningItemDto> | null;
+  initialLoadError?: boolean;
 }
 
 interface UseLearningItemsReturn {
@@ -65,9 +70,13 @@ function mapToPaginationViewModel(
   };
 }
 
-export function useLearningItems(): UseLearningItemsReturn {
-  const [data, setData] = useState<PaginatedResponseDto<LearningItemDto> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+export function useLearningItems(options: UseLearningItemsOptions = {}): UseLearningItemsReturn {
+  const { initialData = null, initialLoadError = false } = options;
+  const hasInitialData = initialData !== null;
+  const usedInitialDataRef = useRef(false);
+
+  const [data, setData] = useState<PaginatedResponseDto<LearningItemDto> | null>(initialData);
+  const [isLoading, setIsLoading] = useState(!hasInitialData && !initialLoadError);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [itemToDelete, setItemToDelete] = useState<LearningItemDto | null>(null);
@@ -98,8 +107,13 @@ export function useLearningItems(): UseLearningItemsReturn {
   }, []);
 
   useEffect(() => {
+    if ((hasInitialData || initialLoadError) && !usedInitialDataRef.current && page === 1) {
+      usedInitialDataRef.current = true;
+      return;
+    }
+
     fetchItems(page);
-  }, [page, fetchItems]);
+  }, [page, fetchItems, hasInitialData, initialLoadError]);
 
   const handleSetPage = useCallback((newPage: number) => {
     setPage(newPage);
