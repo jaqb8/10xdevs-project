@@ -99,13 +99,9 @@ const Navbar1 = ({
             <>
               {user ? (
                 <>
-                  {shouldShowPointsSkeleton && <GamificationBadge variant="desktop" isLoading />}
+                  {shouldShowPointsSkeleton && <GamificationBadge isLoading />}
                   {shouldShowPointsBadge && (
-                    <GamificationBadge
-                      variant="desktop"
-                      points={points ?? undefined}
-                      showBeta={gamificationBetaTagEnabled}
-                    />
+                    <GamificationBadge points={points ?? undefined} showBeta={gamificationBetaTagEnabled} />
                   )}
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
@@ -179,13 +175,9 @@ const Navbar1 = ({
           <div className="flex items-center gap-2">
             {shouldShowAuthControls && user && (
               <>
-                {shouldShowPointsSkeleton && <GamificationBadge variant="desktop" isLoading />}
+                {shouldShowPointsSkeleton && <GamificationBadge isLoading />}
                 {shouldShowPointsBadge && (
-                  <GamificationBadge
-                    variant="desktop"
-                    points={points ?? undefined}
-                    showBeta={gamificationBetaTagEnabled}
-                  />
+                  <GamificationBadge points={points ?? undefined} showBeta={gamificationBetaTagEnabled} />
                 )}
               </>
             )}
