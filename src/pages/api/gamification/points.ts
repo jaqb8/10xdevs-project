@@ -6,7 +6,7 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
   if (!locals.user) {
-    return createErrorResponse("unauthorized", 401);
+    return createErrorResponse("authentication_error_unauthorized", 401);
   }
 
   try {

@@ -6,6 +6,7 @@ type StatsActionResult<T> = { data: T; errorMessage?: undefined } | { data: null
 const mapErrorCodeToMessage = (errorCode: string): string => {
   const messages: Record<string, string> = {
     authentication_error_unauthorized: "Musisz być zalogowany, aby pobrać statystyki.",
+    unauthorized: "Musisz być zalogowany, aby pobrać statystyki.",
     database_error: "Wystąpił błąd serwera. Spróbuj ponownie za chwilę.",
     unknown_error: "Wystąpił nieoczekiwany błąd. Spróbuj ponownie.",
   };
