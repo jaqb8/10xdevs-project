@@ -10,7 +10,7 @@ export const DELETE: APIRoute = async ({ locals }) => {
   }
 
   try {
-    await new GamificationService(locals.supabase).resetUserPoints();
+    await new GamificationService(locals.supabase).resetAnalysisStats();
 
     return new Response(null, {
       status: 204,

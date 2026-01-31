@@ -4,7 +4,8 @@ import { usePointsStore } from "./points.store";
 describe("usePointsStore", () => {
   beforeEach(() => {
     usePointsStore.setState({
-      points: null,
+      correctAnalyses: null,
+      totalAnalyses: null,
       lastModifiedAt: null,
     });
     vi.useFakeTimers();
@@ -15,9 +16,14 @@ describe("usePointsStore", () => {
   });
 
   describe("initial state", () => {
-    it("should have null points initially", () => {
-      const { points } = usePointsStore.getState();
-      expect(points).toBeNull();
+    it("should have null correctAnalyses initially", () => {
+      const { correctAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBeNull();
+    });
+
+    it("should have null totalAnalyses initially", () => {
+      const { totalAnalyses } = usePointsStore.getState();
+      expect(totalAnalyses).toBeNull();
     });
 
     it("should have null lastModifiedAt initially", () => {
@@ -26,183 +32,215 @@ describe("usePointsStore", () => {
     });
   });
 
-  describe("setPoints", () => {
-    it("should set points to specified value", () => {
-      const { setPoints } = usePointsStore.getState();
+  describe("setStats", () => {
+    it("should set stats to specified values", () => {
+      const { setStats } = usePointsStore.getState();
 
-      setPoints(42);
+      setStats({ correctAnalyses: 10, totalAnalyses: 15 });
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(42);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(10);
+      expect(totalAnalyses).toBe(15);
     });
 
-    it("should update lastModifiedAt when setting points", () => {
-      const { setPoints } = usePointsStore.getState();
+    it("should update lastModifiedAt when setting stats", () => {
+      const { setStats } = usePointsStore.getState();
       vi.setSystemTime(new Date("2026-01-22T12:00:00Z"));
 
-      setPoints(10);
+      setStats({ correctAnalyses: 5, totalAnalyses: 10 });
 
       const { lastModifiedAt } = usePointsStore.getState();
       expect(lastModifiedAt).toBe(new Date("2026-01-22T12:00:00Z").getTime());
     });
 
-    it("should allow setting points to null", () => {
-      const { setPoints } = usePointsStore.getState();
-      setPoints(50);
-      setPoints(null);
+    it("should allow setting stats to null", () => {
+      const { setStats } = usePointsStore.getState();
+      setStats({ correctAnalyses: 50, totalAnalyses: 60 });
+      setStats(null);
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBeNull();
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBeNull();
+      expect(totalAnalyses).toBeNull();
     });
 
-    it("should allow setting points to 0", () => {
-      const { setPoints } = usePointsStore.getState();
+    it("should allow setting stats to zeros", () => {
+      const { setStats } = usePointsStore.getState();
 
-      setPoints(0);
+      setStats({ correctAnalyses: 0, totalAnalyses: 0 });
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(0);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(0);
+      expect(totalAnalyses).toBe(0);
     });
   });
 
-  describe("initializePoints", () => {
-    it("should set points when lastModifiedAt is null", () => {
-      const { initializePoints } = usePointsStore.getState();
+  describe("initializeStats", () => {
+    it("should set stats when lastModifiedAt is null", () => {
+      const { initializeStats } = usePointsStore.getState();
 
-      initializePoints(100);
+      initializeStats({ correctAnalyses: 100, totalAnalyses: 120 });
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(100);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(100);
+      expect(totalAnalyses).toBe(120);
     });
 
     it("should set lastModifiedAt when initializing", () => {
-      const { initializePoints } = usePointsStore.getState();
+      const { initializeStats } = usePointsStore.getState();
       vi.setSystemTime(new Date("2026-01-22T14:00:00Z"));
 
-      initializePoints(100);
+      initializeStats({ correctAnalyses: 100, totalAnalyses: 100 });
 
       const { lastModifiedAt } = usePointsStore.getState();
       expect(lastModifiedAt).toBe(new Date("2026-01-22T14:00:00Z").getTime());
     });
 
-    it("should NOT overwrite points if lastModifiedAt is already set", () => {
-      const { initializePoints, incrementPoints } = usePointsStore.getState();
+    it("should NOT overwrite stats if lastModifiedAt is already set", () => {
+      const { initializeStats, incrementStats } = usePointsStore.getState();
 
-      initializePoints(100);
-      incrementPoints();
-      initializePoints(50);
+      initializeStats({ correctAnalyses: 100, totalAnalyses: 100 });
+      incrementStats(true);
+      initializeStats({ correctAnalyses: 50, totalAnalyses: 50 });
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(101);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(101);
+      expect(totalAnalyses).toBe(101);
     });
 
-    it("should NOT overwrite points after setPoints was called", () => {
-      const { initializePoints, setPoints } = usePointsStore.getState();
+    it("should NOT overwrite stats after setStats was called", () => {
+      const { initializeStats, setStats } = usePointsStore.getState();
 
-      setPoints(200);
-      initializePoints(50);
+      setStats({ correctAnalyses: 200, totalAnalyses: 250 });
+      initializeStats({ correctAnalyses: 50, totalAnalyses: 50 });
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(200);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(200);
+      expect(totalAnalyses).toBe(250);
     });
 
     it("should prevent race condition when fetch returns after increment", () => {
-      const { initializePoints, incrementPoints } = usePointsStore.getState();
+      const { initializeStats, incrementStats } = usePointsStore.getState();
 
-      initializePoints(10);
-      incrementPoints();
-      incrementPoints();
-      initializePoints(10);
+      initializeStats({ correctAnalyses: 10, totalAnalyses: 10 });
+      incrementStats(true);
+      incrementStats(false);
+      initializeStats({ correctAnalyses: 10, totalAnalyses: 10 });
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(12);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(11);
+      expect(totalAnalyses).toBe(12);
     });
   });
 
-  describe("incrementPoints", () => {
-    it("should increment points by 1 when points exist", () => {
-      const { setPoints, incrementPoints } = usePointsStore.getState();
-      setPoints(5);
+  describe("incrementStats", () => {
+    it("should increment both counts when isCorrect is true", () => {
+      const { setStats, incrementStats } = usePointsStore.getState();
+      setStats({ correctAnalyses: 5, totalAnalyses: 10 });
 
-      incrementPoints();
+      incrementStats(true);
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(6);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(6);
+      expect(totalAnalyses).toBe(11);
     });
 
-    it("should set points to 1 when points is null", () => {
-      const { incrementPoints } = usePointsStore.getState();
+    it("should only increment totalAnalyses when isCorrect is false", () => {
+      const { setStats, incrementStats } = usePointsStore.getState();
+      setStats({ correctAnalyses: 5, totalAnalyses: 10 });
 
-      incrementPoints();
+      incrementStats(false);
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(1);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(5);
+      expect(totalAnalyses).toBe(11);
     });
 
-    it("should increment from 0 to 1", () => {
-      const { setPoints, incrementPoints } = usePointsStore.getState();
-      setPoints(0);
+    it("should set stats from null to initial values", () => {
+      const { incrementStats } = usePointsStore.getState();
 
-      incrementPoints();
+      incrementStats(true);
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(1);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(1);
+      expect(totalAnalyses).toBe(1);
+    });
+
+    it("should handle first incorrect analysis from null state", () => {
+      const { incrementStats } = usePointsStore.getState();
+
+      incrementStats(false);
+
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(0);
+      expect(totalAnalyses).toBe(1);
     });
 
     it("should update lastModifiedAt on increment", () => {
-      const { incrementPoints } = usePointsStore.getState();
+      const { incrementStats } = usePointsStore.getState();
       vi.setSystemTime(new Date("2026-01-22T15:00:00Z"));
 
-      incrementPoints();
+      incrementStats(true);
 
       const { lastModifiedAt } = usePointsStore.getState();
       expect(lastModifiedAt).toBe(new Date("2026-01-22T15:00:00Z").getTime());
     });
 
     it("should increment multiple times correctly", () => {
-      const { setPoints, incrementPoints } = usePointsStore.getState();
-      setPoints(0);
+      const { setStats, incrementStats } = usePointsStore.getState();
+      setStats({ correctAnalyses: 0, totalAnalyses: 0 });
 
-      incrementPoints();
-      incrementPoints();
-      incrementPoints();
+      incrementStats(true);
+      incrementStats(false);
+      incrementStats(true);
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(3);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(2);
+      expect(totalAnalyses).toBe(3);
     });
   });
 
-  describe("clearPoints", () => {
-    it("should reset points to null", () => {
-      const { setPoints, clearPoints } = usePointsStore.getState();
-      setPoints(100);
+  describe("clearStats", () => {
+    it("should reset correctAnalyses to null", () => {
+      const { setStats, clearStats } = usePointsStore.getState();
+      setStats({ correctAnalyses: 100, totalAnalyses: 150 });
 
-      clearPoints();
+      clearStats();
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBeNull();
+      const { correctAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBeNull();
+    });
+
+    it("should reset totalAnalyses to null", () => {
+      const { setStats, clearStats } = usePointsStore.getState();
+      setStats({ correctAnalyses: 100, totalAnalyses: 150 });
+
+      clearStats();
+
+      const { totalAnalyses } = usePointsStore.getState();
+      expect(totalAnalyses).toBeNull();
     });
 
     it("should reset lastModifiedAt to null", () => {
-      const { setPoints, clearPoints } = usePointsStore.getState();
-      setPoints(100);
+      const { setStats, clearStats } = usePointsStore.getState();
+      setStats({ correctAnalyses: 100, totalAnalyses: 150 });
 
-      clearPoints();
+      clearStats();
 
       const { lastModifiedAt } = usePointsStore.getState();
       expect(lastModifiedAt).toBeNull();
     });
 
     it("should allow initialize to work again after clear", () => {
-      const { initializePoints, incrementPoints, clearPoints } = usePointsStore.getState();
+      const { initializeStats, incrementStats, clearStats } = usePointsStore.getState();
 
-      initializePoints(100);
-      incrementPoints();
-      clearPoints();
-      initializePoints(50);
+      initializeStats({ correctAnalyses: 100, totalAnalyses: 100 });
+      incrementStats(true);
+      clearStats();
+      initializeStats({ correctAnalyses: 50, totalAnalyses: 60 });
 
-      const { points } = usePointsStore.getState();
-      expect(points).toBe(50);
+      const { correctAnalyses, totalAnalyses } = usePointsStore.getState();
+      expect(correctAnalyses).toBe(50);
+      expect(totalAnalyses).toBe(60);
     });
   });
 });

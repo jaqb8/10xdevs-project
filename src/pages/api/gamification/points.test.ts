@@ -2,14 +2,14 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GET } from "./points";
 import { GamificationDatabaseError } from "@/lib/services/gamification";
 
-const mockGetUserPointsTotal = vi.fn();
+const mockGetAnalysisStats = vi.fn();
 
 vi.mock("@/lib/services/gamification", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/services/gamification")>();
   return {
     ...original,
     GamificationService: vi.fn().mockImplementation(() => ({
-      getUserPointsTotal: mockGetUserPointsTotal,
+      getAnalysisStats: mockGetAnalysisStats,
     })),
   };
 });
@@ -44,14 +44,14 @@ describe("GET /api/gamification/points", () => {
 
       expect(response.status).toBe(401);
       const body = await response.json();
-      expect(body.error_code).toBe("unauthorized");
+      expect(body.error_code).toBe("authentication_error_unauthorized");
     });
 
     it("should return 200 when user is authenticated", async () => {
       const context = createMockContext({
         user: { id: "user-123", email: "test@example.com" },
       });
-      mockGetUserPointsTotal.mockResolvedValue(42);
+      mockGetAnalysisStats.mockResolvedValue({ correctAnalyses: 10, totalAnalyses: 15 });
 
       const response = await GET(context as Parameters<typeof GET>[0]);
 
@@ -60,41 +60,43 @@ describe("GET /api/gamification/points", () => {
   });
 
   describe("successful responses", () => {
-    it("should return total points for authenticated user", async () => {
+    it("should return analysis stats for authenticated user", async () => {
       const context = createMockContext({
         user: { id: "user-123", email: "test@example.com" },
       });
-      mockGetUserPointsTotal.mockResolvedValue(42);
+      mockGetAnalysisStats.mockResolvedValue({ correctAnalyses: 42, totalAnalyses: 50 });
 
       const response = await GET(context as Parameters<typeof GET>[0]);
 
       expect(response.status).toBe(200);
       const body = await response.json();
-      expect(body.total).toBe(42);
+      expect(body.correctAnalyses).toBe(42);
+      expect(body.totalAnalyses).toBe(50);
     });
 
-    it("should return 0 points for user with no points", async () => {
+    it("should return zero stats for user with no analyses", async () => {
       const context = createMockContext({
         user: { id: "user-456", email: "new@example.com" },
       });
-      mockGetUserPointsTotal.mockResolvedValue(0);
+      mockGetAnalysisStats.mockResolvedValue({ correctAnalyses: 0, totalAnalyses: 0 });
 
       const response = await GET(context as Parameters<typeof GET>[0]);
 
       expect(response.status).toBe(200);
       const body = await response.json();
-      expect(body.total).toBe(0);
+      expect(body.correctAnalyses).toBe(0);
+      expect(body.totalAnalyses).toBe(0);
     });
 
     it("should call GamificationService without parameters (auth.uid used internally)", async () => {
       const context = createMockContext({
         user: { id: "user-789", email: "test@example.com" },
       });
-      mockGetUserPointsTotal.mockResolvedValue(10);
+      mockGetAnalysisStats.mockResolvedValue({ correctAnalyses: 5, totalAnalyses: 10 });
 
       await GET(context as Parameters<typeof GET>[0]);
 
-      expect(mockGetUserPointsTotal).toHaveBeenCalledWith();
+      expect(mockGetAnalysisStats).toHaveBeenCalledWith();
     });
   });
 
@@ -103,7 +105,7 @@ describe("GET /api/gamification/points", () => {
       const context = createMockContext({
         user: { id: "user-123", email: "test@example.com" },
       });
-      mockGetUserPointsTotal.mockRejectedValue(new GamificationDatabaseError(new Error("DB error")));
+      mockGetAnalysisStats.mockRejectedValue(new GamificationDatabaseError(new Error("DB error")));
 
       const response = await GET(context as Parameters<typeof GET>[0]);
 
@@ -116,7 +118,7 @@ describe("GET /api/gamification/points", () => {
       const context = createMockContext({
         user: { id: "user-123", email: "test@example.com" },
       });
-      mockGetUserPointsTotal.mockRejectedValue(new Error("Unexpected error"));
+      mockGetAnalysisStats.mockRejectedValue(new Error("Unexpected error"));
 
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
@@ -136,24 +138,26 @@ describe("GET /api/gamification/points", () => {
       const context = createMockContext({
         user: { id: "user-123", email: "test@example.com" },
       });
-      mockGetUserPointsTotal.mockResolvedValue(5);
+      mockGetAnalysisStats.mockResolvedValue({ correctAnalyses: 5, totalAnalyses: 5 });
 
       const response = await GET(context as Parameters<typeof GET>[0]);
 
       expect(response.headers.get("Content-Type")).toBe("application/json");
     });
 
-    it("should return response with total property", async () => {
+    it("should return response with correctAnalyses and totalAnalyses properties", async () => {
       const context = createMockContext({
         user: { id: "user-123", email: "test@example.com" },
       });
-      mockGetUserPointsTotal.mockResolvedValue(100);
+      mockGetAnalysisStats.mockResolvedValue({ correctAnalyses: 100, totalAnalyses: 120 });
 
       const response = await GET(context as Parameters<typeof GET>[0]);
       const body = await response.json();
 
-      expect(body).toHaveProperty("total");
-      expect(typeof body.total).toBe("number");
+      expect(body).toHaveProperty("correctAnalyses");
+      expect(body).toHaveProperty("totalAnalyses");
+      expect(typeof body.correctAnalyses).toBe("number");
+      expect(typeof body.totalAnalyses).toBe("number");
     });
   });
 });

@@ -20,12 +20,12 @@ vi.mock("@/lib/services/openrouter", async (importOriginal) => {
   };
 });
 
-const mockRecordCorrectAnalysis = vi.fn();
+const mockRecordAnalysis = vi.fn();
 const mockGetUserSettings = vi.fn();
 
 vi.mock("@/lib/services/gamification", () => ({
   GamificationService: vi.fn().mockImplementation(() => ({
-    recordCorrectAnalysis: mockRecordCorrectAnalysis,
+    recordAnalysis: mockRecordAnalysis,
   })),
 }));
 
@@ -96,7 +96,7 @@ describe("POST /api/analyze", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockRecordCorrectAnalysis.mockResolvedValue(1);
+    mockRecordAnalysis.mockResolvedValue({ correctAnalyses: 1, totalAnalyses: 1 });
     mockGetUserSettings.mockResolvedValue({ pointsEnabled: true, contextEnabled: true });
   });
 
@@ -766,8 +766,8 @@ Third line`;
     });
   });
 
-  describe("gamification points integration", () => {
-    it("should record gamification point when analysis is correct and user is logged in", async () => {
+  describe("gamification stats integration", () => {
+    it("should record correct analysis when text has no errors and user is logged in", async () => {
       const request = createMockRequest({
         text: "Hello world.",
         mode: "grammar_and_spelling",
@@ -779,11 +779,11 @@ Third line`;
 
       expect(response.status).toBe(200);
       expect(GamificationService).toHaveBeenCalledWith(mockSupabase);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledTimes(1);
+      expect(mockRecordAnalysis).toHaveBeenCalledWith(true);
+      expect(mockRecordAnalysis).toHaveBeenCalledTimes(1);
     });
 
-    it("should NOT record gamification point when points are disabled in settings", async () => {
+    it("should NOT record analysis when stats are disabled in settings", async () => {
       const request = createMockRequest({
         text: "Hello world.",
         mode: "grammar_and_spelling",
@@ -795,10 +795,10 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+      expect(mockRecordAnalysis).not.toHaveBeenCalled();
     });
 
-    it("should NOT record gamification point when analysis has errors", async () => {
+    it("should record incorrect analysis when text has errors", async () => {
       const request = createMockRequest({
         text: "I gonna go home.",
         mode: "grammar_and_spelling",
@@ -809,10 +809,10 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+      expect(mockRecordAnalysis).toHaveBeenCalledWith(false);
     });
 
-    it("should NOT record gamification point when user is not logged in", async () => {
+    it("should NOT record analysis when user is not logged in", async () => {
       const request = createMockRequest({
         text: "Hello world.",
         mode: "grammar_and_spelling",
@@ -823,7 +823,7 @@ Third line`;
       const response = await POST(createMockContext(request, { user: null }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+      expect(mockRecordAnalysis).not.toHaveBeenCalled();
     });
 
     it("should return successful response even if gamification service throws an error", async () => {
@@ -833,14 +833,14 @@ Third line`;
       });
 
       vi.mocked(openRouterService.getChatCompletion).mockResolvedValue(mockCorrectResult);
-      mockRecordCorrectAnalysis.mockRejectedValue(new Error("Database connection failed"));
+      mockRecordAnalysis.mockRejectedValue(new Error("Database connection failed"));
 
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
       const body = await response.json();
       expect(body.is_correct).toBe(true);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
+      expect(mockRecordAnalysis).toHaveBeenCalledWith(true);
     });
 
     it("should skip gamification when settings service throws an error", async () => {
@@ -855,10 +855,10 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+      expect(mockRecordAnalysis).not.toHaveBeenCalled();
     });
 
-    it("should record point for correct analysis with context", async () => {
+    it("should record correct analysis with context", async () => {
       const request = createMockRequest({
         text: "Hello world.",
         mode: "grammar_and_spelling",
@@ -870,10 +870,10 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
+      expect(mockRecordAnalysis).toHaveBeenCalledWith(true);
     });
 
-    it("should record point for correct analysis in colloquial_speech mode", async () => {
+    it("should record correct analysis in colloquial_speech mode", async () => {
       const request = createMockRequest({
         text: "Hey, what's up?",
         mode: "colloquial_speech",
@@ -884,10 +884,10 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(200);
-      expect(mockRecordCorrectAnalysis).toHaveBeenCalledWith();
+      expect(mockRecordAnalysis).toHaveBeenCalledWith(true);
     });
 
-    it("should NOT record point when validation fails", async () => {
+    it("should NOT record analysis when validation fails", async () => {
       const request = createMockRequest({
         text: "",
         mode: "grammar_and_spelling",
@@ -896,10 +896,10 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(400);
-      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+      expect(mockRecordAnalysis).not.toHaveBeenCalled();
     });
 
-    it("should NOT record point when analysis service throws an error", async () => {
+    it("should NOT record analysis when analysis service throws an error", async () => {
       const request = createMockRequest({
         text: "Hello world.",
         mode: "grammar_and_spelling",
@@ -910,7 +910,7 @@ Third line`;
       const response = await POST(createMockContext(request, { user: mockUser }) as Parameters<typeof POST>[0]);
 
       expect(response.status).toBe(500);
-      expect(mockRecordCorrectAnalysis).not.toHaveBeenCalled();
+      expect(mockRecordAnalysis).not.toHaveBeenCalled();
     });
   });
 });

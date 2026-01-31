@@ -10,17 +10,17 @@ const featureFlagsConfig: Record<Environment, Record<Feature, FeatureConfig>> = 
   local: {
     auth: { enabled: true },
     "learning-items": { enabled: true },
-    gamification: { enabled: true, beta: true },
+    gamification: { enabled: true, beta: false },
   },
   integration: {
     auth: { enabled: true },
     "learning-items": { enabled: true },
-    gamification: { enabled: true, beta: true },
+    gamification: { enabled: true, beta: false },
   },
   production: {
     auth: { enabled: true },
     "learning-items": { enabled: true },
-    gamification: { enabled: true, beta: true },
+    gamification: { enabled: true, beta: false },
   },
 };
 

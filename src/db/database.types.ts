@@ -81,87 +81,88 @@ export interface Database {
       };
       user_points: {
         Row: {
-          user_id: string;
-          points: number;
+          correct_analyses: number;
+          total_analyses: number;
           updated_at: string;
+          user_id: string;
         };
         Insert: {
-          user_id: string;
-          points?: number;
+          correct_analyses?: number;
+          total_analyses?: number;
           updated_at?: string;
+          user_id: string;
         };
         Update: {
-          user_id?: string;
-          points?: number;
+          correct_analyses?: number;
+          total_analyses?: number;
           updated_at?: string;
+          user_id?: string;
         };
         Relationships: [];
       };
       user_settings: {
         Row: {
-          user_id: string;
-          points_enabled: boolean;
           context_enabled: boolean;
+          points_enabled: boolean;
           updated_at: string;
+          user_id: string;
         };
         Insert: {
-          user_id: string;
-          points_enabled?: boolean;
           context_enabled?: boolean;
+          points_enabled?: boolean;
           updated_at?: string;
+          user_id: string;
         };
         Update: {
-          user_id?: string;
-          points_enabled?: boolean;
           context_enabled?: boolean;
+          points_enabled?: boolean;
           updated_at?: string;
+          user_id?: string;
         };
         Relationships: [];
       };
     };
     Views: Record<never, never>;
     Functions: {
+      get_analysis_stats: {
+        Args: never;
+        Returns: {
+          correct_analyses: number;
+          total_analyses: number;
+        }[];
+      };
       get_anonymous_quota_status: {
         Args: { p_ip_hash: string; p_usage_date: string };
         Returns: number;
       };
-      get_user_points_total: {
-        Args: Record<string, never>;
-        Returns: number;
-      };
       get_user_settings: {
-        Args: Record<string, never>;
+        Args: never;
         Returns: {
-          points_enabled: boolean;
           context_enabled: boolean;
+          points_enabled: boolean;
         }[];
       };
       increment_anonymous_daily_usage: {
         Args: { p_ip_hash: string; p_limit: number; p_usage_date: string };
         Returns: Json;
       };
-      increment_user_points: {
-        Args: Record<string, never>;
-        Returns: number;
-      };
-      reset_user_points: {
-        Args: Record<string, never>;
-        Returns: undefined;
-      };
-      upsert_user_settings: {
-        Args: {
-          p_points_enabled?: boolean;
-          p_context_enabled?: boolean;
-        };
+      record_analysis: {
+        Args: { p_is_correct: boolean };
         Returns: {
-          points_enabled: boolean;
+          correct_analyses: number;
+          total_analyses: number;
+        }[];
+      };
+      reset_analysis_stats: { Args: never; Returns: undefined };
+      upsert_user_settings: {
+        Args: { p_context_enabled?: boolean; p_points_enabled?: boolean };
+        Returns: {
           context_enabled: boolean;
+          points_enabled: boolean;
         }[];
       };
     };
-    Enums: {
-      analysis_mode: "grammar_and_spelling" | "colloquial_speech";
-    };
+    Enums: Record<never, never>;
     CompositeTypes: Record<never, never>;
   };
   storage: {
@@ -781,9 +782,7 @@ export const Constants = {
     Enums: {},
   },
   public: {
-    Enums: {
-      analysis_mode: ["grammar_and_spelling", "colloquial_speech"],
-    },
+    Enums: {},
   },
   storage: {
     Enums: {

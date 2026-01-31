@@ -2,52 +2,53 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { GamificationService } from "./gamification.service";
 import { GamificationDatabaseError } from "./gamification.errors";
 
-function createMockSupabase(rpcResponse: { data: unknown; error: unknown }) {
-  return {
-    rpc: vi.fn().mockResolvedValue(rpcResponse),
-  } as unknown as Parameters<typeof GamificationService.prototype.recordCorrectAnalysis>[0] extends never
-    ? ReturnType<typeof createMockSupabase>
-    : never;
-}
-
 describe("GamificationService", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  describe("recordCorrectAnalysis", () => {
-    it("should call increment_user_points RPC without parameters", async () => {
+  describe("recordAnalysis", () => {
+    it("should call record_analysis RPC with isCorrect parameter", async () => {
       const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: 1, error: null }),
+        rpc: vi.fn().mockResolvedValue({
+          data: [{ correct_analyses: 1, total_analyses: 1 }],
+          error: null,
+        }),
       };
       const service = new GamificationService(mockSupabase as never);
 
-      await service.recordCorrectAnalysis();
+      await service.recordAnalysis(true);
 
       expect(mockSupabase.rpc).toHaveBeenCalledTimes(1);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith("increment_user_points");
+      expect(mockSupabase.rpc).toHaveBeenCalledWith("record_analysis", { p_is_correct: true });
     });
 
-    it("should return the new total points after increment", async () => {
+    it("should return analysis stats after recording correct analysis", async () => {
       const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: 42, error: null }),
+        rpc: vi.fn().mockResolvedValue({
+          data: [{ correct_analyses: 10, total_analyses: 15 }],
+          error: null,
+        }),
       };
       const service = new GamificationService(mockSupabase as never);
 
-      const result = await service.recordCorrectAnalysis();
+      const result = await service.recordAnalysis(true);
 
-      expect(result).toBe(42);
+      expect(result).toEqual({ correctAnalyses: 10, totalAnalyses: 15 });
     });
 
-    it("should return 1 for first point recorded", async () => {
+    it("should record incorrect analysis without incrementing correct count", async () => {
       const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: 1, error: null }),
+        rpc: vi.fn().mockResolvedValue({
+          data: [{ correct_analyses: 5, total_analyses: 10 }],
+          error: null,
+        }),
       };
       const service = new GamificationService(mockSupabase as never);
 
-      const result = await service.recordCorrectAnalysis();
+      await service.recordAnalysis(false);
 
-      expect(result).toBe(1);
+      expect(mockSupabase.rpc).toHaveBeenCalledWith("record_analysis", { p_is_correct: false });
     });
 
     it("should throw GamificationDatabaseError on database error", async () => {
@@ -59,13 +60,13 @@ describe("GamificationService", () => {
 
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      await expect(service.recordCorrectAnalysis()).rejects.toThrow(GamificationDatabaseError);
+      await expect(service.recordAnalysis(true)).rejects.toThrow(GamificationDatabaseError);
 
-      expect(consoleSpy).toHaveBeenCalledWith("Database error in recordCorrectAnalysis:", dbError);
+      expect(consoleSpy).toHaveBeenCalledWith("Database error in recordAnalysis:", dbError);
       consoleSpy.mockRestore();
     });
 
-    it("should throw GamificationDatabaseError when RPC returns non-number", async () => {
+    it("should throw GamificationDatabaseError when RPC returns invalid data", async () => {
       const mockSupabase = {
         rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
       };
@@ -73,68 +74,53 @@ describe("GamificationService", () => {
 
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      await expect(service.recordCorrectAnalysis()).rejects.toThrow(GamificationDatabaseError);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Unexpected RPC return type in recordCorrectAnalysis:",
-        "object",
-        null
-      );
-      consoleSpy.mockRestore();
-    });
-
-    it("should throw GamificationDatabaseError when RPC returns string instead of number", async () => {
-      const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: "42", error: null }),
-      };
-      const service = new GamificationService(mockSupabase as never);
-
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-      await expect(service.recordCorrectAnalysis()).rejects.toThrow(GamificationDatabaseError);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Unexpected RPC return type in recordCorrectAnalysis:",
-        "string",
-        "42"
-      );
+      await expect(service.recordAnalysis(true)).rejects.toThrow(GamificationDatabaseError);
       consoleSpy.mockRestore();
     });
   });
 
-  describe("getUserPointsTotal", () => {
-    it("should call get_user_points_total RPC without parameters", async () => {
+  describe("getAnalysisStats", () => {
+    it("should call get_analysis_stats RPC without parameters", async () => {
       const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: 0, error: null }),
+        rpc: vi.fn().mockResolvedValue({
+          data: [{ correct_analyses: 0, total_analyses: 0 }],
+          error: null,
+        }),
       };
       const service = new GamificationService(mockSupabase as never);
 
-      await service.getUserPointsTotal();
+      await service.getAnalysisStats();
 
       expect(mockSupabase.rpc).toHaveBeenCalledTimes(1);
-      expect(mockSupabase.rpc).toHaveBeenCalledWith("get_user_points_total");
+      expect(mockSupabase.rpc).toHaveBeenCalledWith("get_analysis_stats");
     });
 
-    it("should return the total points for authenticated user", async () => {
+    it("should return analysis stats for authenticated user", async () => {
       const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: 100, error: null }),
+        rpc: vi.fn().mockResolvedValue({
+          data: [{ correct_analyses: 42, total_analyses: 50 }],
+          error: null,
+        }),
       };
       const service = new GamificationService(mockSupabase as never);
 
-      const result = await service.getUserPointsTotal();
+      const result = await service.getAnalysisStats();
 
-      expect(result).toBe(100);
+      expect(result).toEqual({ correctAnalyses: 42, totalAnalyses: 50 });
     });
 
-    it("should return 0 for user with no points", async () => {
+    it("should return zeros for user with no analyses", async () => {
       const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: 0, error: null }),
+        rpc: vi.fn().mockResolvedValue({
+          data: [{ correct_analyses: 0, total_analyses: 0 }],
+          error: null,
+        }),
       };
       const service = new GamificationService(mockSupabase as never);
 
-      const result = await service.getUserPointsTotal();
+      const result = await service.getAnalysisStats();
 
-      expect(result).toBe(0);
+      expect(result).toEqual({ correctAnalyses: 0, totalAnalyses: 0 });
     });
 
     it("should throw GamificationDatabaseError on database error", async () => {
@@ -146,31 +132,13 @@ describe("GamificationService", () => {
 
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      await expect(service.getUserPointsTotal()).rejects.toThrow(GamificationDatabaseError);
+      await expect(service.getAnalysisStats()).rejects.toThrow(GamificationDatabaseError);
 
-      expect(consoleSpy).toHaveBeenCalledWith("Database error in getUserPointsTotal:", dbError);
+      expect(consoleSpy).toHaveBeenCalledWith("Database error in getAnalysisStats:", dbError);
       consoleSpy.mockRestore();
     });
 
-    it("should throw GamificationDatabaseError when RPC returns non-number", async () => {
-      const mockSupabase = {
-        rpc: vi.fn().mockResolvedValue({ data: undefined, error: null }),
-      };
-      const service = new GamificationService(mockSupabase as never);
-
-      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-      await expect(service.getUserPointsTotal()).rejects.toThrow(GamificationDatabaseError);
-
-      expect(consoleSpy).toHaveBeenCalledWith(
-        "Unexpected RPC return type in getUserPointsTotal:",
-        "undefined",
-        undefined
-      );
-      consoleSpy.mockRestore();
-    });
-
-    it("should throw GamificationDatabaseError when RPC returns array instead of number", async () => {
+    it("should throw GamificationDatabaseError when RPC returns invalid data", async () => {
       const mockSupabase = {
         rpc: vi.fn().mockResolvedValue({ data: [], error: null }),
       };
@@ -178,7 +146,45 @@ describe("GamificationService", () => {
 
       const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
-      await expect(service.getUserPointsTotal()).rejects.toThrow(GamificationDatabaseError);
+      await expect(service.getAnalysisStats()).rejects.toThrow(GamificationDatabaseError);
+      consoleSpy.mockRestore();
+    });
+
+    it("should throw GamificationDatabaseError when RPC returns null data and error is null", async () => {
+      const mockSupabase = {
+        rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+      const service = new GamificationService(mockSupabase as never);
+
+      await expect(service.getAnalysisStats()).rejects.toThrow(GamificationDatabaseError);
+    });
+  });
+
+  describe("resetAnalysisStats", () => {
+    it("should call reset_analysis_stats RPC", async () => {
+      const mockSupabase = {
+        rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+      const service = new GamificationService(mockSupabase as never);
+
+      await service.resetAnalysisStats();
+
+      expect(mockSupabase.rpc).toHaveBeenCalledTimes(1);
+      expect(mockSupabase.rpc).toHaveBeenCalledWith("reset_analysis_stats");
+    });
+
+    it("should throw GamificationDatabaseError on database error", async () => {
+      const dbError = { message: "Connection failed", code: "PGRST116" };
+      const mockSupabase = {
+        rpc: vi.fn().mockResolvedValue({ data: null, error: dbError }),
+      };
+      const service = new GamificationService(mockSupabase as never);
+
+      const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      await expect(service.resetAnalysisStats()).rejects.toThrow(GamificationDatabaseError);
+
+      expect(consoleSpy).toHaveBeenCalledWith("Database error in resetAnalysisStats:", dbError);
       consoleSpy.mockRestore();
     });
   });

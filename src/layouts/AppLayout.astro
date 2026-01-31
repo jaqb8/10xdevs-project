@@ -15,15 +15,15 @@ interface Props {
 const { title = "Language Learning Buddy" } = Astro.props;
 const { user, supabase } = Astro.locals;
 
-const { initialPoints, initialSettings, status } = user
+const { initialStats, initialSettings, status } = user
   ? await fetchInitialUserData(supabase)
-  : { initialPoints: null, initialSettings: null, status: "unauthenticated" as const };
+  : { initialStats: null, initialSettings: null, status: "unauthenticated" as const };
 ---
 
 <Layout title={title}>
   <AuthInitializer user={user} client:only="react" />
   <InitialUserDataErrorToast status={status} client:load />
-  <PointsInitializer initialPoints={initialPoints} status={status} client:only="react" />
+  <PointsInitializer initialStats={initialStats} status={status} client:only="react" />
   <SettingsInitializer initialSettings={initialSettings} status={status} client:only="react" />
   <Header client:load />
   <main class="flex-1">
