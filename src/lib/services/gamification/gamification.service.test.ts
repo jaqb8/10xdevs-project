@@ -149,6 +149,15 @@ describe("GamificationService", () => {
       await expect(service.getAnalysisStats()).rejects.toThrow(GamificationDatabaseError);
       consoleSpy.mockRestore();
     });
+
+    it("should throw GamificationDatabaseError when RPC returns null data and error is null", async () => {
+      const mockSupabase = {
+        rpc: vi.fn().mockResolvedValue({ data: null, error: null }),
+      };
+      const service = new GamificationService(mockSupabase as never);
+
+      await expect(service.getAnalysisStats()).rejects.toThrow(GamificationDatabaseError);
+    });
   });
 
   describe("resetAnalysisStats", () => {
