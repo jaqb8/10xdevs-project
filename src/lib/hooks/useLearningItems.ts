@@ -28,7 +28,6 @@ function mapErrorCodeToMessage(errorCode: string): string {
 
 interface UseLearningItemsOptions {
   initialData?: PaginatedResponseDto<LearningItemDto> | null;
-  initialLoadError?: boolean;
 }
 
 interface UseLearningItemsReturn {
@@ -71,12 +70,12 @@ function mapToPaginationViewModel(
 }
 
 export function useLearningItems(options: UseLearningItemsOptions = {}): UseLearningItemsReturn {
-  const { initialData = null, initialLoadError = false } = options;
+  const { initialData = null } = options;
   const hasInitialData = initialData !== null;
   const usedInitialDataRef = useRef(false);
 
   const [data, setData] = useState<PaginatedResponseDto<LearningItemDto> | null>(initialData);
-  const [isLoading, setIsLoading] = useState(!hasInitialData && !initialLoadError);
+  const [isLoading, setIsLoading] = useState(!hasInitialData);
   const [error, setError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [itemToDelete, setItemToDelete] = useState<LearningItemDto | null>(null);
@@ -107,13 +106,13 @@ export function useLearningItems(options: UseLearningItemsOptions = {}): UseLear
   }, []);
 
   useEffect(() => {
-    if ((hasInitialData || initialLoadError) && !usedInitialDataRef.current && page === 1) {
+    if (hasInitialData && !usedInitialDataRef.current && page === 1) {
       usedInitialDataRef.current = true;
       return;
     }
 
     fetchItems(page);
-  }, [page, fetchItems, hasInitialData, initialLoadError]);
+  }, [page, fetchItems, hasInitialData]);
 
   const handleSetPage = useCallback((newPage: number) => {
     setPage(newPage);

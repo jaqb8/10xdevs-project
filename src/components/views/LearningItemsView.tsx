@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { useLearningItems } from "@/lib/hooks/useLearningItems";
 import { LearningItemsList } from "@/components/features/learning-items/LearningItemsList";
@@ -16,7 +16,6 @@ interface LearningItemsViewProps {
 const INITIAL_LOAD_ERROR_MESSAGE = "Nie udało się załadować listy. Spróbuj odświeżyć stronę.";
 
 export function LearningItemsView({ initialData, initialLoadError }: LearningItemsViewProps) {
-  const hasShownInitialErrorToast = useRef(false);
   const {
     viewModels,
     paginationViewModel,
@@ -28,20 +27,13 @@ export function LearningItemsView({ initialData, initialLoadError }: LearningIte
     deleteItem,
     confirmDelete,
     cancelDelete,
-  } = useLearningItems({ initialData, initialLoadError });
+  } = useLearningItems({ initialData });
 
   useEffect(() => {
-    if (initialLoadError && !hasShownInitialErrorToast.current) {
-      hasShownInitialErrorToast.current = true;
-      toast.error(INITIAL_LOAD_ERROR_MESSAGE);
-    }
-  }, [initialLoadError]);
-
-  useEffect(() => {
-    if (error && !initialLoadError) {
+    if (error) {
       toast.error(error);
     }
-  }, [error, initialLoadError]);
+  }, [error]);
 
   const handleDeleteItem = (id: string) => {
     const item = viewModels.find((vm) => vm.id === id);
