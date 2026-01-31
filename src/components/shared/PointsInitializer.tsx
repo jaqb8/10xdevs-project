@@ -1,28 +1,29 @@
 import { useEffect } from "react";
 import type { InitialUserDataStatus } from "@/lib/fetch-initial-user-data";
+import type { AnalysisStats } from "@/types";
 import { usePointsStore } from "@/lib/stores/points.store";
 
 interface PointsInitializerProps {
-  initialPoints: number | null;
+  initialStats: AnalysisStats | null;
   status: InitialUserDataStatus;
 }
 
-export function PointsInitializer({ initialPoints, status }: PointsInitializerProps) {
-  const initializePoints = usePointsStore((state) => state.initializePoints);
-  const clearPoints = usePointsStore((state) => state.clearPoints);
+export function PointsInitializer({ initialStats, status }: PointsInitializerProps) {
+  const initializeStats = usePointsStore((state) => state.initializeStats);
+  const clearStats = usePointsStore((state) => state.clearStats);
 
   useEffect(() => {
     if (status === "unauthenticated") {
-      clearPoints();
+      clearStats();
       return;
     }
 
-    if (initialPoints === null) {
+    if (initialStats === null) {
       return;
     }
 
-    initializePoints(initialPoints);
-  }, [initialPoints, status, initializePoints, clearPoints]);
+    initializeStats(initialStats);
+  }, [initialStats, status, initializeStats, clearStats]);
 
   return null;
 }

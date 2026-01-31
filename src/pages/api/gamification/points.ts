@@ -6,14 +6,14 @@ export const prerender = false;
 
 export const GET: APIRoute = async ({ locals }) => {
   if (!locals.user) {
-    return createErrorResponse("unauthorized", 401);
+    return createErrorResponse("authentication_error_unauthorized", 401);
   }
 
   try {
     const gamificationService = new GamificationService(locals.supabase);
-    const total = await gamificationService.getUserPointsTotal();
+    const stats = await gamificationService.getAnalysisStats();
 
-    return new Response(JSON.stringify({ total }), {
+    return new Response(JSON.stringify(stats), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

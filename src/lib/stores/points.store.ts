@@ -1,34 +1,47 @@
 import { create } from "zustand";
+import type { AnalysisStats } from "@/types";
 
-interface PointsState {
-  points: number | null;
+interface AnalysisStatsState {
+  correctAnalyses: number | null;
+  totalAnalyses: number | null;
   lastModifiedAt: number | null;
 }
 
-interface PointsActions {
-  setPoints: (points: number | null) => void;
-  initializePoints: (points: number) => void;
-  incrementPoints: () => void;
-  clearPoints: () => void;
+interface AnalysisStatsActions {
+  setStats: (stats: AnalysisStats | null) => void;
+  initializeStats: (stats: AnalysisStats) => void;
+  incrementStats: (isCorrect: boolean) => void;
+  clearStats: () => void;
 }
 
-type PointsStore = PointsState & PointsActions;
+type AnalysisStatsStore = AnalysisStatsState & AnalysisStatsActions;
 
-export const usePointsStore = create<PointsStore>((set) => ({
-  points: null,
+export const usePointsStore = create<AnalysisStatsStore>((set) => ({
+  correctAnalyses: null,
+  totalAnalyses: null,
   lastModifiedAt: null,
-  setPoints: (points) => set({ points, lastModifiedAt: Date.now() }),
-  initializePoints: (points) =>
+  setStats: (stats) =>
+    set({
+      correctAnalyses: stats?.correctAnalyses ?? null,
+      totalAnalyses: stats?.totalAnalyses ?? null,
+      lastModifiedAt: Date.now(),
+    }),
+  initializeStats: (stats) =>
     set((state) => {
       if (state.lastModifiedAt !== null) {
         return state;
       }
-      return { points, lastModifiedAt: Date.now() };
+      return {
+        correctAnalyses: stats.correctAnalyses,
+        totalAnalyses: stats.totalAnalyses,
+        lastModifiedAt: Date.now(),
+      };
     }),
-  incrementPoints: () =>
+  incrementStats: (isCorrect) =>
     set((state) => ({
-      points: state.points !== null ? state.points + 1 : 1,
+      correctAnalyses: isCorrect ? (state.correctAnalyses ?? 0) + 1 : (state.correctAnalyses ?? 0),
+      totalAnalyses: (state.totalAnalyses ?? 0) + 1,
       lastModifiedAt: Date.now(),
     })),
-  clearPoints: () => set({ points: null, lastModifiedAt: null }),
+  clearStats: () => set({ correctAnalyses: null, totalAnalyses: null, lastModifiedAt: null }),
 }));

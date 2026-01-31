@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TextDiff } from "@/components/shared/TextDiff";
 import { AnalysisModeBadge } from "@/components/shared/AnalysisModeBadge";
-import { BookPlus, CheckCircle2, UserPlus, Languages, Trophy } from "lucide-react";
+import { BookPlus, CheckCircle2, UserPlus, Languages, TrendingUp } from "lucide-react";
 import { useAuthStore } from "@/lib/stores/auth.store";
 import { usePendingAnalysisStore } from "@/lib/stores/pending-analysis.store";
 import { isFeatureEnabled, isFeatureBeta } from "@/features/feature-flags.service";
@@ -117,24 +117,29 @@ export function AnalysisResult({
             <div className="flex flex-col items-center justify-center space-y-4 py-2 text-center">
               <CheckCircle2 className="size-12 text-green-600 dark:text-green-500" aria-hidden="true" />
               <div className="space-y-2">
-                <h2 className="text-xl font-semibold">Świetna robota!</h2>
-                <p className="text-muted-foreground text-sm">Twój tekst nie wymaga poprawek.</p>
+                <h2 className="text-2xl font-semibold">Świetna robota!</h2>
+                <p className="text-muted-foreground">Twój tekst nie wymaga poprawek.</p>
               </div>
               {gamificationFeatureEnabled && earnedPoint && (
                 <div
-                  className="flex flex-col items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500"
+                  className="flex flex-col pt-2 items-center gap-2 animate-in fade-in slide-in-from-bottom-2 duration-500"
                   data-test-id="earned-point-badge"
                 >
-                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-amber-100 dark:bg-amber-900/50 border border-amber-300 dark:border-amber-700">
-                    <Trophy className="size-5 text-amber-600 dark:text-amber-400" aria-hidden="true" />
-                    <span className="text-sm font-semibold text-amber-700 dark:text-amber-300">+1 punkt!</span>
+                  <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-green-100 dark:bg-green-900/50 border border-green-300 dark:border-green-700">
+                    <TrendingUp className="size-5 text-green-600 dark:text-green-400" aria-hidden="true" />
+                    <span className="text-sm font-semibold text-green-700 dark:text-green-300">
+                      Awansujesz w rankingu!
+                    </span>
                     {gamificationBetaTagEnabled && (
-                      <span className="text-[7px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
+                      <span className="text-[7px] font-semibold uppercase tracking-wide text-green-600 dark:text-green-400 border border-green-400 dark:border-green-500 rounded-sm px-1 py-0.5">
                         beta
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground">Zdobywasz punkty za każdą analizę bez błędów.</p>
+                  <p className="text-sm pt-1 md:max-w-md text-muted-foreground">
+                    Każda poprawna analiza podnosi Twój poziom w rankingu i zbliża Cię do kolejnego poziomu znajomości
+                    języka. Tak trzymaj!
+                  </p>
                 </div>
               )}
               {analysisResult.translation && (
