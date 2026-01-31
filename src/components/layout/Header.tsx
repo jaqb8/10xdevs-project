@@ -99,13 +99,9 @@ const Navbar1 = ({
             <>
               {user ? (
                 <>
-                  {shouldShowPointsSkeleton && <GamificationBadge variant="desktop" isLoading />}
+                  {shouldShowPointsSkeleton && <GamificationBadge isLoading />}
                   {shouldShowPointsBadge && (
-                    <GamificationBadge
-                      variant="desktop"
-                      points={points ?? undefined}
-                      showBeta={gamificationBetaTagEnabled}
-                    />
+                    <GamificationBadge points={points ?? undefined} showBeta={gamificationBetaTagEnabled} />
                   )}
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
@@ -175,88 +171,92 @@ const Navbar1 = ({
           <a href={logo.url} className="flex items-center gap-2" data-test-id="header-logo-mobile">
             <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
           </a>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon" data-test-id="header-mobile-menu-trigger">
-                <Menu className="size-4" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent className="overflow-y-auto">
-              <SheetHeader>
-                <SheetTitle>
-                  <a href={logo.url} className="flex items-center gap-2">
-                    <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
-                  </a>
-                </SheetTitle>
-              </SheetHeader>
-              <div className="flex flex-col gap-6 p-4">
-                {filteredMenu.length > 0 && (
-                  <Accordion type="single" collapsible className="flex w-full flex-col gap-4">
-                    {filteredMenu.map((item) => renderMobileMenuItem(item))}
-                  </Accordion>
-                )}
 
-                <div className="flex flex-col gap-3">
-                  {shouldShowAuthControls && (
-                    <>
-                      {user ? (
-                        <>
-                          <div className="flex items-center gap-3">
-                            <Avatar className="size-10" data-test-id="header-user-avatar-mobile">
-                              <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
-                              <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
-                            </Avatar>
-                            <span className="text-md text-muted-foreground" data-test-id="header-user-email-mobile">
-                              {user.email}
-                            </span>
-                          </div>
-                          {shouldShowPointsSkeleton && <GamificationBadge variant="mobile" isLoading />}
-                          {shouldShowPointsBadge && (
-                            <GamificationBadge
-                              variant="mobile"
-                              points={points ?? undefined}
-                              showBeta={gamificationBetaTagEnabled}
-                            />
-                          )}
-                          <Button
-                            asChild
-                            variant="outline"
-                            className="w-full"
-                            data-test-id="header-settings-button-mobile"
-                          >
-                            <a href="/settings" className="flex items-center justify-center gap-2">
-                              <Settings className="size-4" />
-                              Ustawienia
-                            </a>
-                          </Button>
-                          <form action="/api/auth/logout" method="POST">
+          <div className="flex items-center gap-2">
+            {shouldShowAuthControls && user && (
+              <>
+                {shouldShowPointsSkeleton && <GamificationBadge isLoading />}
+                {shouldShowPointsBadge && (
+                  <GamificationBadge points={points ?? undefined} showBeta={gamificationBetaTagEnabled} />
+                )}
+              </>
+            )}
+
+            <Sheet>
+              <SheetTrigger asChild>
+                <Button variant="outline" size="icon" data-test-id="header-mobile-menu-trigger">
+                  <Menu className="size-4" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent className="overflow-y-auto">
+                <SheetHeader>
+                  <SheetTitle>
+                    <a href={logo.url} className="flex items-center gap-2">
+                      <img src={logo.src} className="max-h-8 dark:invert" alt={logo.alt} />
+                    </a>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="flex flex-col gap-6 p-4">
+                  {filteredMenu.length > 0 && (
+                    <Accordion type="single" collapsible className="flex w-full flex-col gap-4">
+                      {filteredMenu.map((item) => renderMobileMenuItem(item))}
+                    </Accordion>
+                  )}
+
+                  <div className="flex flex-col gap-3">
+                    {shouldShowAuthControls && (
+                      <>
+                        {user ? (
+                          <>
+                            <div className="flex items-center gap-3">
+                              <Avatar className="size-10" data-test-id="header-user-avatar-mobile">
+                                <AvatarImage src={user.avatarUrl ?? undefined} alt={user.email} />
+                                <AvatarFallback>{getInitials(user.email)}</AvatarFallback>
+                              </Avatar>
+                              <span className="text-md text-muted-foreground" data-test-id="header-user-email-mobile">
+                                {user.email}
+                              </span>
+                            </div>
                             <Button
-                              type="submit"
+                              asChild
                               variant="outline"
                               className="w-full"
-                              data-test-id="header-logout-button-mobile"
+                              data-test-id="header-settings-button-mobile"
                             >
-                              Wyloguj
+                              <a href="/settings" className="flex items-center justify-center gap-2">
+                                <Settings className="size-4" />
+                                Ustawienia
+                              </a>
                             </Button>
-                          </form>
-                        </>
-                      ) : (
-                        <>
-                          <Button asChild variant="outline" data-test-id="header-login-button-mobile">
-                            <a href="/login">Zaloguj</a>
-                          </Button>
-                          <Button asChild data-test-id="header-signup-button-mobile">
-                            <a href="/signup">Zarejestruj</a>
-                          </Button>
-                        </>
-                      )}
-                    </>
-                  )}
+                            <form action="/api/auth/logout" method="POST">
+                              <Button
+                                type="submit"
+                                variant="outline"
+                                className="w-full"
+                                data-test-id="header-logout-button-mobile"
+                              >
+                                Wyloguj
+                              </Button>
+                            </form>
+                          </>
+                        ) : (
+                          <>
+                            <Button asChild variant="outline" data-test-id="header-login-button-mobile">
+                              <a href="/login">Zaloguj</a>
+                            </Button>
+                            <Button asChild data-test-id="header-signup-button-mobile">
+                              <a href="/signup">Zarejestruj</a>
+                            </Button>
+                          </>
+                        )}
+                      </>
+                    )}
+                  </div>
+                  <ModeToggle>Przełącz motyw</ModeToggle>
                 </div>
-                <ModeToggle>Przełącz motyw</ModeToggle>
-              </div>
-            </SheetContent>
-          </Sheet>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </div>
     </section>

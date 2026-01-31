@@ -6,8 +6,16 @@ import { PaginationControls } from "@/components/features/learning-items/Paginat
 import { DeleteConfirmationDialog } from "@/components/features/learning-items/DeleteConfirmationDialog";
 import { LoadingSkeleton } from "@/components/features/learning-items/LoadingSkeleton";
 import { ErrorMessage } from "@/components/features/learning-items/ErrorMessage";
+import type { LearningItemDto, PaginatedResponseDto } from "@/types";
 
-export function LearningItemsView() {
+interface LearningItemsViewProps {
+  initialData?: PaginatedResponseDto<LearningItemDto> | null;
+  initialLoadError?: boolean;
+}
+
+const INITIAL_LOAD_ERROR_MESSAGE = "Nie udało się załadować listy. Spróbuj odświeżyć stronę.";
+
+export function LearningItemsView({ initialData, initialLoadError }: LearningItemsViewProps) {
   const {
     viewModels,
     paginationViewModel,
@@ -19,7 +27,7 @@ export function LearningItemsView() {
     deleteItem,
     confirmDelete,
     cancelDelete,
-  } = useLearningItems();
+  } = useLearningItems({ initialData });
 
   useEffect(() => {
     if (error) {
@@ -48,11 +56,11 @@ export function LearningItemsView() {
     );
   }
 
-  if (error && !viewModels.length) {
+  if ((error || initialLoadError) && !viewModels.length) {
     return (
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         <h1 className="text-3xl font-bold mb-8">Lista wyrażeń do nauki</h1>
-        <ErrorMessage message={error} />
+        <ErrorMessage message={error || INITIAL_LOAD_ERROR_MESSAGE} />
       </div>
     );
   }
