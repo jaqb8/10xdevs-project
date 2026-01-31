@@ -28,7 +28,7 @@ export class GamificationService {
       throw new GamificationDatabaseError(error);
     }
 
-    const row = data[0];
+    const row = data?.[0];
     if (!row || typeof row.correct_analyses !== "number" || typeof row.total_analyses !== "number") {
       console.error("Unexpected RPC return type in recordAnalysis:", typeof data, data);
       throw new GamificationDatabaseError(new Error("Invalid response from record_analysis RPC"));
@@ -55,7 +55,7 @@ export class GamificationService {
       throw new GamificationDatabaseError(error);
     }
 
-    const row = data[0];
+    const row = data?.[0];
     if (!row || typeof row.correct_analyses !== "number" || typeof row.total_analyses !== "number") {
       console.error("Unexpected RPC return type in getAnalysisStats:", typeof data, data);
       throw new GamificationDatabaseError(new Error("Invalid response from get_analysis_stats RPC"));
