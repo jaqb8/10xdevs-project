@@ -20,7 +20,7 @@ export function AnalyzeView() {
   const mode = useAnalysisModeStore((state) => state.mode);
   const { clearPendingAnalysis } = usePendingAnalysisStore();
   const isAuth = useAuthStore((state) => state.isAuth);
-  const incrementPoints = usePointsStore((state) => state.incrementPoints);
+  const incrementStats = usePointsStore((state) => state.incrementStats);
   const { pointsEnabled: pointsSettingEnabled, contextEnabled, isLoaded } = useSettingsStore();
   const gamificationFeatureEnabled = isFeatureEnabled("gamification");
   const lastResultRef = useRef<number | null>(null);
@@ -38,14 +38,14 @@ export function AnalyzeView() {
     if (
       gamificationFeatureEnabled &&
       isPointsAwardingEnabled &&
-      state.result?.is_correct &&
+      state.result &&
       isAuth &&
       state.resultTimestamp &&
       !state.isRestoredResult
     ) {
       if (lastResultRef.current !== state.resultTimestamp) {
         lastResultRef.current = state.resultTimestamp;
-        incrementPoints();
+        incrementStats(state.result.is_correct);
       }
     }
   }, [
@@ -53,7 +53,7 @@ export function AnalyzeView() {
     state.resultTimestamp,
     state.isRestoredResult,
     isAuth,
-    incrementPoints,
+    incrementStats,
     gamificationFeatureEnabled,
     isPointsAwardingEnabled,
   ]);

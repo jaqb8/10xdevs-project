@@ -63,7 +63,7 @@ const Navbar1 = ({
   ],
 }: Navbar1Props) => {
   const { user, isAuth, isAuthInitialized } = useAuthStore();
-  const points = usePointsStore((state) => state.points);
+  const { correctAnalyses, totalAnalyses } = usePointsStore();
   const { pointsEnabled: pointsSettingEnabled, isLoaded: areSettingsLoaded } = useSettingsStore();
   const isAuthFeatureEnabled = isFeatureEnabled("auth");
   const isLearningItemsFeatureEnabled = isFeatureEnabled("learning-items");
@@ -74,7 +74,7 @@ const Navbar1 = ({
   const shouldShowAuthControls = isAuthFeatureEnabled && isAuthInitialized;
   const shouldShowPointsSkeleton = gamificationFeatureEnabled && !areSettingsLoaded;
   const shouldShowPointsBadge =
-    gamificationFeatureEnabled && areSettingsLoaded && pointsSettingEnabled && points !== null;
+    gamificationFeatureEnabled && areSettingsLoaded && pointsSettingEnabled && totalAnalyses !== null;
 
   return (
     <section className="py-4">
@@ -101,7 +101,11 @@ const Navbar1 = ({
                 <>
                   {shouldShowPointsSkeleton && <GamificationBadge isLoading />}
                   {shouldShowPointsBadge && (
-                    <GamificationBadge points={points ?? undefined} showBeta={gamificationBetaTagEnabled} />
+                    <GamificationBadge
+                      correctAnalyses={correctAnalyses ?? undefined}
+                      totalAnalyses={totalAnalyses ?? undefined}
+                      showBeta={gamificationBetaTagEnabled}
+                    />
                   )}
                   <DropdownMenu modal={false}>
                     <DropdownMenuTrigger asChild>
@@ -177,7 +181,11 @@ const Navbar1 = ({
               <>
                 {shouldShowPointsSkeleton && <GamificationBadge isLoading />}
                 {shouldShowPointsBadge && (
-                  <GamificationBadge points={points ?? undefined} showBeta={gamificationBetaTagEnabled} />
+                  <GamificationBadge
+                    correctAnalyses={correctAnalyses ?? undefined}
+                    totalAnalyses={totalAnalyses ?? undefined}
+                    showBeta={gamificationBetaTagEnabled}
+                  />
                 )}
               </>
             )}

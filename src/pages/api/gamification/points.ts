@@ -11,9 +11,9 @@ export const GET: APIRoute = async ({ locals }) => {
 
   try {
     const gamificationService = new GamificationService(locals.supabase);
-    const total = await gamificationService.getUserPointsTotal();
+    const stats = await gamificationService.getAnalysisStats();
 
-    return new Response(JSON.stringify({ total }), {
+    return new Response(JSON.stringify(stats), {
       status: 200,
       headers: { "Content-Type": "application/json" },
     });

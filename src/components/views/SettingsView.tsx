@@ -22,10 +22,10 @@ import { usePointsActions } from "@/lib/hooks/usePointsActions";
 
 export function SettingsView() {
   const { pointsEnabled, contextEnabled, isLoaded, initializeSettings } = useSettingsStore();
-  const clearPoints = usePointsStore((state) => state.clearPoints);
-  const setPoints = usePointsStore((state) => state.setPoints);
+  const clearStats = usePointsStore((state) => state.clearStats);
+  const setStats = usePointsStore((state) => state.setStats);
   const { updateSettings, resetPoints } = useSettingsActions();
-  const { fetchPoints } = usePointsActions();
+  const { fetchStats } = usePointsActions();
   const [isConfirmOpen, setIsConfirmOpen] = useState(false);
   const [isSavingPoints, setIsSavingPoints] = useState(false);
   const [isSavingContext, setIsSavingContext] = useState(false);
@@ -39,18 +39,18 @@ export function SettingsView() {
     const result = await updateSettings({ pointsEnabled: true });
     if (result.data) {
       initializeSettings(result.data);
-      const pointsResult = await fetchPoints();
-      if (pointsResult.data !== null) {
-        setPoints(pointsResult.data);
-      } else if (pointsResult.errorMessage) {
-        toast.error(pointsResult.errorMessage);
+      const statsResult = await fetchStats();
+      if (statsResult.data !== null) {
+        setStats(statsResult.data);
+      } else if (statsResult.errorMessage) {
+        toast.error(statsResult.errorMessage);
       }
-      toast.success("Włączono zliczanie punktów.");
+      toast.success("Włączono śledzenie postępów.");
     } else if (result.errorMessage) {
       toast.error(result.errorMessage);
     }
     setIsSavingPoints(false);
-  }, [fetchPoints, initializeSettings, setPoints, updateSettings]);
+  }, [fetchStats, initializeSettings, setStats, updateSettings]);
 
   const handleDisablePoints = useCallback(async () => {
     setIsSavingPoints(true);
@@ -76,12 +76,12 @@ export function SettingsView() {
       return;
     }
 
-    clearPoints();
+    clearStats();
     initializeSettings(updated.data);
-    toast.success("Wyłączono zliczanie punktów i usunięto historię.");
+    toast.success("Wyłączono śledzenie postępów i usunięto historię.");
     setIsSavingPoints(false);
     setIsConfirmOpen(false);
-  }, [clearPoints, initializeSettings, resetPoints, updateSettings]);
+  }, [clearStats, initializeSettings, resetPoints, updateSettings]);
 
   const handleContextToggle = useCallback(
     async (enabled: boolean) => {
@@ -136,7 +136,7 @@ export function SettingsView() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <span>Punkty za poprawne analizy</span>
+                  <span>Procent poprawnych analiz</span>
                   {gamificationBetaTagEnabled && (
                     <span className="text-[9px] font-semibold uppercase tracking-wide text-amber-600 dark:text-amber-400 border border-amber-400 dark:border-amber-500 rounded-sm px-1 py-0.5">
                       beta
@@ -144,14 +144,14 @@ export function SettingsView() {
                   )}
                 </CardTitle>
                 <CardDescription>
-                  Punkty są przyznawane za analizy bez błędów i pomagają śledzić postępy.
+                  Wyświetla procent analiz bez błędów i pomaga śledzić postępy w nauce.
                 </CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-between gap-4">
                 <div className="text-sm text-muted-foreground">
                   {currentPointsEnabled
                     ? "Funkcja jest aktywna."
-                    : "Funkcja jest wyłączona, punkty nie będą naliczane."}
+                    : "Funkcja jest wyłączona, statystyki nie będą zbierane."}
                 </div>
                 <Switch
                   checked={currentPointsEnabled}
@@ -198,16 +198,16 @@ export function SettingsView() {
       <AlertDialog open={isConfirmOpen} onOpenChange={setIsConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Wyłączyć zliczanie punktów?</AlertDialogTitle>
+            <AlertDialogTitle>Wyłączyć śledzenie postępów?</AlertDialogTitle>
             <AlertDialogDescription>
-              Twoja aktualna punktacja zostanie trwale usunięta. Tej operacji nie można cofnąć.
+              Twoje statystyki analiz zostaną trwale usunięte. Tej operacji nie można cofnąć.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isSavingPoints}>Anuluj</AlertDialogCancel>
             <AlertDialogAction asChild>
               <Button variant="destructive" onClick={handleDisablePoints} disabled={isSavingPoints}>
-                Wyłącz i usuń punkty
+                Wyłącz i usuń statystyki
               </Button>
             </AlertDialogAction>
           </AlertDialogFooter>

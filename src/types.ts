@@ -38,6 +38,15 @@ export interface UserSettings {
 }
 
 /**
+ * Statistics for user text analyses used in gamification.
+ * Used to calculate percentage of correct analyses.
+ */
+export interface AnalysisStats {
+  correctAnalyses: number;
+  totalAnalyses: number;
+}
+
+/**
  * DTO for a learning item returned to the client.
  * It omits the `user_id` to avoid exposing it unnecessarily.
  *
