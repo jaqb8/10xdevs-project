@@ -44,7 +44,7 @@ describe("GET /api/gamification/points", () => {
 
       expect(response.status).toBe(401);
       const body = await response.json();
-      expect(body.error_code).toBe("unauthorized");
+      expect(body.error_code).toBe("authentication_error_unauthorized");
     });
 
     it("should return 200 when user is authenticated", async () => {
