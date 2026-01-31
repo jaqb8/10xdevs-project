@@ -143,9 +143,7 @@ export function SettingsView() {
                     </span>
                   )}
                 </CardTitle>
-                <CardDescription>
-                  Wyświetla procent analiz bez błędów i pomaga śledzić postępy w nauce.
-                </CardDescription>
+                <CardDescription>Wyświetla procent analiz bez błędów i pomaga śledzić postępy w nauce.</CardDescription>
               </CardHeader>
               <CardContent className="flex items-center justify-between gap-4">
                 <div className="text-sm text-muted-foreground">

@@ -39,9 +39,7 @@ export const usePointsStore = create<AnalysisStatsStore>((set) => ({
     }),
   incrementStats: (isCorrect) =>
     set((state) => ({
-      correctAnalyses: isCorrect
-        ? (state.correctAnalyses ?? 0) + 1
-        : state.correctAnalyses ?? 0,
+      correctAnalyses: isCorrect ? (state.correctAnalyses ?? 0) + 1 : (state.correctAnalyses ?? 0),
       totalAnalyses: (state.totalAnalyses ?? 0) + 1,
       lastModifiedAt: Date.now(),
     })),
